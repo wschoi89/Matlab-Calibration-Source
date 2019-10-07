@@ -79,6 +79,11 @@ axis([-250 150 -150 150 -150 150]);
 view([155,36])
 hold on
 axis('equal')
+Origin=[1 0 0 0; 0 1 0 0; 0 0 1 0; 0 0 0 1];%% initial values
+% Origin_TH=Origin*transl(-86.71,-28.55,22.75)*trotz(24*pi/180)*trotx(-75*pi/180)*troty(54*pi/180)*trotz(45*pi/180);%% initial values
+Origin_TH=Origin*transl(-88.75,-29.04,-24.35)*trotz(24*pi/180)*trotx(-75*pi/180)*troty(54*pi/180)*trotz(45*pi/180);%% initial values
+% Origin_THParam=[-88.75 -29.04 -24.35 asin(-Origin_TH(2,3)/cos(asin(Origin_TH(1,3)))) asin(Origin_TH(1,3)) asin(-Origin_TH(1,2)/cos(asin(Origin_TH(1,3))))];
+Origin_MI=Origin*transl(0,0,19);%% initial values
 
 Link1_1=Origin*transl(-37,0,-15);
 Link1_2=Origin*transl(-37,0,15);
