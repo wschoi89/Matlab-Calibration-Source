@@ -75,8 +75,6 @@ M=size(data4);
 Matout=zeros(M(1,1),8);
 
 figure;
-axis([-250 150 -150 150 -150 150]);
-view([155,36])
 axis([-250 250 -150 150 -150 150]);
 view([172, -44])
 hold on
