@@ -457,6 +457,7 @@ L3_TH = 34.561 * scale1;
 
 %% Mechanism & Finger Drawing
 for iter=1:M(1,1)
+    disp(strcat('iteration : ', num2str(iter)));
 %% Thumb
 mag=sqrt(data4(iter,T1*3+1)^2+data4(iter,T1*3+2)^2+data4(iter,T1*3+3)^2);
 a=data4(iter,T1*3+1)/mag;
