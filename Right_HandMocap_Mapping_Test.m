@@ -77,8 +77,9 @@ Matout=zeros(M(1,1),8);
 figure;
 axis([-250 150 -150 150 -150 150]);
 view([155,36])
+axis([-250 250 -150 150 -150 150]);
+view([172, -44])
 hold on
-axis('equal')
 Origin=[1 0 0 0; 0 1 0 0; 0 0 1 0; 0 0 0 1];%% initial values
 % Origin_TH=Origin*transl(-86.71,-28.55,22.75)*trotz(24*pi/180)*trotx(-75*pi/180)*troty(54*pi/180)*trotz(45*pi/180);%% initial values
 Origin_TH=Origin*transl(-88.75,-29.04,-24.35)*trotz(24*pi/180)*trotx(-75*pi/180)*troty(54*pi/180)*trotz(45*pi/180);%% initial values
