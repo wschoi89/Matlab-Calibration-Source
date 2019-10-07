@@ -1,6 +1,9 @@
 %%
 
-data4=csvread('Simulation_Right06_190509.csv');
+clear
+clc
+
+data4=csvread('Simulation_Right02_191004.csv');
 %load Calibrated DH parameters
 DH_json = jsondecode(fileread('DH_parameters.json'));
 DHoffset = reshape(DH_json.DH_offset, 23, 3);
@@ -34,7 +37,7 @@ I2=3;
 M1=4;
 M2=5;
 
-% %% Link Length_181114 Fingertip ï¿½ï¿½ï¿½ï¿½
+% %% Link Length_181114 Fingertip ¼öÁ¤
 l1=24.2;
 l2=56.03;
 l3=12.94;
