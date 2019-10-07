@@ -1,6 +1,30 @@
 %%
 
 data4=csvread('Simulation_Right06_190509.csv');
+%load Calibrated DH parameters
+DH_json = jsondecode(fileread('DH_parameters.json'));
+DHoffset = reshape(DH_json.DH_offset, 23, 3);
+%load device angle offset
+offsetFileName = 'offdata_right.txt';
+fileID = fopen(offsetFileName, 'r');
+format = '%f';
+offset = fscanf(fileID, format);
+fclose(fileID);
+
+off_TH1 = 0;
+off_TH2 = offset(1, 1);
+off_TH3 = offset(2, 1);
+off_TH4 = 0;
+
+off_TH1_MI = 0;
+off_TH2_MI = offset(3, 1);
+off_TH3_MI = offset(4, 1);
+off_TH4_MI = 0;
+
+off_TH1_TH = 0;
+off_TH2_TH = offset(5, 1);
+off_TH3_TH = offset(6, 1);
+off_TH4_TH = 0;
 
 M=size(data4);
 % 
