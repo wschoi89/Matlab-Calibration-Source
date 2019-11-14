@@ -2,11 +2,13 @@
 clear
 clc
 
+disp('start')
+
 %angle range for forward kinematics simulator
 angle_TH1 = -20:20:20;
-angle_TH2 = -10:10:10;
-angle_TH3 = -15:10:15;
-angle_TH4 = -15:10:15;
+angle_TH2 = -30:20:30;
+angle_TH3 = -30:20:30;
+angle_TH4 =  -30:20:30;
 %iteration number
 count=1;
 
@@ -129,10 +131,10 @@ for i=1:length(angle_TH1)
                 
                 DHparameter_offset(1,1)=3;DHparameter_offset(1,2)=0.3;   DHparameter_offset(1,3)=3;     DHparameter_offset(1,4)=0.3;
                 DHparameter_offset(2,1)=-3;                              DHparameter_offset(2,3)=-3;    DHparameter_offset(2,4)=-0.3;
-                DHparameter_offset(3,1)=2.7;                             DHparameter_offset(3,3)=3.5;   DHparameter_offset(3,4)=0.4;
+                DHparameter_offset(3,1)=3;                             DHparameter_offset(3,3)=3;   DHparameter_offset(3,4)=0.3;
 %                 DHparameter_offset(4,1)=3;DHparameter_offset(4,2)=-0.3;DHparameter_offset(4,3)=-3.5;   DHparameter_offset(4,4)=0.4;
-                DHparameter_offset(5,1)=2.0;                             DHparameter_offset(5,3)=2.0;DHparameter_offset(5,4)=-0.15;
-                DHparameter_offset(6,1)=1.0;                             DHparameter_offset(6,3)=3.0;DHparameter_offset(6,4)=0.2;
+                DHparameter_offset(5,1)=3.0;                             DHparameter_offset(5,3)=3.0;DHparameter_offset(5,4)=-0.3;
+                DHparameter_offset(6,1)=-3.0;                             DHparameter_offset(6,3)=-3.0;DHparameter_offset(6,4)=0.3;
                 
 
                 %convert degree to radian
@@ -243,3 +245,5 @@ for i=1:length(angle_TH1)
         end
     end
 end
+
+disp('end')
