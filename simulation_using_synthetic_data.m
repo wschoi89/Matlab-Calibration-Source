@@ -120,6 +120,7 @@ pos_frame7 = subs(pos_frame7);
 % hold on
 
 %iterate for the number of row
+% error = zeros(size(data,1), 1);
 for iter=1:size(data, 1)
     error(iter, 1) = sqrt(sum((pos_reference(iter,:)-pos_frame7(:)').^2));
     error(iter, 1) = subs(error(iter, 1), [B2,B3,B5,B6], [data(iter,1),data(iter,2),data(iter,3),data(iter,4)]);
@@ -129,6 +130,8 @@ for iter=1:size(data, 1)
 % error(3,1) = sqrt(((pos_frame7(3) - pos_reference(3))^2));
 
 end
+
+
 disp('start')
 parameter = [A1;B1;C1;D1;A2;C2;D2;A3;C3;D3;A5;C5;D5;A6;C6;D6;off_TH1;off_TH2;off_TH3;off_TH4];
 
@@ -148,19 +151,20 @@ off_TH4=0;
  
 % options = optimoptions(@lsqnonlin,'Algorithm','trust-region-reflective', 'Display', 'iter', 'MaxFunctionEvaluations', 500000, 'MaxIterations', 40000, ...
 %     'FunctionTolerance', 1.0000e-200000, 'StepTolerance', 1.0000e-10000, 'OptimalityTolerance', 1.0e-1000);
-options = optimoptions(@lsqnonlin,'Algorithm','levenberg-marquardt', 'Display', 'iter', 'MaxFunctionEvaluations', 4000000, 'MaxIterations', 4000000, 'PlotFcn', 'optimplotx');
-lb = [-4;-0.4;-4;-0.4;
-    -4;-4;-0.4;
-    -4;-4;-0.4;
-    -4;-4;-0.4;
+options = optimoptions(@lsqnonlin,'Algorithm','levenberg-marquardt', 'Display', 'iter', 'MaxFunctionEvaluations', 4000000, 'MaxIterations', 4000000, 'PlotFcn', 'optimplotx', 'StepTolerance', 1.0000e-20);
+% 'ScaleProblem', 'jacobian'
+% lb = [-4;-0.4;-4;-0.4;
 %     -4;-4;-0.4;
-    -0.4;-0.4;-0.4;-0.4];
-ub = [4;0.4;4;0.4;
-    4;4;0.4;
-    4;4;0.4;
-    4;4;0.4;
+%     -4;-4;-0.4;
+%     -4;-4;-0.4;
+% %     -4;-4;-0.4;
+%     -0.4;-0.4;-0.4;-0.4];
+% ub = [4;0.4;4;0.4;
 %     4;4;0.4;
-    0.4;0.4;0.4;0.4];
+%     4;4;0.4;
+%     4;4;0.4;
+% %     4;4;0.4;
+%     0.4;0.4;0.4;0.4];
 % output = lsqnonlin(fh,[A1;B1;C1;D1;A2;C2;D2;A3;C3;D3;A4;off_TH1;off_TH2;off_TH3;off_TH4;], lb, ub, options);    
 output = lsqnonlin(fh,[A1;B1;C1;D1;A2;C2;D2;A3;C3;D3;A5;C5;D5;A6;C6;D6;off_TH1;off_TH2;off_TH3;off_TH4;],[],[], options);    
 
