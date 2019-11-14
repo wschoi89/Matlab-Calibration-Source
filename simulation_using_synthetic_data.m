@@ -2,7 +2,7 @@
 % clear
 % clc
 % close all
-
+clearvars -except data
 %create origin coordinate
 % figure
 % axis equal
@@ -22,11 +22,11 @@ arr_links = loadLinkLength();
 % hold on
 
 syms A1 B1 C1 D1 
-% syms A2 B2 C2 D2  
-% syms A3 B3 C3 D3  
-% syms A4 B4 C4 D4  
-% syms A5 B5 C5 D5  
-% syms A6 B6 C6 D6  
+syms A2    C2 D2  
+syms A3    C3 D3  
+% syms A4 B4 C4 D4
+syms A5    C5 D5  
+syms A6    C6 D6  
 % syms A7 B7 C7 D7
 
 % syms off_TH1 off_TH2 off_TH3 off_TH4 %device angle offset by sensor misalingment
@@ -34,13 +34,13 @@ syms off_TH1 off_TH2 off_TH3 off_TH4
 syms B2 B3 B5 B6
 
 % to do: off_TH1, off_TH2, off_TH3, off_TH4 test 완료 후 모두 symbolic 변수로 바꾸기
-DHRef = [ 0          0             -pi/2;
-         0 B2+off_TH1 arr_links(1,1) pi/2;
-         0 B3+off_TH2 arr_links(2,1) 0;
-         0 -pi/2      arr_links(3,1) 0;
-         0 B5+off_TH3 arr_links(4,1) 0;
-         0 B6+off_TH4 arr_links(5,1) 0;
-         0 -pi/2      arr_links(6,1) 0;];
+DHRef = [0+A1 0+B1       0+C1              -pi/2+D1;
+         0+A2 B2+off_TH1 arr_links(1,1)+C2 pi/2+D2;
+         0+A3 B3+off_TH2 arr_links(2,1)+C3 0+D3;
+         0    -pi/2      arr_links(3,1) 0;
+         0+A5 B5+off_TH3 arr_links(4,1)+C5 0+D5;
+         0+A6 B6+off_TH4 arr_links(5,1)+C6 0+D6;
+         0    -pi/2      arr_links(6,1) 0;];
 
 % CAD DH paramter(joint offset, joint angle, link length, link twist)
 % DHRef = [0 0             arr_links(1,1) -pi/2;
@@ -130,21 +130,51 @@ for iter=1:size(data, 1)
 
 end
 disp('start')
-parameter = [off_TH1;off_TH2;off_TH3;off_TH4];
+parameter = [A1;B1;C1;D1;A2;C2;D2;A3;C3;D3;A5;C5;D5;A6;C6;D6;off_TH1;off_TH2;off_TH3;off_TH4];
 
 fh = matlabFunction(error,'vars',{parameter});
+
+A1=0;B1=0;C1=0;D1=0;
+A2=0;     C2=0;D2=0;
+A3=0;     C3=0;D3=0;
+A5=0;     C5=0;D5=0;
+A6=0;     C6=0;D6=0;
+
+
 off_TH1=0;
 off_TH2=0;
 off_TH3=0;
 off_TH4=0;
-
+ 
 % options = optimoptions(@lsqnonlin,'Algorithm','trust-region-reflective', 'Display', 'iter', 'MaxFunctionEvaluations', 500000, 'MaxIterations', 40000, ...
 %     'FunctionTolerance', 1.0000e-200000, 'StepTolerance', 1.0000e-10000, 'OptimalityTolerance', 1.0e-1000);
-options = optimoptions(@lsqnonlin,'Algorithm','trust-region-reflective', 'Display', 'iter', 'MaxFunctionEvaluations', 5000, 'MaxIterations', 5000);
-output = lsqnonlin(fh,[off_TH1;off_TH2;off_TH3;off_TH4;], [], [], options);    
+options = optimoptions(@lsqnonlin,'Algorithm','levenberg-marquardt', 'Display', 'iter', 'MaxFunctionEvaluations', 4000000, 'MaxIterations', 4000000, 'PlotFcn', 'optimplotx');
+lb = [-4;-0.4;-4;-0.4;
+    -4;-4;-0.4;
+    -4;-4;-0.4;
+    -4;-4;-0.4;
+%     -4;-4;-0.4;
+    -0.4;-0.4;-0.4;-0.4];
+ub = [4;0.4;4;0.4;
+    4;4;0.4;
+    4;4;0.4;
+    4;4;0.4;
+%     4;4;0.4;
+    0.4;0.4;0.4;0.4];
+% output = lsqnonlin(fh,[A1;B1;C1;D1;A2;C2;D2;A3;C3;D3;A4;off_TH1;off_TH2;off_TH3;off_TH4;], lb, ub, options);    
+output = lsqnonlin(fh,[A1;B1;C1;D1;A2;C2;D2;A3;C3;D3;A5;C5;D5;A6;C6;D6;off_TH1;off_TH2;off_TH3;off_TH4;],[],[], options);    
+
+% output = [output(1) output(2) output(3) output(4);
+%           output(5)           output(6) output(7);
+%           output(8)           output(9) output(10);
+%           
+%           output(11)          output(12) output(13);
+%           output(14)          output(15) output(16);
+%           output(17) output(18) output(19) output(20);];
+      
 
 
-output*180/pi
+
 % 
 % off_TH1 = output(1);off_TH2 = output(2); off_TH3 = output(3);
 % 

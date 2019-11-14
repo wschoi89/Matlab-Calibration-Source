@@ -4,9 +4,9 @@ clc
 
 %angle range for forward kinematics simulator
 angle_TH1 = -20:20:20;
-angle_TH2 = -30:30:30;
-angle_TH3 = -15:15:15;
-angle_TH4 = 0:30:60;
+angle_TH2 = -10:10:10;
+angle_TH3 = -15:10:15;
+angle_TH4 = -15:10:15;
 %iteration number
 count=1;
 
@@ -119,23 +119,37 @@ for i=1:length(angle_TH1)
                 view(0, -180);title({'X-Z', strcat('angle : ', num2str(angle_device(1)*180/pi), ', ', num2str(angle_device(2)*180/pi), ', ', num2str(angle_device(3)*180/pi), ', ', num2str(angle_device(4)*180/pi))});
                 data(count, 9:11) = pos_frame7;
                 
+                
                 %plot offset-reflecting link position
                 %hand mocap device angle for one finger
 
                 angle_device = [angle_TH1(i), angle_TH2(j), angle_TH3(k), angle_TH4(m)];
                 angle_offset = [-20, -20, 10, 10];
+                DHparameter_offset = zeros(7, 4);
+                
+                DHparameter_offset(1,1)=3;DHparameter_offset(1,2)=0.3;   DHparameter_offset(1,3)=3;     DHparameter_offset(1,4)=0.3;
+                DHparameter_offset(2,1)=-3;                              DHparameter_offset(2,3)=-3;    DHparameter_offset(2,4)=-0.3;
+                DHparameter_offset(3,1)=2.7;                             DHparameter_offset(3,3)=3.5;   DHparameter_offset(3,4)=0.4;
+%                 DHparameter_offset(4,1)=3;DHparameter_offset(4,2)=-0.3;DHparameter_offset(4,3)=-3.5;   DHparameter_offset(4,4)=0.4;
+                DHparameter_offset(5,1)=2.0;                             DHparameter_offset(5,3)=2.0;DHparameter_offset(5,4)=-0.15;
+                DHparameter_offset(6,1)=1.0;                             DHparameter_offset(6,3)=3.0;DHparameter_offset(6,4)=0.2;
+                
 
                 %convert degree to radian
                 angle_device = angle_device*pi/180;
                 angle_offset = angle_offset*pi/180;
 
+                % add angle offset
                 DHRef_offset = [0 0                               0             -pi/2;
-                         0 angle_device(1)+angle_offset(1) arr_links(1,1) pi/2;
-                         0 angle_device(2)+angle_offset(2) arr_links(2,1) 0;
-                         0 -pi/2                           arr_links(3,1) 0;
-                         0 angle_device(3)+angle_offset(3) arr_links(4,1) 0;
-                         0 angle_device(4)+angle_offset(4) arr_links(5,1) 0;
-                         0 -pi/2                           arr_links(6,1) 0;];
+                                0 angle_device(1)+angle_offset(1) arr_links(1,1) pi/2;
+                                0 angle_device(2)+angle_offset(2) arr_links(2,1) 0;
+                                0 -pi/2                           arr_links(3,1) 0;
+                                0 angle_device(3)+angle_offset(3) arr_links(4,1) 0;
+                                0 angle_device(4)+angle_offset(4) arr_links(5,1) 0;
+                                0 -pi/2                           arr_links(6,1) 0;];
+                     
+                % add DH paramter offset
+                DHRef_offset = DHRef_offset + DHparameter_offset;
 
                 Origin = eye(4);
                 %transformation matrix
@@ -211,10 +225,11 @@ for i=1:length(angle_TH1)
                 % set figure axis limit
                 xlim([-50 200]);ylim([-200 50]);zlim([-100 100]);
                 
-                saveas(gcf, strcat(num2str(count),'.jpg'));
+%                 saveas(gcf, strcat(num2str(count),'.jpg'));
                 data(count, 1:4) = angle_device;
                 data(count, 5:8) = angle_offset;
                 data(count, 12:14) = pos_frame7_offset;
+                
                 count=count+1;
                 
                 
