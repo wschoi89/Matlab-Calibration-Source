@@ -29,9 +29,9 @@ syms A5    C5 D5
 syms A6    C6 D6  
 % syms A7 B7 C7 D7
 
-% syms off_TH1 off_TH2 off_TH3 off_TH4 %device angle offset by sensor misalingment
-syms off_TH1 off_TH2 off_TH3 off_TH4
-syms B2 B3 B5 B6
+
+syms off_TH1 off_TH2 off_TH3 off_TH4 %% device angle offset by sensor misalingment
+syms B2 B3 B5 B6 %% joint angle 
 
 % to do: off_TH1, off_TH2, off_TH3, off_TH4 test 완료 후 모두 symbolic 변수로 바꾸기
 DHRef = [0+A1 0+B1       0+C1              -pi/2+D1;
@@ -39,6 +39,7 @@ DHRef = [0+A1 0+B1       0+C1              -pi/2+D1;
          0+A3 B3+off_TH2 arr_links(2,1)+C3 0+D3;
          0    -pi/2      arr_links(3,1) 0;
          0+A5 B5+off_TH3 arr_links(4,1)+C5 0+D5;
+%          0+A6 B6+off_TH4 arr_links(5,1)+C6 0+D6;
          0+A6 B6+off_TH4 arr_links(5,1)+C6 0+D6;
          0    -pi/2      arr_links(6,1) 0;];
 
@@ -132,16 +133,27 @@ for iter=1:size(data, 1)
 end
 
 
+
+
 disp('start')
+
 parameter = [A1;B1;C1;D1;A2;C2;D2;A3;C3;D3;A5;C5;D5;A6;C6;D6;off_TH1;off_TH2;off_TH3;off_TH4];
 
-fh = matlabFunction(error,'vars',{parameter});
+
+[error, grad_error] = return_error_errorJacob(error, parameter);
+
+
+currdir = [pwd filesep]; % You may need to use currdir = pwd 
+filename = [currdir,'return_error_errorJacob.m'];
+
+fh = matlabFunction(error, grad_error, 'file', filename, 'vars',{parameter});
 
 A1=0;B1=0;C1=0;D1=0;
 A2=0;     C2=0;D2=0;
 A3=0;     C3=0;D3=0;
 A5=0;     C5=0;D5=0;
 A6=0;     C6=0;D6=0;
+% C6=0;D6=0;
 
 
 off_TH1=0;
@@ -151,7 +163,8 @@ off_TH4=0;
  
 % options = optimoptions(@lsqnonlin,'Algorithm','trust-region-reflective', 'Display', 'iter', 'MaxFunctionEvaluations', 500000, 'MaxIterations', 40000, ...
 %     'FunctionTolerance', 1.0000e-200000, 'StepTolerance', 1.0000e-10000, 'OptimalityTolerance', 1.0e-1000);
-options = optimoptions(@lsqnonlin,'Algorithm','levenberg-marquardt', 'Display', 'iter', 'MaxFunctionEvaluations', 4000000, 'MaxIterations', 4000000, 'PlotFcn', 'optimplotx', 'StepTolerance', 1.0000e-20);
+options = optimoptions(@lsqnonlin,'Algorithm', 'levenberg-marquardt','Display', 'iter', 'MaxFunctionEvaluations', 4000000, 'MaxIterations', 4000000,'initDamping', 1e4, ...
+    'FiniteDifferenceType', 'central', 'SpecifyConstraintGradient',true);
 % 'ScaleProblem', 'jacobian'
 % lb = [-4;-0.4;-4;-0.4;
 %     -4;-4;-0.4;
@@ -166,7 +179,47 @@ options = optimoptions(@lsqnonlin,'Algorithm','levenberg-marquardt', 'Display', 
 % %     4;4;0.4;
 %     0.4;0.4;0.4;0.4];
 % output = lsqnonlin(fh,[A1;B1;C1;D1;A2;C2;D2;A3;C3;D3;A4;off_TH1;off_TH2;off_TH3;off_TH4;], lb, ub, options);    
+
+disp('before non-linear least square')
+% output = lsqnonlin(fh,[A1;B1;C1;D1;A2;C2;D2;A3;C3;D3;A5;C5;D5;A6;C6;D6;off_TH1;off_TH2;off_TH3;off_TH4;],[],[], options);    
 output = lsqnonlin(fh,[A1;B1;C1;D1;A2;C2;D2;A3;C3;D3;A5;C5;D5;A6;C6;D6;off_TH1;off_TH2;off_TH3;off_TH4;],[],[], options);    
+disp('after non-linear least square')
+output
+output*180/pi
+
+A1=output(1);B1=output(2);C1=output(3); D1=output(4);
+A2=output(5);             C2=output(6); D2=output(7);
+A3=output(8);             C3=output(9); D3=output(10);
+A5=output(11);            C5=output(12);D5=output(13);
+A6=output(14);            C6=output(15);D6=output(16);
+% C6=output(15);D6=output(16);
+
+
+off_TH1=output(17);
+off_TH2=output(18);
+off_TH3=output(19);
+off_TH4=output(20);
+
+
+for iter=1:size(data, 1)
+    
+    error(iter, 1) = sqrt(sum((pos_reference(iter,:)-pos_frame7(:)').^2));
+    error_1(iter, 1) = subs(error(iter, 1), [B2,B3,B5,B6], [data(iter,1),data(iter,2),data(iter,3),data(iter,4)]);
+    error_2(iter, 1) = subs(error_1(iter,1));
+    
+% error = sqrt(sum((pos_frame7 - pos_reference).^2));
+% error(1,1) = sqrt(((pos_frame7(1) - pos_reference(1))^2));
+% error(2,1) = sqrt(((pos_frame7(2) - pos_reference(2))^2));
+% error(3,1) = sqrt(((pos_frame7(3) - pos_reference(3))^2));
+
+end
+
+for iter=1:size(data, 1)
+   error_2(iter, 1) = vpa(error_2(iter, 1));
+end
+
+avg_error = sum(error_2)/size(data, 1)
+
 
 % output = [output(1) output(2) output(3) output(4);
 %           output(5)           output(6) output(7);
