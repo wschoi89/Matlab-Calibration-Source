@@ -138,6 +138,7 @@ end
 disp('start')
 
 parameter = [A1;B1;C1;D1;A2;C2;D2;A3;C3;D3;A5;C5;D5;A6;C6;D6;off_TH1;off_TH2;off_TH3;off_TH4];
+% parameter = [A1,B1,C1,D1,A2,C2,D2,A3,C3,D3,A5,C5,D5,A6,C6,D6,off_TH1,off_TH2,off_TH3,off_TH4];
 
 
 [error, grad_error] = return_error_errorJacob(error, parameter);
@@ -164,7 +165,7 @@ off_TH4=0;
 % options = optimoptions(@lsqnonlin,'Algorithm','trust-region-reflective', 'Display', 'iter', 'MaxFunctionEvaluations', 500000, 'MaxIterations', 40000, ...
 %     'FunctionTolerance', 1.0000e-200000, 'StepTolerance', 1.0000e-10000, 'OptimalityTolerance', 1.0e-1000);
 options = optimoptions(@lsqnonlin,'Algorithm', 'levenberg-marquardt','Display', 'iter', 'MaxFunctionEvaluations', 4000000, 'MaxIterations', 4000000,'initDamping', 1e4, ...
-    'FiniteDifferenceType', 'central', 'SpecifyConstraintGradient',true);
+    'FiniteDifferenceType', 'central', 'SpecifyObjectiveGradient',true);
 % 'ScaleProblem', 'jacobian'
 % lb = [-4;-0.4;-4;-0.4;
 %     -4;-4;-0.4;
