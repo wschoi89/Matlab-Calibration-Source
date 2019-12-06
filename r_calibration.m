@@ -1,6 +1,7 @@
+
 clc, clear, close ('all')
 
-data3=csvread('Simulation_Right06_190509.csv');
+data3=csvread('191108.csv');
 
 alpha=0;
 beta=0;
@@ -93,27 +94,25 @@ q_MI_double=[0 0 0 -pi/2 0 l1_MI pi/2 0 0 0 l4_MI 0 0 0 -pi/2 l6_MI 0 Origin_MIP
 DHinit=[[q_double';0;0;0;0;0;0] q_TH_double' q_MI_double'];
 
 off_TH1=0;
-off_TH2=-0.027579212399741;
-off_TH3=0.034543489156776;
+off_TH2=0.07138331;
+off_TH3=0.14656058;
 off_TH4=0;
 
 off_TH1_MI=0;
-off_TH2_MI=0.002188180315000;
-off_TH3_MI=0.050119803193707;
+off_TH2_MI=0.14548494;
+off_TH3_MI=0.17983605;
 off_TH4_MI=0;
 
 off_TH1_TH=0;
 off_TH2_TH=-0.055498505245717;
-off_TH3_TH=0.024994793618920;
+off_TH3_TH=-0.42904747;
 off_TH4_TH=0;
 
 qRef=[A1 B1 C1 D1 A2 C2 D2 A3 D4 A5 C5 D5 A6 A7 B7 C7 D7]';
 qRef_TH=[A1_TH B1_TH C1_TH D1_TH A2_TH C2_TH D2_TH A3_TH D4_TH A5_TH C5_TH D5_TH A6_TH A7_TH B7_TH C7_TH D7_TH A0_TH B0_TH C0_TH D0_TH E0_TH F0_TH]';
 qRef_MI=[A1_MI B1_MI C1_MI D1_MI A2_MI C2_MI D2_MI A3_MI D4_MI A5_MI C5_MI D5_MI A6_MI A7_MI B7_MI C7_MI D7_MI A0_MI B0_MI C0_MI D0_MI E0_MI F0_MI]';
 
-DHRef = [A1 B1 C1 D1;
-         A2 B2 C2 D2;
-         A3 B3 C3 D3; A4 B4 C4 D4; A5 B5 C5 D5; A6 B6 C6 D6; A7 B7 C7 D7; A8 B8 C8 D8];
+DHRef = [A1 B1 C1 D1; A2 B2 C2 D2; A3 B3 C3 D3; A4 B4 C4 D4; A5 B5 C5 D5; A6 B6 C6 D6; A7 B7 C7 D7; A8 B8 C8 D8];
 
 R01=transl(0,0,DHRef(1,1))*[cos(DHRef(1,2)) -sin(DHRef(1,2)) 0 0; sin(DHRef(1,2)) cos(DHRef(1,2)) 0 0; 0 0 1 0; 0 0 0 1]*transl(DHRef(1,3),0,0)*[1 0 0 0; 0 cos(DHRef(1,4)) -sin(DHRef(1,4)) 0; 0 sin(DHRef(1,4)) cos(DHRef(1,4)) 0; 0 0 0 1];
 R12=transl(0,0,DHRef(2,1))*[cos(DHRef(2,2)) -sin(DHRef(2,2)) 0 0; sin(DHRef(2,2)) cos(DHRef(2,2)) 0 0; 0 0 1 0; 0 0 0 1]*transl(DHRef(2,3),0,0)*[1 0 0 0; 0 cos(DHRef(2,4)) -sin(DHRef(2,4)) 0; 0 sin(DHRef(2,4)) cos(DHRef(2,4)) 0; 0 0 0 1];
@@ -191,7 +190,7 @@ JacobianMatRef_MI = [diff(Joint7Ref_MI(1),A1_MI) diff(Joint7Ref_MI(1),B1_MI) dif
 
 
 
-for iter=2500:500:4000
+for iter=500:100:800
     
     mag=sqrt(data3(iter,T1*3+1)^2+data3(iter,T1*3+2)^2+data3(iter,T1*3+3)^2);
     a=data3(iter,T1*3+1)/mag;
@@ -406,7 +405,7 @@ for iter=2500:500:4000
     end
 end
 
-for iter=500:500:2000
+for iter=100:100:400
     
     mag=sqrt(data3(iter,T1*3+1)^2+data3(iter,T1*3+2)^2+data3(iter,T1*3+3)^2);
     a=data3(iter,T1*3+1)/mag;

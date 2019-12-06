@@ -1,8 +1,6 @@
 clear
 clc
 
-lambda = 200;
-
 % ideal 3D magnetic data(x, y, z)
 alpha=0;
 beta=0;
@@ -18,14 +16,10 @@ I2=3; % index distal
 M1=4; % middle proximal
 M2=5; % middle distal
 
-%load offset txt file 
-offsetFileName = 'offdata_right.txt';
+%initialize offset
+offset = zeros(4, 3);
 calibrationFileName = 'Simulation_Right02_191004.csv';
-fileID = fopen(offsetFileName, 'r');
-format = '%f';
 
-offset = fscanf(fileID, format);
-fclose(fileID);
 
 %load 3D magnetic data for calibration
 cal_data = csvread(calibrationFileName);

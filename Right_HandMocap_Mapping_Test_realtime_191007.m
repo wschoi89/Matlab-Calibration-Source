@@ -1,4 +1,4 @@
-%% 
+%% clear workspace and close all figures
 
 clear
 clc
@@ -6,7 +6,7 @@ close all
 disp('Start in 5 seconds!')
 % data4=csvread('Simulation_Right02_191004.csv');
 %load Calibrated DH parameters
-DH_json = jsondecode(fileread('DH_parameters.json'));
+DH_json = jsondecode(fileread('test_mech-R3.json'));
 DHoffset = reshape(DH_json.DH_offset, 23, 3);
 %load device angle offset
 offsetFileName = 'offdata_right.txt';
@@ -14,6 +14,17 @@ fileID = fopen(offsetFileName, 'r');
 format = '%f';
 offset = fscanf(fileID, format);
 fclose(fileID);
+
+%close existing memory of port object
+if ~isempty(instrfind)
+     fclose(instrfind);
+      delete(instrfind);
+end
+
+
+%open serial port
+ser = serial('COM5');
+ser.Baudrate = 115200;
 
 off_TH1 = 0;
 off_TH2 = offset(1, 1);
@@ -73,21 +84,14 @@ l8_MI=16.61;
 
 %% connect serial port 
 
-%close existing memory of port object
-if ~isempty(instrfind)
-     fclose(instrfind);
-      delete(instrfind);
-end
 
 %data length, prefix, postfix
 length_protocol = 46;
 hex_prefix = 64;
-hex_postfix = 255;
+    hex_postfix = 255;
 
 
-%open serial port
-ser = serial('COM4');
-ser.Baudrate = 115200;
+
 
 % 5초 정도 시간 소요됨 
 fopen(ser);
@@ -96,8 +100,15 @@ fopen(ser);
 data = zeros(length_protocol, 1);
    
 while(true)
-    % read first byte and check whether it is same with the prefix byte
-    first_byte = fread(ser, 1);    
+    % read first byte 
+    [first_byte, num_read] = fread(ser, 1);    
+   
+    %check the USB connection status
+    if num_read == 0
+        error("please check the USB connection or power ")
+        exit
+    end
+    
     % check first byte
     if first_byte == hex_prefix
         remain_byte = fread(ser, length_protocol - 1);
@@ -169,19 +180,19 @@ Origin_MI=Origin*transl(0,0,19);%% initial values
 
 Link1_1=Origin*transl(-37,0,-15);
 Link1_2=Origin*transl(-37,0,15);
-plot3([Origin(1,4) Link1_1(1,4)],[Origin(2,4) Link1_1(2,4)],[Origin(3,4) Link1_1(3,4)],'b-');
-plot3([Link1_2(1,4) Link1_1(1,4)],[Link1_2(2,4) Link1_1(2,4)],[Link1_2(3,4) Link1_1(3,4)],'b-');
-plot3([Origin(1,4) Link1_2(1,4)],[Origin(2,4) Link1_2(2,4)],[Origin(3,4) Link1_2(3,4)],'b-');
+plot3([Origin(1,4) Link1_1(1,4)],[Origin(2,4) Link1_1(2,4)],[Origin(3,4) Link1_1(3,4)],'black-');
+plot3([Link1_2(1,4) Link1_1(1,4)],[Link1_2(2,4) Link1_1(2,4)],[Link1_2(3,4) Link1_1(3,4)],'black-');
+plot3([Origin(1,4) Link1_2(1,4)],[Origin(2,4) Link1_2(2,4)],[Origin(3,4) Link1_2(3,4)],'black-');
 Link2_1=Origin_TH*transl(-37,0,-15);
 Link2_2=Origin_TH*transl(-37,0,15);
-plot3([Origin_TH(1,4) Link2_1(1,4)],[Origin_TH(2,4) Link2_1(2,4)],[Origin_TH(3,4) Link2_1(3,4)],'b-');
-plot3([Link2_2(1,4) Link2_1(1,4)],[Link2_2(2,4) Link2_1(2,4)],[Link2_2(3,4) Link2_1(3,4)],'b-');
-plot3([Origin_TH(1,4) Link2_2(1,4)],[Origin_TH(2,4) Link2_2(2,4)],[Origin_TH(3,4) Link2_2(3,4)],'b-');
+plot3([Origin_TH(1,4) Link2_1(1,4)],[Origin_TH(2,4) Link2_1(2,4)],[Origin_TH(3,4) Link2_1(3,4)],'black-');
+plot3([Link2_2(1,4) Link2_1(1,4)],[Link2_2(2,4) Link2_1(2,4)],[Link2_2(3,4) Link2_1(3,4)],'black-');
+plot3([Origin_TH(1,4) Link2_2(1,4)],[Origin_TH(2,4) Link2_2(2,4)],[Origin_TH(3,4) Link2_2(3,4)],'black-');
 Link3_1=Origin_MI*transl(-37,0,-15);
 Link3_2=Origin_MI*transl(-37,0,15);
-plot3([Origin_MI(1,4) Link3_1(1,4)],[Origin_MI(2,4) Link3_1(2,4)],[Origin_MI(3,4) Link3_1(3,4)],'b-');
-plot3([Link3_2(1,4) Link3_1(1,4)],[Link3_2(2,4) Link3_1(2,4)],[Link3_2(3,4) Link3_1(3,4)],'b-');
-plot3([Origin_MI(1,4) Link3_2(1,4)],[Origin_MI(2,4) Link3_2(2,4)],[Origin_MI(3,4) Link3_2(3,4)],'b-');
+plot3([Origin_MI(1,4) Link3_1(1,4)],[Origin_MI(2,4) Link3_1(2,4)],[Origin_MI(3,4) Link3_1(3,4)],'black-');
+plot3([Link3_2(1,4) Link3_1(1,4)],[Link3_2(2,4) Link3_1(2,4)],[Link3_2(3,4) Link3_1(3,4)],'black-');
+plot3([Origin_MI(1,4) Link3_2(1,4)],[Origin_MI(2,4) Link3_2(2,4)],[Origin_MI(3,4) Link3_2(3,4)],'black-');
 
 alpha=0;
 beta=0;
@@ -823,49 +834,40 @@ Finger_coor4=Finger_coor3*trotx(TH4_FTH(iter))*transl(0,0,L3_TH);
 % p9=plot3([Finger_coor3(1,4) Finger_coor4(1,4)],[Finger_coor3(2,4) Finger_coor4(2,4)],[Finger_coor3(3,4) Finger_coor4(3,4)],'r.-');
 if flag_init ==0 
     
-%     pp9=plot3([Joint1_TH(1) Joint2_TH(1)],[Joint1_TH(2) Joint2_TH(2)],[Joint1_TH(3) Joint2_TH(3)],'g.-');
-%     pp10=plot3([Joint2_TH(1) Joint3_TH(1)],[Joint2_TH(2) Joint3_TH(2)],[Joint2_TH(3) Joint3_TH(3)],'g.-');
-%     pp11=plot3([Joint3_TH(1) Joint4_TH(1)],[Joint3_TH(2) Joint4_TH(2)],[Joint3_TH(3) Joint4_TH(3)],'g.-');
-%     pp12=plot3([Joint4_TH(1) Joint5_TH(1)],[Joint4_TH(2) Joint5_TH(2)],[Joint4_TH(3) Joint5_TH(3)],'g.-');
-%     pp13=plot3([Joint5_TH(1) Joint6_TH(1)],[Joint5_TH(2) Joint6_TH(2)],[Joint5_TH(3) Joint6_TH(3)],'g.-');
-%     pp14=plot3([Joint6_TH(1) Joint7_TH(1)],[Joint6_TH(2) Joint7_TH(2)],[Joint6_TH(3) Joint7_TH(3)],'g.-');
-%     pp14.XDataSource = '[Joint6_TH(1) Joint7_TH(1)]';
-%     pp14.YDataSource = '[Joint6_TH(2) Joint7_TH(2)]';
-%     pp14.ZDataSource = '[Joint6_TH(3) Joint7_TH(3)]';
-pp8=plot3([Origin_TH(1,4) Joint1_TH(1)],[Origin_TH(2,4) Joint1_TH(2)],[Origin_TH(3,4) Joint1_TH(3)],'r.-');
-pp8.XDataSource = '[Origin_TH(1,4) Joint1_TH(1)]';
-pp8.YDataSource = '[Origin_TH(2,4) Joint1_TH(2)]';
-pp8.ZDataSource = '[Origin_TH(3,4) Joint1_TH(3)]';
+    pp8=plot3([Origin_TH(1,4) Joint1_TH(1)],[Origin_TH(2,4) Joint1_TH(2)],[Origin_TH(3,4) Joint1_TH(3)],'r.-');
+    pp8.XDataSource = '[Origin_TH(1,4) Joint1_TH(1)]';
+    pp8.YDataSource = '[Origin_TH(2,4) Joint1_TH(2)]';
+    pp8.ZDataSource = '[Origin_TH(3,4) Joint1_TH(3)]';
 
-pp9=plot3([Joint1_TH(1) Joint2_TH(1)],[Joint1_TH(2) Joint2_TH(2)],[Joint1_TH(3) Joint2_TH(3)],'r.-');
-pp9.XDataSource = '[Joint1_TH(1) Joint2_TH(1)]';
-pp9.YDataSource = '[Joint1_TH(2) Joint2_TH(2)]';
-pp9.ZDataSource = '[Joint1_TH(3) Joint2_TH(3)]';
+    pp9=plot3([Joint1_TH(1) Joint2_TH(1)],[Joint1_TH(2) Joint2_TH(2)],[Joint1_TH(3) Joint2_TH(3)],'r.-');
+    pp9.XDataSource = '[Joint1_TH(1) Joint2_TH(1)]';
+    pp9.YDataSource = '[Joint1_TH(2) Joint2_TH(2)]';
+    pp9.ZDataSource = '[Joint1_TH(3) Joint2_TH(3)]';
 
-pp10=plot3([Joint2_TH(1) Joint3_TH(1)],[Joint2_TH(2) Joint3_TH(2)],[Joint2_TH(3) Joint3_TH(3)],'r.-');
-pp10.XDataSource = '[Joint2_TH(1) Joint3_TH(1)]';
-pp10.YDataSource = '[Joint2_TH(2) Joint3_TH(2)]';
-pp10.ZDataSource = '[Joint2_TH(3) Joint3_TH(3)]';
+    pp10=plot3([Joint2_TH(1) Joint3_TH(1)],[Joint2_TH(2) Joint3_TH(2)],[Joint2_TH(3) Joint3_TH(3)],'r.-');
+    pp10.XDataSource = '[Joint2_TH(1) Joint3_TH(1)]';
+    pp10.YDataSource = '[Joint2_TH(2) Joint3_TH(2)]';
+    pp10.ZDataSource = '[Joint2_TH(3) Joint3_TH(3)]';
 
-pp11=plot3([Joint3_TH(1) Joint4_TH(1)],[Joint3_TH(2) Joint4_TH(2)],[Joint3_TH(3) Joint4_TH(3)],'r.-');
-pp11.XDataSource = '[Joint3_TH(1) Joint4_TH(1)]';
-pp11.YDataSource = '[Joint3_TH(2) Joint4_TH(2)]';
-pp11.ZDataSource = '[Joint3_TH(3) Joint4_TH(3)]';
+    pp11=plot3([Joint3_TH(1) Joint4_TH(1)],[Joint3_TH(2) Joint4_TH(2)],[Joint3_TH(3) Joint4_TH(3)],'r.-');
+    pp11.XDataSource = '[Joint3_TH(1) Joint4_TH(1)]';
+    pp11.YDataSource = '[Joint3_TH(2) Joint4_TH(2)]';
+    pp11.ZDataSource = '[Joint3_TH(3) Joint4_TH(3)]';
 
-pp12=plot3([Joint4_TH(1) Joint5_TH(1)],[Joint4_TH(2) Joint5_TH(2)],[Joint4_TH(3) Joint5_TH(3)],'r.-');
-pp12.XDataSource = '[Joint4_TH(1) Joint5_TH(1)]';
-pp12.YDataSource = '[Joint4_TH(2) Joint5_TH(2)]';
-pp12.ZDataSource = '[Joint4_TH(3) Joint5_TH(3)]';
+    pp12=plot3([Joint4_TH(1) Joint5_TH(1)],[Joint4_TH(2) Joint5_TH(2)],[Joint4_TH(3) Joint5_TH(3)],'r.-');
+    pp12.XDataSource = '[Joint4_TH(1) Joint5_TH(1)]';
+    pp12.YDataSource = '[Joint4_TH(2) Joint5_TH(2)]';
+    pp12.ZDataSource = '[Joint4_TH(3) Joint5_TH(3)]';
 
-pp13=plot3([Joint5_TH(1) Joint6_TH(1)],[Joint5_TH(2) Joint6_TH(2)],[Joint5_TH(3) Joint6_TH(3)],'r.-');
-pp13.XDataSource = '[Joint5_TH(1) Joint6_TH(1)]';
-pp13.YDataSource = '[Joint5_TH(2) Joint6_TH(2)]';
-pp13.ZDataSource = '[Joint5_TH(3) Joint6_TH(3)]';
+    pp13=plot3([Joint5_TH(1) Joint6_TH(1)],[Joint5_TH(2) Joint6_TH(2)],[Joint5_TH(3) Joint6_TH(3)],'r.-');
+    pp13.XDataSource = '[Joint5_TH(1) Joint6_TH(1)]';
+    pp13.YDataSource = '[Joint5_TH(2) Joint6_TH(2)]';
+    pp13.ZDataSource = '[Joint5_TH(3) Joint6_TH(3)]';
 
-pp14=plot3([Joint6_TH(1) Joint7_TH(1)],[Joint6_TH(2) Joint7_TH(2)],[Joint6_TH(3) Joint7_TH(3)],'r.-');
-pp14.XDataSource = '[Joint6_TH(1) Joint7_TH(1)]';
-pp14.YDataSource = '[Joint6_TH(2) Joint7_TH(2)]';
-pp14.ZDataSource = '[Joint6_TH(3) Joint7_TH(3)]';
+    pp14=plot3([Joint6_TH(1) Joint7_TH(1)],[Joint6_TH(2) Joint7_TH(2)],[Joint6_TH(3) Joint7_TH(3)],'r.-');
+    pp14.XDataSource = '[Joint6_TH(1) Joint7_TH(1)]';
+    pp14.YDataSource = '[Joint6_TH(2) Joint7_TH(2)]';
+    pp14.ZDataSource = '[Joint6_TH(3) Joint7_TH(3)]';
 
 end
 
@@ -896,13 +898,10 @@ set(pp13, 'ZData', [Joint5_TH(3) Joint6_TH(3)]);
 set(pp14, 'XData', [Joint6_TH(1) Joint7_TH(1)]);
 set(pp14, 'YData', [Joint6_TH(2) Joint7_TH(2)]);
 set(pp14, 'ZData', [Joint6_TH(3) Joint7_TH(3)]);
-drawnow
+% drawnow
 % pp8=plot3([Origin_TH(1,4) Joint1_TH(1)],[Origin_TH(2,4) Joint1_TH(2)],[Origin_TH(3,4) Joint1_TH(3)],'g.-');
 % set(pp14,'XDataSource',Joint6_TH(1),Joint7_TH(1),'YDataSource',Joint6_TH(2),Joint7_TH(2), 'ZDataSource', Joint6_TH(3), Joint7_TH(3));
 
-
-
-t_end_two =toc;
 % Matout(iter,1)=TH1_FTH(iter)*180/pi;
 % Matout(iter,2)=TH2_FTH(iter)*180/pi;
 % Matout(iter,3)=-(Finger_coor1(3,4)-HandOrigin(3));
@@ -943,6 +942,7 @@ if TH1(iter)>pi/2
 elseif TH1(iter)<-pi/2
     TH1(iter)=-pi/2;
 end
+disp(TH1(iter)*180.0/pi);
 
 Y(iter)=-sin(TH1(iter))*alpha+cos(TH1(iter))*gamma;
 if Y(iter)*Y(iter)+beta*beta-b*b<0
@@ -1151,12 +1151,12 @@ if flag_init == 0
     pp1.YDataSource = '[Origin(2, 4) Joint1(2)]';
     pp1.ZDataSource = '[Origin(3, 4) Joint1(3)]';
     
-    pp2=plot3([Joint1(1) Joint2(1)],[Joint1(2) Joint2(2)],[Joint1(3) Joint2(3)],'g.-');pp2.XDataSource = '[Joint1(1) Joint2(1)]';pp2.YDataSource = '[Joint1(2) Joint2(2)]';pp2.ZDataSource = '[Joint1(3) Joint2(3)]';
-    pp3=plot3([Joint2(1) Joint3(1)],[Joint2(2) Joint3(2)],[Joint2(3) Joint3(3)],'g.-');pp3.XDataSource = '[Joint2(1) Joint3(1)]';pp3.YDataSource = '[Joint2(2) Joint3(2)]';pp3.ZDataSource = '[Joint2(3) Joint3(3)]';
-    pp4=plot3([Joint3(1) Joint4(1)],[Joint3(2) Joint4(2)],[Joint3(3) Joint4(3)],'g.-');pp4.XDataSource = '[Joint3(1) Joint4(1)]';pp4.YDataSource = '[Joint3(2) Joint4(2)]';pp4.ZDataSource = '[Joint3(3) Joint4(3)]';
-    pp5=plot3([Joint4(1) Joint5(1)],[Joint4(2) Joint5(2)],[Joint4(3) Joint5(3)],'g.-');pp5.XDataSource = '[Joint4(1) Joint5(1)]';pp5.YDataSource = '[Joint4(2) Joint5(2)]';pp5.ZDataSource = '[Joint4(3) Joint5(3)]';
-    pp6=plot3([Joint5(1) Joint6(1)],[Joint5(2) Joint6(2)],[Joint5(3) Joint6(3)],'g.-');pp6.XDataSource = '[Joint5(1) Joint6(1)]';pp6.YDataSource = '[Joint5(2) Joint6(2)]';pp6.ZDataSource = '[Joint5(3) Joint6(3)]';
-    pp7=plot3([Joint6(1) Joint7(1)],[Joint6(2) Joint7(2)],[Joint6(3) Joint7(3)],'g.-');pp7.XDataSource = '[Joint6(1) Joint7(1)]';pp7.YDataSource = '[Joint6(2) Joint7(2)]';pp7.ZDataSource = '[Joint^(3) Joint7(3)]';
+    pp2=plot3([Joint1(1) Joint2(1)],[Joint1(2) Joint2(2)],[Joint1(3) Joint2(3)],'g.-');
+    pp3=plot3([Joint2(1) Joint3(1)],[Joint2(2) Joint3(2)],[Joint2(3) Joint3(3)],'g.-');
+    pp4=plot3([Joint3(1) Joint4(1)],[Joint3(2) Joint4(2)],[Joint3(3) Joint4(3)],'g.-');
+    pp5=plot3([Joint4(1) Joint5(1)],[Joint4(2) Joint5(2)],[Joint4(3) Joint5(3)],'g.-');
+    pp6=plot3([Joint5(1) Joint6(1)],[Joint5(2) Joint6(2)],[Joint5(3) Joint6(3)],'g.-');
+    pp7=plot3([Joint6(1) Joint7(1)],[Joint6(2) Joint7(2)],[Joint6(3) Joint7(3)],'g.-');
 %     pp3=plot3([Joint2(1) Joint3(1)],[Joint2(2) Joint3(2)],[Joint2(3) Joint3(3)],'g.-');
 %     pp4=plot3([Joint3(1) Joint4(1)],[Joint3(2) Joint4(2)],[Joint3(3) Joint4(3)],'g.-');
 %     pp5=plot3([Joint4(1) Joint5(1)],[Joint4(2) Joint5(2)],[Joint4(3) Joint5(3)],'g.-');
@@ -1172,253 +1172,265 @@ set(pp5, 'XData', [Joint4(1) Joint5(1)]);   set(pp5, 'YData', [Joint4(2) Joint5(
 set(pp6, 'XData', [Joint5(1) Joint6(1)]);   set(pp6, 'YData', [Joint5(2) Joint6(2)]);   set(pp6, 'ZData', [Joint5(3) Joint6(3)]);
 set(pp7, 'XData', [Joint6(1) Joint7(1)]);   set(pp7, 'YData', [Joint6(2) Joint7(2)]);   set(pp7, 'ZData', [Joint6(3) Joint7(3)]);
 
-distance_thumb_index = sqrt((Joint7(1)-Joint7_TH(1))^2+(Joint7(2)-Joint7_TH(2))^2+(Joint7(3)-Joint7_TH(3))^2);
-fprintf('%f\n', distance_thumb_index);
 
-% %% Middle
-% 
-% mag=sqrt(data4(iter,M1*3+1)^2+data4(iter,M1*3+2)^2+data4(iter,M1*3+3)^2);
-% a=data4(iter,M1*3+1)/mag;
-% b=data4(iter,M1*3+2)/mag;
-% 
-% X=atan2(gamma,alpha);
-% if alpha*alpha+gamma*gamma-a*a>0
-%     TH1_MI(iter)=atan2(sqrt(alpha*alpha+gamma*gamma-a*a),a)-X;
-% else
-%     TH1_MI(iter)=atan2(0,a)-X;
-% end
-% 
-% if TH1_MI(iter)>pi/2
-%     TH1_MI(iter)=pi/2;
-% elseif TH1_MI(iter)<-pi/2
-%     TH1_MI(iter)=-pi/2;
-% end
-%     
-% Y(iter)=sin(TH1_MI(iter))*alpha+cos(TH1_MI(iter))*gamma;
-% if Y(iter)*Y(iter)+beta*beta-b*b<0
-%     TH2_MI(iter)=atan2(b,0)-atan2(beta,Y(iter));
-% else
-%     TH2_MI(iter)=atan2(b,sqrt(Y(iter)*Y(iter)+beta*beta-b*b))-atan2(beta,Y(iter));
-% end
-% 
-% if TH2_MI(iter)>pi/2
-%     TH2_MI(iter)=pi/2;
-% elseif TH2_MI(iter)<-pi/2
-%     TH2_MI(iter)=-pi/2;
-% end
-%     
-% mag=sqrt(data4(iter,M2*3+1)^2+data4(iter,M2*3+2)^2+data4(iter,M2*3+3)^2);
-% a=data4(iter,M2*3+1)/mag;
-% b=data4(iter,M2*3+2)/mag;
-% 
-% X=atan2(alpha,gamma);
-% if alpha*alpha+gamma*gamma-a*a>0
-%     TH4_MI(iter)=atan2(a,sqrt(alpha*alpha+gamma*gamma-a*a))-X;
-% else
-%     TH4_MI(iter)=atan2(a,0)-X;
-% end
-% 
-% if TH4_MI(iter)>pi/2
-%     TH4_MI(iter)=pi/2;
-% elseif TH4_MI(iter)<-pi/2
-%     TH4_MI(iter)=-pi/2;
-% end
-% 
-% 
-% Y(iter)=-sin(TH4_MI(iter))*alpha+cos(TH4_MI(iter))*gamma;
-% if Y(iter) == 0
-%     Y(iter)=0.00001;
-% end
-% if Y(iter)*Y(iter)+beta*beta-b*b<0
-%     TH3_MI(iter)=atan2(0,b)-atan2(Y(iter),beta);
-% else
-%     TH3_MI(iter)=atan2(sqrt(Y(iter)*Y(iter)+beta*beta-b*b),b)-atan2(Y(iter),beta);
-%     compare=atan2(abs(cos(TH3_MI(iter))*cos(TH4_MI(iter))),b)-atan2(Y(iter),beta);
-% end
-% 
-% if TH3_MI(iter)>pi/2
-%     TH3_MI(iter)=pi/2;
-% elseif TH3_MI(iter)<-pi/2
-%     TH3_MI(iter)=-pi/2;
-% end
-% 
-% TH4_MI(iter)=TH4_MI(iter)+pi/4;
-% 
-% TH1_MI(iter)=TH1_MI(iter)-off_TH1_MI;
-% TH2_MI(iter)=TH2_MI(iter)-off_TH2_MI;
-% TH3_MI(iter)=TH3_MI(iter)-off_TH3_MI;
-% TH4_MI(iter)=TH4_MI(iter)-off_TH4_MI;
-% 
-% % DH_MI=[0 0 0 -pi/2; 0 TH1_MI(iter) l1_MI pi/2; 0 TH2_MI(iter) l2_MI 0; 0 -pi/2 l3_MI 0; 0 TH3_MI(iter) l4_MI 0; 0 TH4_MI(iter) l5_MI 0; 0 -pi/2 l6_MI 0; 0 pi/2 20.46 0];
-% DH_MI=[DHoffset(1,3) DHoffset(2,3) DHoffset(3,3) DHoffset(4,3); DHoffset(5,3) TH1_MI(iter) DHoffset(6,3) DHoffset(7,3); DHoffset(8,3) TH2_MI(iter) l2_MI 0; 0 -pi/2 l3_MI DHoffset(9,3); DHoffset(10,3) TH3_MI(iter) DHoffset(11,3) DHoffset(12,3); DHoffset(13,3) TH4_MI(iter) l5_MI 0; DHoffset(14,3) DHoffset(15,3) DHoffset(16,3) DHoffset(17,3); 0 pi/2 20.65 0];
-% 
-% R01_MI=transl(0,0,DH_MI(1,1))*trotz(DH_MI(1,2))*transl(DH_MI(1,3),0,0)*trotx(DH_MI(1,4));
-% R12_MI=transl(0,0,DH_MI(2,1))*trotz(DH_MI(2,2))*transl(DH_MI(2,3),0,0)*trotx(DH_MI(2,4));
-% R23_MI=transl(0,0,DH_MI(3,1))*trotz(DH_MI(3,2))*transl(DH_MI(3,3),0,0)*trotx(DH_MI(3,4));
-% R34_MI=transl(0,0,DH_MI(4,1))*trotz(DH_MI(4,2))*transl(DH_MI(4,3),0,0)*trotx(DH_MI(4,4));
-% R45_MI=transl(0,0,DH_MI(5,1))*trotz(DH_MI(5,2))*transl(DH_MI(5,3),0,0)*trotx(DH_MI(5,4));
-% R56_MI=transl(0,0,DH_MI(6,1))*trotz(DH_MI(6,2))*transl(DH_MI(6,3),0,0)*trotx(DH_MI(6,4));
-% R67_MI=transl(0,0,DH_MI(7,1))*trotz(DH_MI(7,2))*transl(DH_MI(7,3),0,0)*trotx(DH_MI(7,4));
-% R78_MI=transl(0,0,DH_MI(8,1))*trotz(DH_MI(8,2))*transl(DH_MI(8,3),0,0)*trotx(DH_MI(8,4));
-% 
-% R1_MI=Origin_MI*R01_MI*R12_MI;
-% Joint1_MI=[R1_MI(1,4); R1_MI(2,4); R1_MI(3,4)];
-% R2_MI=R1_MI*R23_MI;
-% Joint2_MI=[R2_MI(1,4); R2_MI(2,4); R2_MI(3,4)];
-% R3_MI=R2_MI*R34_MI;
-% Joint3_MI=[R3_MI(1,4); R3_MI(2,4); R3_MI(3,4)];
-% R4_MI=R3_MI*R45_MI;
-% Joint4_MI=[R4_MI(1,4); R4_MI(2,4); R4_MI(3,4)];
-% R5_MI=R4_MI*R56_MI;
-% Joint5_MI=[R5_MI(1,4); R5_MI(2,4); R5_MI(3,4)];
-% R6_MI=R5_MI*R67_MI;
-% Joint6_MI=[R6_MI(1,4); R6_MI(2,4); R6_MI(3,4)];
-% R7_MI=R6_MI*R78_MI;
-% Joint7_MI=[R7_MI(1,4); R7_MI(2,4); R7_MI(3,4)];
-% R7_MI=R7_MI*trotz(Fingeroffset_MI);
-% 
-% FingerOrigin(3,4)=FingerOrigin(3,4)+Joint7_MI(3)-FingerOrigin_MI(3,4);
-% FingerOrigin_TH(3,4)=FingerOrigin_TH(3,4)+Joint7_MI(3)-FingerOrigin_MI(3,4);
-% FingerOrigin_MI(3,4)=Joint7_MI(3);
-% 
-% % fourth option
-% vec1=[R7_MI(1,4)-FingerOrigin_MI(1,4) R7_MI(2,4)-FingerOrigin_MI(2,4) R7_MI(3,4)-FingerOrigin_MI(3,4)];
-% vec2=[R7_MI(1,1);R7_MI(2,1);R7_MI(3,1)];
-% vec1=[vec1*FingerOrigin_MI(1:3,1) vec1*FingerOrigin_MI(1:3,2) vec1*FingerOrigin_MI(1:3,3)];
-% vec2=[vec2'*FingerOrigin_MI(1:3,1);vec2'*FingerOrigin_MI(1:3,2);vec2'*FingerOrigin_MI(1:3,3)];
-% norm1=sqrt(vec1(1)*vec1(1)+vec1(3)*vec1(3));
-% norm2=sqrt(vec2(1)*vec2(1)+vec2(3)*vec2(3));
-% ang = acos([vec1(1) 0 vec1(3)]*[vec2(1) 0 vec2(3)]'/norm1/norm2);
-% det=cross([vec1(1) 0 vec1(3)],[vec2(1) 0 vec2(3)]);
-% 
-% if ang < pi/2
-%     if det(2)>0
-%         newaxis=roty(-ang)*vec2;
-%     else
-%         newaxis=roty(ang)*vec2;
-%     end
-% else
-%     if det(2)>0
-%         newaxis=roty(pi-ang)*vec2;
-%     else
-%         newaxis=roty(ang-pi)*vec2;
-%     end
-% end
-% 
-% newaxis=[newaxis'*FingerOrigin_MI(1,1:3)' newaxis'*FingerOrigin_MI(2,1:3)' newaxis'*FingerOrigin_MI(3,1:3)']';
-% 
-% P0_MI=FingerOrigin_MI(1:3,4);
-% P3_MI=Joint7_MI;
-% P2_MI=Joint7_MI-newaxis*L3_MI;
-% L_MI=norm(P0_MI-P2_MI);
-% P3_af_MI=[(P3_MI(1)-FingerOrigin_MI(1,4)) P3_MI(2)-FingerOrigin_MI(2,4) P3_MI(3)-FingerOrigin_MI(3,4)];
-% P2_af_MI=[(P2_MI(1)-FingerOrigin_MI(1,4)) P2_MI(2)-FingerOrigin_MI(2,4) P2_MI(3)-FingerOrigin_MI(3,4)];
-% P3_af_MI=[P3_af_MI*FingerOrigin_MI(1:3,1) P3_af_MI*FingerOrigin_MI(1:3,2) P3_af_MI*FingerOrigin_MI(1:3,3)];
-% P2_af_MI=[P2_af_MI*FingerOrigin_MI(1:3,1) P2_af_MI*FingerOrigin_MI(1:3,2) P2_af_MI*FingerOrigin_MI(1:3,3)];
-% 
-% TH1_FMI(iter)=0;
-% 
-% if P3_af_MI(2)-P2_af_MI(2) > 0
-%     the_tot=-acos((P3_af_MI(3)-P2_af_MI(3))/L3_MI);
-% else
-%     the_tot=acos((P3_af_MI(3)-P2_af_MI(3))/L3_MI);
-% end
-% 
-% if L_MI<L1_MI+L2_MI
-%     theta=acos((L2_MI^2+L_MI^2-L1_MI^2)/(2*L2_MI*L_MI));
-%     x=[P3_af_MI(1)-P2_af_MI(1) P3_af_MI(2)-P2_af_MI(2) P3_af_MI(3)-P2_af_MI(3)]*P2_af_MI'/L_MI/L3_MI;
-%     if x>1
-%         x=1;
-%     end
-%     theta_1=acos(x);
-%     
-%     Det_vec=cross(P2_af_MI,[P3_af_MI(1)-P2_af_MI(1) P3_af_MI(2)-P2_af_MI(2) P3_af_MI(3)-P2_af_MI(3)]);
-%     
-%     if Det_vec(1)>0
-%         if theta>theta_1
-%             TH=theta-theta_1;
-%             P1_af_MI=P2_af_MI-(rotx(TH)*[P3_af_MI(1)-P2_af_MI(1) P3_af_MI(2)-P2_af_MI(2) P3_af_MI(3)-P2_af_MI(3)]')'*L2_MI/L3_MI;
-%             TH4_FMI(iter)=-TH;
-%         else
-%             TH=theta_1-theta;
-%             P1_af_MI=P2_af_MI-(rotx(-TH)*[P3_af_MI(1)-P2_af_MI(1) P3_af_MI(2)-P2_af_MI(2) P3_af_MI(3)-P2_af_MI(3)]')'*L2_MI/L3_MI;
-%             TH4_FMI(iter)=TH;
-%         end
-% 
-%         TH3_FMI(iter)=(pi-acos((L2_MI^2+L1_MI^2-L_MI^2)/(2*L2_MI*L1_MI)));
-%     else
-%         if theta>theta_1
-%             TH=theta-theta_1;
-%             P1_af_MI=P2_af_MI-(rotx(-TH)*[P3_af_MI(1)-P2_af_MI(1) P3_af_MI(2)-P2_af_MI(2) P3_af_MI(3)-P2_af_MI(3)]')'*L2_MI/L3_MI;
-%             TH4_FMI(iter)=TH;
-%         else
-%             TH=theta_1-theta;
-%             P1_af_MI=P2_af_MI-(rotx(TH)*[P3_af_MI(1)-P2_af_MI(1) P3_af_MI(2)-P2_af_MI(2) P3_af_MI(3)-P2_af_MI(3)]')'*L2_MI/L3_MI;
-%             TH4_FMI(iter)=-TH;
-%         end
-% 
-%         TH3_FMI(iter)=-(pi-acos((L2_MI^2+L1_MI^2-L_MI^2)/(2*L2_MI*L1_MI)));
-%     end
-%     
-%     TH2_FMI(iter)=the_tot-TH3_FMI(iter)-TH4_FMI(iter);
-%     
-%     P1_af_MI=P1_af_MI*roty(-TH1_FMI(iter));
-%     
-%     Finger_coor1=FingerOrigin_MI;
-%     Finger_coor2=Finger_coor1*troty(TH1_FMI(iter))*trotx(TH2_FMI(iter))*transl(0,0,L1_MI);
-%     Finger_coor3=Finger_coor2*trotx(TH3_FMI(iter))*transl(0,0,L2_MI);
-% else
-%     P1_af_MI=P2_af_MI+(-P2_af_MI)*L2_MI/L_MI;
-%     TH3_FMI(iter)=0;
-%     theta_2=acos([0 0 1]*P2_af_MI'/L_MI);
-%     
-%     if P1_af_MI(2)>0
-%         TH2_FMI(iter)=-theta_2;
-%     else
-%         TH2_FMI(iter)=theta_2;
-%     end
-%     
-%     TH4_FMI(iter)=the_tot-TH2_FMI(iter);
-%     
-%     P1_af_MI=P1_af_MI*roty(-TH1_FMI(iter));
-%     
-%     Finger_coor1=FingerOrigin_MI;
-%     Finger_coor2=Finger_coor1*troty(TH1_FMI(iter))*trotx(TH2_FMI(iter))*transl(0,0,L_MI-L2_MI);
-%     Finger_coor3=Finger_coor2*trotx(TH3_FMI(iter))*transl(0,0,L2_MI);
-% end
-% 
-% new_P1=[P1_af_MI*FingerOrigin_MI(1,1:3)' P1_af_MI*FingerOrigin_MI(2,1:3)' P1_af_MI*FingerOrigin_MI(3,1:3)'];
-% 
-% t_end_four = toc;
-% tic;
-% % p13=plot3([P0_MI(1) new_P1(1)+FingerOrigin_MI(1,4)],[P0_MI(2) new_P1(2)+FingerOrigin_MI(2,4)],[P0_MI(3) new_P1(3)+FingerOrigin_MI(3,4)],'k.-');
-% % p14=plot3([P2_MI(1) new_P1(1)+FingerOrigin_MI(1,4)],[P2_MI(2) new_P1(2)+FingerOrigin_MI(2,4)],[P2_MI(3) new_P1(3)+FingerOrigin_MI(3,4)],'k.-');
-% % p15=plot3([P2_MI(1) P3_MI(1)],[P2_MI(2) P3_MI(2)],[P2_MI(3) P3_MI(3)],'k.-');
-% 
-% % p13=plot3([P0_MI(1) (P1_af_MI(3)+FingerOrigin_MI(3))],[P0_MI(2) P1_af_MI(2)+FingerOrigin_MI(2)],[P0_MI(3) -(P1_af_MI(1)+FingerOrigin_MI(1))],'k.-');
-% % p14=plot3([P2_MI(1) (P1_af_MI(3)+FingerOrigin_MI(3))],[P2_MI(2) P1_af_MI(2)+FingerOrigin_MI(2)],[P2_MI(3) -(P1_af_MI(1)+FingerOrigin_MI(1))],'k.-');
-% % p15=plot3([P2_MI(1) P3_MI(1)],[P2_MI(2) P3_MI(2)],[P2_MI(3) P3_MI(3)],'k.-');
-% 
-% Finger_coor4=Finger_coor3*trotx(TH4_FMI(iter))*transl(0,0,L3_MI);
-% 
-% % p16=plot3([Finger_coor1(1,4) Finger_coor2(1,4)],[Finger_coor1(2,4) Finger_coor2(2,4)],[Finger_coor1(3,4) Finger_coor2(3,4)],'r.-');
-% % p17=plot3([Finger_coor3(1,4) Finger_coor2(1,4)],[Finger_coor3(2,4) Finger_coor2(2,4)],[Finger_coor3(3,4) Finger_coor2(3,4)],'r.-');
-% % p18=plot3([Finger_coor3(1,4) Finger_coor4(1,4)],[Finger_coor3(2,4) Finger_coor4(2,4)],[Finger_coor3(3,4) Finger_coor4(3,4)],'r.-');
-% 
-% pp15=plot3([Origin_MI(1,4) Joint1_MI(1)],[Origin_MI(2,4) Joint1_MI(2)],[Origin_MI(3,4) Joint1_MI(3)],'k.-');
-% pp16=plot3([Joint1_MI(1) Joint2_MI(1)],[Joint1_MI(2) Joint2_MI(2)],[Joint1_MI(3) Joint2_MI(3)],'k.-');
-% pp17=plot3([Joint2_MI(1) Joint3_MI(1)],[Joint2_MI(2) Joint3_MI(2)],[Joint2_MI(3) Joint3_MI(3)],'k.-');
-% pp18=plot3([Joint3_MI(1) Joint4_MI(1)],[Joint3_MI(2) Joint4_MI(2)],[Joint3_MI(3) Joint4_MI(3)],'k.-');
-% pp19=plot3([Joint4_MI(1) Joint5_MI(1)],[Joint4_MI(2) Joint5_MI(2)],[Joint4_MI(3) Joint5_MI(3)],'k.-');
-% pp20=plot3([Joint5_MI(1) Joint6_MI(1)],[Joint5_MI(2) Joint6_MI(2)],[Joint5_MI(3) Joint6_MI(3)],'k.-');
-% pp21=plot3([Joint7_MI(1) Joint6_MI(1)],[Joint7_MI(2) Joint6_MI(2)],[Joint7_MI(3) Joint6_MI(3)],'k.-');
+
+%% Middle
+
+mag=sqrt(data4(iter,M1*3+1)^2+data4(iter,M1*3+2)^2+data4(iter,M1*3+3)^2);
+a=data4(iter,M1*3+1)/mag;
+b=data4(iter,M1*3+2)/mag;
+
+X=atan2(gamma,alpha);
+if alpha*alpha+gamma*gamma-a*a>0
+    TH1_MI(iter)=atan2(sqrt(alpha*alpha+gamma*gamma-a*a),a)-X;
+else
+    TH1_MI(iter)=atan2(0,a)-X;
+end
+
+if TH1_MI(iter)>pi/2
+    TH1_MI(iter)=pi/2;
+elseif TH1_MI(iter)<-pi/2
+    TH1_MI(iter)=-pi/2;
+end
+    
+Y(iter)=sin(TH1_MI(iter))*alpha+cos(TH1_MI(iter))*gamma;
+if Y(iter)*Y(iter)+beta*beta-b*b<0
+    TH2_MI(iter)=atan2(b,0)-atan2(beta,Y(iter));
+else
+    TH2_MI(iter)=atan2(b,sqrt(Y(iter)*Y(iter)+beta*beta-b*b))-atan2(beta,Y(iter));
+end
+
+if TH2_MI(iter)>pi/2
+    TH2_MI(iter)=pi/2;
+elseif TH2_MI(iter)<-pi/2
+    TH2_MI(iter)=-pi/2;
+end
+    
+mag=sqrt(data4(iter,M2*3+1)^2+data4(iter,M2*3+2)^2+data4(iter,M2*3+3)^2);
+a=data4(iter,M2*3+1)/mag;
+b=data4(iter,M2*3+2)/mag;
+
+X=atan2(alpha,gamma);
+if alpha*alpha+gamma*gamma-a*a>0
+    TH4_MI(iter)=atan2(a,sqrt(alpha*alpha+gamma*gamma-a*a))-X;
+else
+    TH4_MI(iter)=atan2(a,0)-X;
+end
+
+if TH4_MI(iter)>pi/2
+    TH4_MI(iter)=pi/2;
+elseif TH4_MI(iter)<-pi/2
+    TH4_MI(iter)=-pi/2;
+end
+
+
+Y(iter)=-sin(TH4_MI(iter))*alpha+cos(TH4_MI(iter))*gamma;
+if Y(iter) == 0
+    Y(iter)=0.00001;
+end
+if Y(iter)*Y(iter)+beta*beta-b*b<0
+    TH3_MI(iter)=atan2(0,b)-atan2(Y(iter),beta);
+else
+    TH3_MI(iter)=atan2(sqrt(Y(iter)*Y(iter)+beta*beta-b*b),b)-atan2(Y(iter),beta);
+    compare=atan2(abs(cos(TH3_MI(iter))*cos(TH4_MI(iter))),b)-atan2(Y(iter),beta);
+end
+
+if TH3_MI(iter)>pi/2
+    TH3_MI(iter)=pi/2;
+elseif TH3_MI(iter)<-pi/2
+    TH3_MI(iter)=-pi/2;
+end
+
+TH4_MI(iter)=TH4_MI(iter)+pi/4;
+
+TH1_MI(iter)=TH1_MI(iter)-off_TH1_MI;
+TH2_MI(iter)=TH2_MI(iter)-off_TH2_MI;
+TH3_MI(iter)=TH3_MI(iter)-off_TH3_MI;
+TH4_MI(iter)=TH4_MI(iter)-off_TH4_MI;
+
+% DH_MI=[0 0 0 -pi/2; 0 TH1_MI(iter) l1_MI pi/2; 0 TH2_MI(iter) l2_MI 0; 0 -pi/2 l3_MI 0; 0 TH3_MI(iter) l4_MI 0; 0 TH4_MI(iter) l5_MI 0; 0 -pi/2 l6_MI 0; 0 pi/2 20.46 0];
+DH_MI=[DHoffset(1,3) DHoffset(2,3) DHoffset(3,3) DHoffset(4,3); DHoffset(5,3) TH1_MI(iter) DHoffset(6,3) DHoffset(7,3); DHoffset(8,3) TH2_MI(iter) l2_MI 0; 0 -pi/2 l3_MI DHoffset(9,3); DHoffset(10,3) TH3_MI(iter) DHoffset(11,3) DHoffset(12,3); DHoffset(13,3) TH4_MI(iter) l5_MI 0; DHoffset(14,3) DHoffset(15,3) DHoffset(16,3) DHoffset(17,3); 0 pi/2 20.65 0];
+
+R01_MI=transl(0,0,DH_MI(1,1))*trotz(DH_MI(1,2))*transl(DH_MI(1,3),0,0)*trotx(DH_MI(1,4));
+R12_MI=transl(0,0,DH_MI(2,1))*trotz(DH_MI(2,2))*transl(DH_MI(2,3),0,0)*trotx(DH_MI(2,4));
+R23_MI=transl(0,0,DH_MI(3,1))*trotz(DH_MI(3,2))*transl(DH_MI(3,3),0,0)*trotx(DH_MI(3,4));
+R34_MI=transl(0,0,DH_MI(4,1))*trotz(DH_MI(4,2))*transl(DH_MI(4,3),0,0)*trotx(DH_MI(4,4));
+R45_MI=transl(0,0,DH_MI(5,1))*trotz(DH_MI(5,2))*transl(DH_MI(5,3),0,0)*trotx(DH_MI(5,4));
+R56_MI=transl(0,0,DH_MI(6,1))*trotz(DH_MI(6,2))*transl(DH_MI(6,3),0,0)*trotx(DH_MI(6,4));
+R67_MI=transl(0,0,DH_MI(7,1))*trotz(DH_MI(7,2))*transl(DH_MI(7,3),0,0)*trotx(DH_MI(7,4));
+R78_MI=transl(0,0,DH_MI(8,1))*trotz(DH_MI(8,2))*transl(DH_MI(8,3),0,0)*trotx(DH_MI(8,4));
+
+R1_MI=Origin_MI*R01_MI*R12_MI;
+Joint1_MI=[R1_MI(1,4); R1_MI(2,4); R1_MI(3,4)];
+R2_MI=R1_MI*R23_MI;
+Joint2_MI=[R2_MI(1,4); R2_MI(2,4); R2_MI(3,4)];
+R3_MI=R2_MI*R34_MI;
+Joint3_MI=[R3_MI(1,4); R3_MI(2,4); R3_MI(3,4)];
+R4_MI=R3_MI*R45_MI;
+Joint4_MI=[R4_MI(1,4); R4_MI(2,4); R4_MI(3,4)];
+R5_MI=R4_MI*R56_MI;
+Joint5_MI=[R5_MI(1,4); R5_MI(2,4); R5_MI(3,4)];
+R6_MI=R5_MI*R67_MI;
+Joint6_MI=[R6_MI(1,4); R6_MI(2,4); R6_MI(3,4)];
+R7_MI=R6_MI*R78_MI;
+Joint7_MI=[R7_MI(1,4); R7_MI(2,4); R7_MI(3,4)];
+R7_MI=R7_MI*trotz(Fingeroffset_MI);
+
+FingerOrigin(3,4)=FingerOrigin(3,4)+Joint7_MI(3)-FingerOrigin_MI(3,4);
+FingerOrigin_TH(3,4)=FingerOrigin_TH(3,4)+Joint7_MI(3)-FingerOrigin_MI(3,4);
+FingerOrigin_MI(3,4)=Joint7_MI(3);
+
+% fourth option
+vec1=[R7_MI(1,4)-FingerOrigin_MI(1,4) R7_MI(2,4)-FingerOrigin_MI(2,4) R7_MI(3,4)-FingerOrigin_MI(3,4)];
+vec2=[R7_MI(1,1);R7_MI(2,1);R7_MI(3,1)];
+vec1=[vec1*FingerOrigin_MI(1:3,1) vec1*FingerOrigin_MI(1:3,2) vec1*FingerOrigin_MI(1:3,3)];
+vec2=[vec2'*FingerOrigin_MI(1:3,1);vec2'*FingerOrigin_MI(1:3,2);vec2'*FingerOrigin_MI(1:3,3)];
+norm1=sqrt(vec1(1)*vec1(1)+vec1(3)*vec1(3));
+norm2=sqrt(vec2(1)*vec2(1)+vec2(3)*vec2(3));
+ang = acos([vec1(1) 0 vec1(3)]*[vec2(1) 0 vec2(3)]'/norm1/norm2);
+det=cross([vec1(1) 0 vec1(3)],[vec2(1) 0 vec2(3)]);
+
+if ang < pi/2
+    if det(2)>0
+        newaxis=roty(-ang)*vec2;
+    else
+        newaxis=roty(ang)*vec2;
+    end
+else
+    if det(2)>0
+        newaxis=roty(pi-ang)*vec2;
+    else
+        newaxis=roty(ang-pi)*vec2;
+    end
+end
+
+newaxis=[newaxis'*FingerOrigin_MI(1,1:3)' newaxis'*FingerOrigin_MI(2,1:3)' newaxis'*FingerOrigin_MI(3,1:3)']';
+
+P0_MI=FingerOrigin_MI(1:3,4);
+P3_MI=Joint7_MI;
+P2_MI=Joint7_MI-newaxis*L3_MI;
+L_MI=norm(P0_MI-P2_MI);
+P3_af_MI=[(P3_MI(1)-FingerOrigin_MI(1,4)) P3_MI(2)-FingerOrigin_MI(2,4) P3_MI(3)-FingerOrigin_MI(3,4)];
+P2_af_MI=[(P2_MI(1)-FingerOrigin_MI(1,4)) P2_MI(2)-FingerOrigin_MI(2,4) P2_MI(3)-FingerOrigin_MI(3,4)];
+P3_af_MI=[P3_af_MI*FingerOrigin_MI(1:3,1) P3_af_MI*FingerOrigin_MI(1:3,2) P3_af_MI*FingerOrigin_MI(1:3,3)];
+P2_af_MI=[P2_af_MI*FingerOrigin_MI(1:3,1) P2_af_MI*FingerOrigin_MI(1:3,2) P2_af_MI*FingerOrigin_MI(1:3,3)];
+
+TH1_FMI(iter)=0;
+
+if P3_af_MI(2)-P2_af_MI(2) > 0
+    the_tot=-acos((P3_af_MI(3)-P2_af_MI(3))/L3_MI);
+else
+    the_tot=acos((P3_af_MI(3)-P2_af_MI(3))/L3_MI);
+end
+
+if L_MI<L1_MI+L2_MI
+    theta=acos((L2_MI^2+L_MI^2-L1_MI^2)/(2*L2_MI*L_MI));
+    x=[P3_af_MI(1)-P2_af_MI(1) P3_af_MI(2)-P2_af_MI(2) P3_af_MI(3)-P2_af_MI(3)]*P2_af_MI'/L_MI/L3_MI;
+    if x>1
+        x=1;
+    end
+    theta_1=acos(x);
+    
+    Det_vec=cross(P2_af_MI,[P3_af_MI(1)-P2_af_MI(1) P3_af_MI(2)-P2_af_MI(2) P3_af_MI(3)-P2_af_MI(3)]);
+    
+    if Det_vec(1)>0
+        if theta>theta_1
+            TH=theta-theta_1;
+            P1_af_MI=P2_af_MI-(rotx(TH)*[P3_af_MI(1)-P2_af_MI(1) P3_af_MI(2)-P2_af_MI(2) P3_af_MI(3)-P2_af_MI(3)]')'*L2_MI/L3_MI;
+            TH4_FMI(iter)=-TH;
+        else
+            TH=theta_1-theta;
+            P1_af_MI=P2_af_MI-(rotx(-TH)*[P3_af_MI(1)-P2_af_MI(1) P3_af_MI(2)-P2_af_MI(2) P3_af_MI(3)-P2_af_MI(3)]')'*L2_MI/L3_MI;
+            TH4_FMI(iter)=TH;
+        end
+
+        TH3_FMI(iter)=(pi-acos((L2_MI^2+L1_MI^2-L_MI^2)/(2*L2_MI*L1_MI)));
+    else
+        if theta>theta_1
+            TH=theta-theta_1;
+            P1_af_MI=P2_af_MI-(rotx(-TH)*[P3_af_MI(1)-P2_af_MI(1) P3_af_MI(2)-P2_af_MI(2) P3_af_MI(3)-P2_af_MI(3)]')'*L2_MI/L3_MI;
+            TH4_FMI(iter)=TH;
+        else
+            TH=theta_1-theta;
+            P1_af_MI=P2_af_MI-(rotx(TH)*[P3_af_MI(1)-P2_af_MI(1) P3_af_MI(2)-P2_af_MI(2) P3_af_MI(3)-P2_af_MI(3)]')'*L2_MI/L3_MI;
+            TH4_FMI(iter)=-TH;
+        end
+
+        TH3_FMI(iter)=-(pi-acos((L2_MI^2+L1_MI^2-L_MI^2)/(2*L2_MI*L1_MI)));
+    end
+    
+    TH2_FMI(iter)=the_tot-TH3_FMI(iter)-TH4_FMI(iter);
+    
+    P1_af_MI=P1_af_MI*roty(-TH1_FMI(iter));
+    
+    Finger_coor1=FingerOrigin_MI;
+    Finger_coor2=Finger_coor1*troty(TH1_FMI(iter))*trotx(TH2_FMI(iter))*transl(0,0,L1_MI);
+    Finger_coor3=Finger_coor2*trotx(TH3_FMI(iter))*transl(0,0,L2_MI);
+else
+    P1_af_MI=P2_af_MI+(-P2_af_MI)*L2_MI/L_MI;
+    TH3_FMI(iter)=0;
+    theta_2=acos([0 0 1]*P2_af_MI'/L_MI);
+    
+    if P1_af_MI(2)>0
+        TH2_FMI(iter)=-theta_2;
+    else
+        TH2_FMI(iter)=theta_2;
+    end
+    
+    TH4_FMI(iter)=the_tot-TH2_FMI(iter);
+    
+    P1_af_MI=P1_af_MI*roty(-TH1_FMI(iter));
+    
+    Finger_coor1=FingerOrigin_MI;
+    Finger_coor2=Finger_coor1*troty(TH1_FMI(iter))*trotx(TH2_FMI(iter))*transl(0,0,L_MI-L2_MI);
+    Finger_coor3=Finger_coor2*trotx(TH3_FMI(iter))*transl(0,0,L2_MI);
+end
+
+new_P1=[P1_af_MI*FingerOrigin_MI(1,1:3)' P1_af_MI*FingerOrigin_MI(2,1:3)' P1_af_MI*FingerOrigin_MI(3,1:3)'];
+
+t_end_four = toc;
+tic;
+% p13=plot3([P0_MI(1) new_P1(1)+FingerOrigin_MI(1,4)],[P0_MI(2) new_P1(2)+FingerOrigin_MI(2,4)],[P0_MI(3) new_P1(3)+FingerOrigin_MI(3,4)],'k.-');
+% p14=plot3([P2_MI(1) new_P1(1)+FingerOrigin_MI(1,4)],[P2_MI(2) new_P1(2)+FingerOrigin_MI(2,4)],[P2_MI(3) new_P1(3)+FingerOrigin_MI(3,4)],'k.-');
+% p15=plot3([P2_MI(1) P3_MI(1)],[P2_MI(2) P3_MI(2)],[P2_MI(3) P3_MI(3)],'k.-');
+
+% p13=plot3([P0_MI(1) (P1_af_MI(3)+FingerOrigin_MI(3))],[P0_MI(2) P1_af_MI(2)+FingerOrigin_MI(2)],[P0_MI(3) -(P1_af_MI(1)+FingerOrigin_MI(1))],'k.-');
+% p14=plot3([P2_MI(1) (P1_af_MI(3)+FingerOrigin_MI(3))],[P2_MI(2) P1_af_MI(2)+FingerOrigin_MI(2)],[P2_MI(3) -(P1_af_MI(1)+FingerOrigin_MI(1))],'k.-');
+% p15=plot3([P2_MI(1) P3_MI(1)],[P2_MI(2) P3_MI(2)],[P2_MI(3) P3_MI(3)],'k.-');
+
+Finger_coor4=Finger_coor3*trotx(TH4_FMI(iter))*transl(0,0,L3_MI);
+
+% p16=plot3([Finger_coor1(1,4) Finger_coor2(1,4)],[Finger_coor1(2,4) Finger_coor2(2,4)],[Finger_coor1(3,4) Finger_coor2(3,4)],'r.-');
+% p17=plot3([Finger_coor3(1,4) Finger_coor2(1,4)],[Finger_coor3(2,4) Finger_coor2(2,4)],[Finger_coor3(3,4) Finger_coor2(3,4)],'r.-');
+% p18=plot3([Finger_coor3(1,4) Finger_coor4(1,4)],[Finger_coor3(2,4) Finger_coor4(2,4)],[Finger_coor3(3,4) Finger_coor4(3,4)],'r.-');
+
+if flag_init == 0
+    pp15=plot3([Origin_MI(1,4) Joint1_MI(1)],[Origin_MI(2,4) Joint1_MI(2)],[Origin_MI(3,4) Joint1_MI(3)],'b.-');
+    pp16=plot3([Joint1_MI(1)   Joint2_MI(1)],[Joint1_MI(2)   Joint2_MI(2)],[Joint1_MI(3)   Joint2_MI(3)],'b.-');
+    pp17=plot3([Joint2_MI(1)   Joint3_MI(1)],[Joint2_MI(2)   Joint3_MI(2)],[Joint2_MI(3)   Joint3_MI(3)],'b.-');
+    pp18=plot3([Joint3_MI(1)   Joint4_MI(1)],[Joint3_MI(2)   Joint4_MI(2)],[Joint3_MI(3)   Joint4_MI(3)],'b.-');
+    pp19=plot3([Joint4_MI(1)   Joint5_MI(1)],[Joint4_MI(2)   Joint5_MI(2)],[Joint4_MI(3)   Joint5_MI(3)],'b.-');
+    pp20=plot3([Joint5_MI(1)   Joint6_MI(1)],[Joint5_MI(2)   Joint6_MI(2)],[Joint5_MI(3)   Joint6_MI(3)],'b.-');
+    pp21=plot3([Joint6_MI(1)   Joint7_MI(1)],[Joint6_MI(2)   Joint7_MI(2)],[Joint6_MI(3)   Joint7_MI(3)],'b.-');
+end
+set(pp15, 'XData', [Origin_MI(1,4) Joint1_MI(1)]);set(pp15, 'YData', [Origin_MI(2,4) Joint1_MI(2)]);set(pp15, 'ZData', [Origin_MI(3,4) Joint1_MI(3)]);
+set(pp16, 'XData', [Joint1_MI(1)   Joint2_MI(1)]);set(pp16, 'YData', [Joint1_MI(2)   Joint2_MI(2)]);set(pp16, 'ZData', [Joint1_MI(3)   Joint2_MI(3)]);
+set(pp17, 'XData', [Joint2_MI(1)   Joint3_MI(1)]);set(pp17, 'YData', [Joint2_MI(2)   Joint3_MI(2)]);set(pp17, 'ZData', [Joint2_MI(3)   Joint3_MI(3)]);
+set(pp18, 'XData', [Joint3_MI(1)   Joint4_MI(1)]);set(pp18, 'YData', [Joint3_MI(2)   Joint4_MI(2)]);set(pp18, 'ZData', [Joint3_MI(3)   Joint4_MI(3)]);
+set(pp19, 'XData', [Joint4_MI(1)   Joint5_MI(1)]);set(pp19, 'YData', [Joint4_MI(2)   Joint5_MI(2)]);set(pp19, 'ZData', [Joint4_MI(3)   Joint5_MI(3)]);
+set(pp20, 'XData', [Joint5_MI(1)   Joint6_MI(1)]);set(pp20, 'YData', [Joint5_MI(2)   Joint6_MI(2)]);set(pp20, 'ZData', [Joint5_MI(3)   Joint6_MI(3)]);
+set(pp21, 'XData', [Joint6_MI(1)   Joint7_MI(1)]);set(pp21, 'YData', [Joint6_MI(2)   Joint7_MI(2)]);set(pp21, 'ZData', [Joint6_MI(3)   Joint7_MI(3)]);
+
 % pause(1);
-t_end_five = toc;
-tic;
-% drawnow;
-t_end_six = toc;
+
+drawnow;
+% distance between end effectors
+dist_thumb_index = sqrt((Joint7(1)-Joint7_TH(1))^2+(Joint7(2)-Joint7_TH(2))^2+(Joint7(3)-Joint7_TH(3))^2);
+dist_thumb_middle = sqrt((Joint7_MI(1)-Joint7_TH(1))^2+(Joint7_MI(2)-Joint7_TH(2))^2+(Joint7_MI(3)-Joint7_TH(3))^2);
+fprintf('<DISTANCE> TH_INDEX : %3.3f, TH_MIDDLE : %3.3f\n', dist_thumb_index, dist_thumb_middle);
+
 % Movie(iter)=getframe;
-tic;
+
 % delete(pp1);
 % delete(pp2);
 % delete(pp3);

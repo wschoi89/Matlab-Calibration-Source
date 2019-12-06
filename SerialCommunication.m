@@ -2,9 +2,11 @@ clear
 clc
 close all
 
-%file open
-fileID = fopen('Optimizing_Right02_191004.csv', 'w');
 
+
+%file open for offset data recording
+fileID = fopen('191108_threefinger.csv', 'w');
+disp('Start in 5 seconds!')
 flag_show = 0;
 
 %close existing memory of port object
@@ -19,9 +21,12 @@ hex_prefix = 64;
 hex_postfix = 255;
 
 %open serial port
-ser = serial('COM4');
+ser = serial('COM8');
 ser.Baudrate = 115200;
 fopen(ser);
+
+%count number for saving magnetic flux samples
+count_bx = 0;
 
 %assign the size of data
 data = zeros(length_protocol, 1);
@@ -29,8 +34,14 @@ data = zeros(length_protocol, 1);
 %% READ DATA
 
 while(true)
-    %read first byte and check whether it is same with the prefix byte
-    first_byte = fread(ser, 1);    
+    % read first byte 
+    [first_byte, num_read] = fread(ser, 1);    
+   
+    %check the USB connection status
+    if num_read == 0
+        error("please check the USB connection or power ")
+        exit
+    end 
     
     %check first byte
     if first_byte == hex_prefix
@@ -72,11 +83,11 @@ while(true)
             
            %% SAVE data
            if flag_show == 0
-                fprintf(' sensor1 X value: %04.3f, sensor2 X value: %04.3f\n', bx{1}, bx{2})
+                fprintf(' sensor1 X value: %+3.3f, sensor2 X value: %+3.3f, count_bx = %d\n', bx{1}, bx{2}, count_bx)
            elseif flag_show == 1
-                fprintf(' sensor3 X value: %04.3f, sensor4 X value: %04.3f\n', bx{3}, bx{4})
+                fprintf(' sensor3 X value: %+3.3f, sensor4 X value: %+3.3f, count_bx = %d\n', bx{3}, bx{4}, count_bx)
            elseif flag_show == 3
-                fprintf(' sensor5 X value: %04.3f, sensor6 X value: %04.3f\n', bx{5}, bx{6})
+                fprintf(' sensor5 X value: %+3.3f, sensor6 X value: %+3.3f, count_bx = %d\n', bx{5}, bx{6}, count_bx)
            else
                 fprintf('finished\n')
                 exit
@@ -86,28 +97,41 @@ while(true)
 %             fprintf(' sensor 5: %04.3f, %04.3f, %04.3f, sensor6 : %04.3f, %04.3f, %04.3f\n', bx{5}, by{5}, bz{5}, bx{6}, by{6}, bz{6})
             
             if bx{1} == 0 && bx{2} == 0 && flag_show == 0 
-                for idx=1:1:5
+                for idx=1:1:6
                     fprintf(fileID, '%04.3f,%04.3f,%04.3f,', bx{idx}, by{idx}, bz{idx});
                 end
-                fprintf(fileID, '%04.3f,%04.3f,%04.3f\n', bx{6}, by{6}, bz{6});
-                flag_show = bitor(flag_show, 1);
+                fprintf(fileID, '\n');
+                count_bx = count_bx + 1;
+                if count_bx == 10
+                    flag_show = bitor(flag_show, 1);
+                    count_bx = 0;
+                end
             end
             
             if bx{3} == 0 && bx{4} == 0 && flag_show == 1 
-                for idx=1:1:5
+                for idx=1:1:6
                     fprintf(fileID, '%04.3f,%04.3f,%04.3f,', bx{idx}, by{idx}, bz{idx});
                 end
-                fprintf(fileID, '%04.3f,%04.3f,%04.3f\n', bx{6}, by{6}, bz{6});
-                flag_show = bitor(flag_show, 2);
+                fprintf(fileID, '\n');
+                count_bx = count_bx + 1;
+                if count_bx == 10
+                    flag_show = bitor(flag_show, 2);
+                    count_bx = 0;
+                end
             end
             
             if bx{5} == 0 && bx{6} == 0 && flag_show == 3
-                for idx=1:1:5
+                for idx=1:1:6
                     fprintf(fileID, '%04.3f,%04.3f,%04.3f,', bx{idx}, by{idx}, bz{idx});
                 end
-                fprintf(fileID, '%04.3f,%04.3f,%04.3f\n', bx{6}, by{6}, bz{6});
-                flag_show = bitor(flag_show, 4);
-                fclose(fileID);
+                fprintf(fileID, '\n');
+                count_bx = count_bx + 1;
+                if count_bx == 10
+                    flag_show = bitor(flag_show, 4);
+                     count_bx = 0;
+                     break;
+                end
+                
             end
                 
                     
@@ -125,8 +149,12 @@ while(true)
     end
 end
 
+%close csv file
+fclose(fileID);
+%disconnect serial communication
+delete(ser);
+
+disp('finished')
 
 %close serial COM Port
-% fclose(ser);
-% delete(ser);
-% clear ser
+

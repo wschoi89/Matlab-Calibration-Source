@@ -1,6 +1,12 @@
 clc, clear, close ('all')
 
-data3=csvread('Simulation_Right06_190509.csv');
+% data3=csvread('Simulation_Right06_190509.csv');
+
+%load csv data
+data_thumb_index = csvread('R6_thumb_index.csv'); data_thumb_index = data_thumb_index(1:50, :);
+data_thumb_middle = csvread('R6_thumb_middle.csv'); data_thumb_middle = data_thumb_middle(50:100, :);
+
+data3 = [data_thumb_index;data_thumb_middle;];
 
 alpha=0;
 beta=0;
@@ -15,33 +21,6 @@ I1=2;
 I2=3;
 M1=4;
 M2=5;
-
-% l1=24.2;
-% l2=56.03;
-% l3=12.94;
-% l4=47.5;
-% l5=18.5;
-% l6=23.5;
-% l7=-10.37;
-% l8=16.5;
-% 
-% l1_TH=24.2;
-% l2_TH=56.03;
-% l3_TH=12.94;
-% l4_TH=57.5;
-% l5_TH=18.5;
-% l6_TH=26.5;
-% l7_TH=10.37;
-% l8_TH=16.5;
-% 
-% l1_MI=24.2;
-% l2_MI=56.03;
-% l3_MI=12.94;
-% l4_MI=47.5;
-% l5_MI=18.5;
-% l6_MI=25;
-% l7_MI=-10.37;
-% l8_MI=16.5;
 
 % %% Link Length_181114 Fingertip 수정
 l1=24.2;
@@ -74,9 +53,42 @@ l6_MI = 24.19;
 l7_MI=-10.42;
 l8_MI=16.61;
 
-lambda=5000;
+Origin=[1 0 0 0; 0 1 0 0; 0 0 1 0; 0 0 0 1];%% initial values
+% Origin_TH=Origin*transl(-86.71,-28.55,22.75)*trotz(24*pi/180)*trotx(-75*pi/180)*troty(54*pi/180)*trotz(45*pi/180);%% initial values
+Origin_TH=Origin*transl(-88.75,-29.04,-24.35)*trotz(24*pi/180)*trotx(-75*pi/180)*troty(54*pi/180)*trotz(45*pi/180);%% initial values
+Origin_THParam=[-88.75 -29.04 -24.35 asin(-Origin_TH(2,3)/cos(asin(Origin_TH(1,3)))) asin(Origin_TH(1,3)) asin(-Origin_TH(1,2)/cos(asin(Origin_TH(1,3))))];
+Origin_MI=Origin*transl(0,0,19);%% initial values
+Origin_MIParam=[0 0 19 0 0 0];
 
-syms A0_TH B0_TH C0_TH D0_TH E0_TH F0_TH A0_MI B0_MI C0_MI D0_MI E0_MI F0_MI A1 B1 C1 D1 A2 B2 C2 D2 A3 B3 C3 D3 A4 B4 C4 D4 A5 B5 C5 D5 A6 B6 C6 D6 A7 B7 C7 D7 A8 B8 C8 D8 A1_TH B1_TH C1_TH D1_TH A2_TH B2_TH C2_TH D2_TH A3_TH B3_TH C3_TH D3_TH A4_TH B4_TH C4_TH D4_TH A5_TH B5_TH C5_TH D5_TH A6_TH B6_TH C6_TH D6_TH A7_TH B7_TH C7_TH D7_TH A8_TH B8_TH C8_TH D8_TH A1_MI B1_MI C1_MI D1_MI A2_MI B2_MI C2_MI D2_MI A3_MI B3_MI C3_MI D3_MI A4_MI B4_MI C4_MI D4_MI A5_MI B5_MI C5_MI D5_MI A6_MI B6_MI C6_MI D6_MI A7_MI B7_MI C7_MI D7_MI A8_MI B8_MI C8_MI D8_MI
+syms A0_TH B0_TH C0_TH D0_TH E0_TH F0_TH ...
+     A0_MI B0_MI C0_MI D0_MI E0_MI F0_MI ...
+     A1 B1 C1 D1 ...
+     A2 B2 C2 D2 ...
+     A3 B3 C3 D3 ...
+     A4 B4 C4 D4 ...
+     A5 B5 C5 D5 ...
+     A6 B6 C6 D6 ...
+     A7 B7 C7 D7 ...
+     A8 B8 C8 D8 ...
+     A1_TH B1_TH C1_TH D1_TH ...
+     A2_TH B2_TH C2_TH D2_TH ...
+     A3_TH B3_TH C3_TH D3_TH ...
+     A4_TH B4_TH C4_TH D4_TH ...
+     A5_TH B5_TH C5_TH D5_TH ...
+     A6_TH B6_TH C6_TH D6_TH ...
+     A7_TH B7_TH C7_TH D7_TH ...
+     A8_TH B8_TH C8_TH D8_TH ...
+     A1_MI B1_MI C1_MI D1_MI ...
+     A2_MI B2_MI C2_MI D2_MI ...
+     A3_MI B3_MI C3_MI D3_MI ...
+     A4_MI B4_MI C4_MI D4_MI ...
+     A5_MI B5_MI C5_MI D5_MI ...
+     A6_MI B6_MI C6_MI D6_MI ...
+     A7_MI B7_MI C7_MI D7_MI ...
+     A8_MI B8_MI C8_MI D8_MI ...
+     off_TH1 off_TH2 off_TH3 off_TH4 ...
+     off_TH1_MI off_TH2_MI off_TH3_MI off_TH4_MI ...
+     off_TH1_TH off_TH2_TH off_TH3_TH off_TH4_TH
 
 
 Origin=[1 0 0 0; 0 1 0 0; 0 0 1 0; 0 0 0 1];%% initial values
@@ -92,32 +104,17 @@ q_MI_double=[0 0 0 -pi/2 0 l1_MI pi/2 0 0 0 l4_MI 0 0 0 -pi/2 l6_MI 0 Origin_MIP
 
 DHinit=[[q_double';0;0;0;0;0;0] q_TH_double' q_MI_double'];
 
-off_TH1=0;
-off_TH2=-0.027579212399741;
-off_TH3=0.034543489156776;
-off_TH4=0;
-
-off_TH1_MI=0;
-off_TH2_MI=0.002188180315000;
-off_TH3_MI=0.050119803193707;
-off_TH4_MI=0;
-
-off_TH1_TH=0;
-off_TH2_TH=-0.055498505245717;
-off_TH3_TH=0.024994793618920;
-off_TH4_TH=0;
-
-qRef=[A1 B1 C1 D1 A2 C2 D2 A3 D4 A5 C5 D5 A6 A7 B7 C7 D7]';
-qRef_TH=[A1_TH B1_TH C1_TH D1_TH A2_TH C2_TH D2_TH A3_TH D4_TH A5_TH C5_TH D5_TH A6_TH A7_TH B7_TH C7_TH D7_TH A0_TH B0_TH C0_TH D0_TH E0_TH F0_TH]';
-qRef_MI=[A1_MI B1_MI C1_MI D1_MI A2_MI C2_MI D2_MI A3_MI D4_MI A5_MI C5_MI D5_MI A6_MI A7_MI B7_MI C7_MI D7_MI A0_MI B0_MI C0_MI D0_MI E0_MI F0_MI]';
+% qRef=[A1 B1 C1 D1 A2 C2 D2 A3 D4 A5 C5 D5 A6 A7 B7 C7 D7]';
+% qRef_TH=[A1_TH B1_TH C1_TH D1_TH A2_TH C2_TH D2_TH A3_TH D4_TH A5_TH C5_TH D5_TH A6_TH A7_TH B7_TH C7_TH D7_TH A0_TH B0_TH C0_TH D0_TH E0_TH F0_TH]';
+% qRef_MI=[A1_MI B1_MI C1_MI D1_MI A2_MI C2_MI D2_MI A3_MI D4_MI A5_MI C5_MI D5_MI A6_MI A7_MI B7_MI C7_MI D7_MI A0_MI B0_MI C0_MI D0_MI E0_MI F0_MI]';
 
 % 8 x 4 DH table
 DHRef = [A1 B1 C1 D1;
-         A2 B2 C2 D2;
-         A3 B3 C3 D3;
+         A2 B2+off_TH1 C2 D2;
+         A3 B3+off_TH2 C3 D3;
          A4 B4 C4 D4;
-         A5 B5 C5 D5;
-         A6 B6 C6 D6;
+         A5 B5+off_TH3 C5 D5;
+         A6 B6+off_TH4 C6 D6;
          A7 B7 C7 D7;
          A8 B8 C8 D8];
 
@@ -135,17 +132,14 @@ OriginRef=eye(4);
 R7=OriginRef*R01*R12*R23*R34*R45*R56*R67*R78;
 Joint7Ref=[R7(1,4); R7(2,4); R7(3,4)];
 
-% ccode(Joint7Ref,'file','Joint7Ref2.txt');
-% 'Joint7Ref written'
-
-JacobianMatRef = [diff(Joint7Ref(1),A1) diff(Joint7Ref(1),B1) diff(Joint7Ref(1),C1) diff(Joint7Ref(1),D1) diff(Joint7Ref(1),A2) diff(Joint7Ref(1),C2) diff(Joint7Ref(1),D2) diff(Joint7Ref(1),A3) diff(Joint7Ref(1),D4) diff(Joint7Ref(1),A5) diff(Joint7Ref(1),C5) diff(Joint7Ref(1),D5) diff(Joint7Ref(1),A6) diff(Joint7Ref(1),A7) diff(Joint7Ref(1),B7) diff(Joint7Ref(1),C7) diff(Joint7Ref(1),D7); 
-    diff(Joint7Ref(2),A1) diff(Joint7Ref(2),B1) diff(Joint7Ref(2),C1) diff(Joint7Ref(2),D1) diff(Joint7Ref(2),A2) diff(Joint7Ref(2),C2) diff(Joint7Ref(2),D2) diff(Joint7Ref(2),A3) diff(Joint7Ref(2),D4) diff(Joint7Ref(2),A5) diff(Joint7Ref(2),C5) diff(Joint7Ref(2),D5) diff(Joint7Ref(2),A6) diff(Joint7Ref(2),A7) diff(Joint7Ref(2),B7) diff(Joint7Ref(2),C7) diff(Joint7Ref(2),D7); 
-    diff(Joint7Ref(3),A1) diff(Joint7Ref(3),B1) diff(Joint7Ref(3),C1) diff(Joint7Ref(3),D1) diff(Joint7Ref(3),A2) diff(Joint7Ref(3),C2) diff(Joint7Ref(3),D2) diff(Joint7Ref(3),A3) diff(Joint7Ref(3),D4) diff(Joint7Ref(3),A5) diff(Joint7Ref(3),C5) diff(Joint7Ref(3),D5) diff(Joint7Ref(3),A6) diff(Joint7Ref(3),A7) diff(Joint7Ref(3),B7) diff(Joint7Ref(3),C7) diff(Joint7Ref(3),D7)];
-
-% ccode(JacobianMatRef,'file','JacobianMatRef2.txt');
-% 'JacobianMatRef written'
-
-DH_TH=[A1_TH B1_TH C1_TH D1_TH; A2_TH B2_TH C2_TH D2_TH; A3_TH B3_TH C3_TH D3_TH; A4_TH B4_TH C4_TH D4_TH; A5_TH B5_TH C5_TH D5_TH; A6_TH B6_TH C6_TH D6_TH; A7_TH B7_TH C7_TH D7_TH; A8_TH B8_TH C8_TH D8_TH];
+DH_TH=[A1_TH B1_TH            C1_TH D1_TH;
+       A2_TH B2_TH+off_TH1_TH C2_TH D2_TH; 
+       A3_TH B3_TH+off_TH2_TH C3_TH D3_TH;
+       A4_TH B4_TH            C4_TH D4_TH;
+       A5_TH B5_TH+off_TH3_TH C5_TH D5_TH;
+       A6_TH B6_TH+off_TH4_TH C6_TH D6_TH;
+       A7_TH B7_TH            C7_TH D7_TH;
+       A8_TH B8_TH            C8_TH D8_TH];
 
 R01_TH=transl(0,0,DH_TH(1,1))*[cos(DH_TH(1,2)) -sin(DH_TH(1,2)) 0 0; sin(DH_TH(1,2)) cos(DH_TH(1,2)) 0 0; 0 0 1 0; 0 0 0 1]*transl(DH_TH(1,3),0,0)*[1 0 0 0; 0 cos(DH_TH(1,4)) -sin(DH_TH(1,4)) 0; 0 sin(DH_TH(1,4)) cos(DH_TH(1,4)) 0; 0 0 0 1];
 R12_TH=transl(0,0,DH_TH(2,1))*[cos(DH_TH(2,2)) -sin(DH_TH(2,2)) 0 0; sin(DH_TH(2,2)) cos(DH_TH(2,2)) 0 0; 0 0 1 0; 0 0 0 1]*transl(DH_TH(2,3),0,0)*[1 0 0 0; 0 cos(DH_TH(2,4)) -sin(DH_TH(2,4)) 0; 0 sin(DH_TH(2,4)) cos(DH_TH(2,4)) 0; 0 0 0 1];
@@ -160,17 +154,14 @@ Origin_THRef=OriginRef*transl(A0_TH,B0_TH,C0_TH)*[1 0 0 0; 0 cos(D0_TH) -sin(D0_
 R7_TH=Origin_THRef*R01_TH*R12_TH*R23_TH*R34_TH*R45_TH*R56_TH*R67_TH*R78_TH;
 Joint7Ref_TH=[R7_TH(1,4); R7_TH(2,4); R7_TH(3,4)];
 
-% ccode(Joint7Ref_TH,'file','Joint7Ref_TH2.txt');
-% 'Joint7Ref_TH written'
-
-JacobianMatRef_TH = [diff(Joint7Ref_TH(1),A1_TH) diff(Joint7Ref_TH(1),B1_TH) diff(Joint7Ref_TH(1),C1_TH) diff(Joint7Ref_TH(1),D1_TH) diff(Joint7Ref_TH(1),A2_TH) diff(Joint7Ref_TH(1),C2_TH) diff(Joint7Ref_TH(1),D2_TH) diff(Joint7Ref_TH(1),A3_TH) diff(Joint7Ref_TH(1),D4_TH) diff(Joint7Ref_TH(1),A5_TH) diff(Joint7Ref_TH(1),C5_TH) diff(Joint7Ref_TH(1),D5_TH) diff(Joint7Ref_TH(1),A6_TH) diff(Joint7Ref_TH(1),A7_TH) diff(Joint7Ref_TH(1),B7_TH) diff(Joint7Ref_TH(1),C7_TH) diff(Joint7Ref_TH(1),D7_TH) diff(Joint7Ref_TH(1),A0_TH) diff(Joint7Ref_TH(1),B0_TH) diff(Joint7Ref_TH(1),C0_TH) diff(Joint7Ref_TH(1),D0_TH) diff(Joint7Ref_TH(1),E0_TH) diff(Joint7Ref_TH(1),F0_TH); 
-    diff(Joint7Ref_TH(2),A1_TH) diff(Joint7Ref_TH(2),B1_TH) diff(Joint7Ref_TH(2),C1_TH) diff(Joint7Ref_TH(2),D1_TH) diff(Joint7Ref_TH(2),A2_TH) diff(Joint7Ref_TH(2),C2_TH) diff(Joint7Ref_TH(2),D2_TH) diff(Joint7Ref_TH(2),A3_TH) diff(Joint7Ref_TH(2),D4_TH) diff(Joint7Ref_TH(2),A5_TH) diff(Joint7Ref_TH(2),C5_TH) diff(Joint7Ref_TH(2),D5_TH) diff(Joint7Ref_TH(2),A6_TH) diff(Joint7Ref_TH(2),A7_TH) diff(Joint7Ref_TH(2),B7_TH) diff(Joint7Ref_TH(2),C7_TH) diff(Joint7Ref_TH(2),D7_TH) diff(Joint7Ref_TH(2),A0_TH) diff(Joint7Ref_TH(2),B0_TH) diff(Joint7Ref_TH(2),C0_TH) diff(Joint7Ref_TH(2),D0_TH) diff(Joint7Ref_TH(2),E0_TH) diff(Joint7Ref_TH(2),F0_TH); 
-    diff(Joint7Ref_TH(3),A1_TH) diff(Joint7Ref_TH(3),B1_TH) diff(Joint7Ref_TH(3),C1_TH) diff(Joint7Ref_TH(3),D1_TH) diff(Joint7Ref_TH(3),A2_TH) diff(Joint7Ref_TH(3),C2_TH) diff(Joint7Ref_TH(3),D2_TH) diff(Joint7Ref_TH(3),A3_TH) diff(Joint7Ref_TH(3),D4_TH) diff(Joint7Ref_TH(3),A5_TH) diff(Joint7Ref_TH(3),C5_TH) diff(Joint7Ref_TH(3),D5_TH) diff(Joint7Ref_TH(3),A6_TH) diff(Joint7Ref_TH(3),A7_TH) diff(Joint7Ref_TH(3),B7_TH) diff(Joint7Ref_TH(3),C7_TH) diff(Joint7Ref_TH(3),D7_TH) diff(Joint7Ref_TH(3),A0_TH) diff(Joint7Ref_TH(3),B0_TH) diff(Joint7Ref_TH(3),C0_TH) diff(Joint7Ref_TH(3),D0_TH) diff(Joint7Ref_TH(3),E0_TH) diff(Joint7Ref_TH(3),F0_TH)];
-
-% ccode(JacobianMatRef_TH,'file','JacobianMatRef_TH2.txt');
-% 'JacobianMatRef_TH written'
-
-DH_MI=[A1_MI B1_MI C1_MI D1_MI; A2_MI B2_MI C2_MI D2_MI; A3_MI B3_MI C3_MI D3_MI; A4_MI B4_MI C4_MI D4_MI; A5_MI B5_MI C5_MI D5_MI; A6_MI B6_MI C6_MI D6_MI; A7_MI B7_MI C7_MI D7_MI; A8_MI B8_MI C8_MI D8_MI];
+DH_MI=[A1_MI B1_MI            C1_MI D1_MI;
+       A2_MI B2_MI+off_TH1_MI C2_MI D2_MI;
+       A3_MI B3_MI+off_TH2_MI C3_MI D3_MI;
+       A4_MI B4_MI            C4_MI D4_MI;
+       A5_MI B5_MI+off_TH3_MI C5_MI D5_MI;
+       A6_MI B6_MI+off_TH4_MI C6_MI D6_MI;
+       A7_MI B7_MI            C7_MI D7_MI;
+       A8_MI B8_MI            C8_MI D8_MI];
 
 R01_MI=transl(0,0,DH_MI(1,1))*[cos(DH_MI(1,2)) -sin(DH_MI(1,2)) 0 0; sin(DH_MI(1,2)) cos(DH_MI(1,2)) 0 0; 0 0 1 0; 0 0 0 1]*transl(DH_MI(1,3),0,0)*[1 0 0 0; 0 cos(DH_MI(1,4)) -sin(DH_MI(1,4)) 0; 0 sin(DH_MI(1,4)) cos(DH_MI(1,4)) 0; 0 0 0 1];
 R12_MI=transl(0,0,DH_MI(2,1))*[cos(DH_MI(2,2)) -sin(DH_MI(2,2)) 0 0; sin(DH_MI(2,2)) cos(DH_MI(2,2)) 0 0; 0 0 1 0; 0 0 0 1]*transl(DH_MI(2,3),0,0)*[1 0 0 0; 0 cos(DH_MI(2,4)) -sin(DH_MI(2,4)) 0; 0 sin(DH_MI(2,4)) cos(DH_MI(2,4)) 0; 0 0 0 1];
@@ -185,25 +176,13 @@ Origin_MIRef=OriginRef*transl(A0_MI,B0_MI,C0_MI)*[1 0 0 0; 0 cos(D0_MI) -sin(D0_
 R7_MI=Origin_MIRef*R01_MI*R12_MI*R23_MI*R34_MI*R45_MI*R56_MI*R67_MI*R78_MI;
 Joint7Ref_MI=[R7_MI(1,4); R7_MI(2,4); R7_MI(3,4)];
 
-% ccode(Joint7Ref_MI,'file','Joint7Ref_MI2.txt');
-% 'Joint7Ref_MI written'
-
-JacobianMatRef_MI = [diff(Joint7Ref_MI(1),A1_MI) diff(Joint7Ref_MI(1),B1_MI) diff(Joint7Ref_MI(1),C1_MI) diff(Joint7Ref_MI(1),D1_MI) diff(Joint7Ref_MI(1),A2_MI) diff(Joint7Ref_MI(1),C2_MI) diff(Joint7Ref_MI(1),D2_MI) diff(Joint7Ref_MI(1),A3_MI) diff(Joint7Ref_MI(1),D4_MI) diff(Joint7Ref_MI(1),A5_MI) diff(Joint7Ref_MI(1),C5_MI) diff(Joint7Ref_MI(1),D5_MI) diff(Joint7Ref_MI(1),A6_MI) diff(Joint7Ref_MI(1),A7_MI) diff(Joint7Ref_MI(1),B7_MI) diff(Joint7Ref_MI(1),C7_MI) diff(Joint7Ref_MI(1),D7_MI) diff(Joint7Ref_MI(1),A0_MI) diff(Joint7Ref_MI(1),B0_MI) diff(Joint7Ref_MI(1),C0_MI) diff(Joint7Ref_MI(1),D0_MI) diff(Joint7Ref_MI(1),E0_MI) diff(Joint7Ref_MI(1),F0_MI); 
-    diff(Joint7Ref_MI(2),A1_MI) diff(Joint7Ref_MI(2),B1_MI) diff(Joint7Ref_MI(2),C1_MI) diff(Joint7Ref_MI(2),D1_MI) diff(Joint7Ref_MI(2),A2_MI) diff(Joint7Ref_MI(2),C2_MI) diff(Joint7Ref_MI(2),D2_MI) diff(Joint7Ref_MI(2),A3_MI) diff(Joint7Ref_MI(2),D4_MI) diff(Joint7Ref_MI(2),A5_MI) diff(Joint7Ref_MI(2),C5_MI) diff(Joint7Ref_MI(2),D5_MI) diff(Joint7Ref_MI(2),A6_MI) diff(Joint7Ref_MI(2),A7_MI) diff(Joint7Ref_MI(2),B7_MI) diff(Joint7Ref_MI(2),C7_MI) diff(Joint7Ref_MI(2),D7_MI) diff(Joint7Ref_MI(2),A0_MI) diff(Joint7Ref_MI(2),B0_MI) diff(Joint7Ref_MI(2),C0_MI) diff(Joint7Ref_MI(2),D0_MI) diff(Joint7Ref_MI(2),E0_MI) diff(Joint7Ref_MI(2),F0_MI); 
-    diff(Joint7Ref_MI(3),A1_MI) diff(Joint7Ref_MI(3),B1_MI) diff(Joint7Ref_MI(3),C1_MI) diff(Joint7Ref_MI(3),D1_MI) diff(Joint7Ref_MI(3),A2_MI) diff(Joint7Ref_MI(3),C2_MI) diff(Joint7Ref_MI(3),D2_MI) diff(Joint7Ref_MI(3),A3_MI) diff(Joint7Ref_MI(3),D4_MI) diff(Joint7Ref_MI(3),A5_MI) diff(Joint7Ref_MI(3),C5_MI) diff(Joint7Ref_MI(3),D5_MI) diff(Joint7Ref_MI(3),A6_MI) diff(Joint7Ref_MI(3),A7_MI) diff(Joint7Ref_MI(3),B7_MI) diff(Joint7Ref_MI(3),C7_MI) diff(Joint7Ref_MI(3),D7_MI) diff(Joint7Ref_MI(3),A0_MI) diff(Joint7Ref_MI(3),B0_MI) diff(Joint7Ref_MI(3),C0_MI) diff(Joint7Ref_MI(3),D0_MI) diff(Joint7Ref_MI(3),E0_MI) diff(Joint7Ref_MI(3),F0_MI)];
-
-% ccode(JacobianMatRef_MI,'file','JacobianMatRef_MI2.txt');
-% 'JacobianMatRef_MI written'
-
-
-
-for iter=2500:500:4000
+for iter=1:1:2
     
+    %% calculate thumb device angle for thumb_index distance
     mag=sqrt(data3(iter,T1*3+1)^2+data3(iter,T1*3+2)^2+data3(iter,T1*3+3)^2);
     a=data3(iter,T1*3+1)/mag;
     b=data3(iter,T1*3+2)/mag;
     
-
     X=atan2(gamma,alpha);
     if alpha*alpha+gamma*gamma-a*a>0
         TH1_TH(iter)=atan2(sqrt(alpha*alpha+gamma*gamma-a*a),a)-X;
@@ -266,687 +245,829 @@ for iter=2500:500:4000
 
     TH4_TH(iter)=TH4_TH(iter)+pi/4;
 
-    TH1_TH(iter)=TH1_TH(iter)-off_TH1_TH;
-    TH2_TH(iter)=TH2_TH(iter)-off_TH2_TH;
-    TH3_TH(iter)=TH3_TH(iter)-off_TH3_TH;
-    TH4_TH(iter)=TH4_TH(iter)-off_TH4_TH;
-    
-    mag=sqrt(data3(iter,M1*3+1)^2+data3(iter,M1*3+2)^2+data3(iter,M1*3+3)^2);
-    a=data3(iter,M1*3+1)/mag;
-    b=data3(iter,M1*3+2)/mag;
+    %% calculate index device angle for thumb_index distance
+    mag=sqrt(data3(iter,I1*3+1)^2+data3(iter,I1*3+2)^2+data3(iter,I1*3+3)^2);
+    a=data3(iter,I1*3+1)/mag;
+    b=data3(iter,I1*3+2)/mag;
 
     X=atan2(gamma,alpha);
     if alpha*alpha+gamma*gamma-a*a>0
-        TH1_MI(iter)=atan2(sqrt(alpha*alpha+gamma*gamma-a*a),a)-X;
+        TH1(iter)=atan2(sqrt(alpha*alpha+gamma*gamma-a*a),a)-X;
     else
-        TH1_MI(iter)=atan2(0,a)-X;
+        TH1(iter)=atan2(0,a)-X;
     end
 
-    if TH1_MI(iter)>pi/2
-        TH1_MI(iter)=pi/2;
-    elseif TH1_MI(iter)<-pi/2
-        TH1_MI(iter)=-pi/2;
+    if TH1(iter)>pi/2
+        TH1(iter)=pi/2;
+    elseif TH1(iter)<-pi/2
+        TH1(iter)=-pi/2;
     end
 
-    Y(iter)=sin(TH1_MI(iter))*alpha+cos(TH1_MI(iter))*gamma;
+    Y(iter)=-sin(TH1(iter))*alpha+cos(TH1(iter))*gamma;
     if Y(iter)*Y(iter)+beta*beta-b*b<0
-        TH2_MI(iter)=atan2(b,0)-atan2(beta,Y(iter));
+        TH2(iter)=atan2(b,0)-atan2(beta,Y(iter));
     else
-        TH2_MI(iter)=atan2(b,sqrt(Y(iter)*Y(iter)+beta*beta-b*b))-atan2(beta,Y(iter));
+        TH2(iter)=atan2(b,sqrt(Y(iter)*Y(iter)+beta*beta-b*b))-atan2(beta,Y(iter));
     end
 
-    if TH2_MI(iter)>pi/2
-        TH2_MI(iter)=pi/2;
-    elseif TH2_MI(iter)<-pi/2
-        TH2_MI(iter)=-pi/2;
+    if TH2(iter)>pi/2
+        TH2(iter)=pi/2;
+    elseif TH2(iter)<-pi/2
+        TH2(iter)=-pi/2;
     end
+
     
-    mag=sqrt(data3(iter,M2*3+1)^2+data3(iter,M2*3+2)^2+data3(iter,M2*3+3)^2);
-    a=data3(iter,M2*3+1)/mag;
-    b=data3(iter,M2*3+2)/mag;
-    
+    mag=sqrt(data3(iter,I2*3+1)^2+data3(iter,I2*3+2)^2+data3(iter,I2*3+3)^2);
+    a=data3(iter,I2*3+1)/mag;
+    b=data3(iter,I2*3+2)/mag;
 
     X=atan2(alpha,gamma);
     if alpha*alpha+gamma*gamma-a*a>0
-        TH4_MI(iter)=atan2(a,sqrt(alpha*alpha+gamma*gamma-a*a))-X;
+        TH4(iter)=atan2(a,sqrt(alpha*alpha+gamma*gamma-a*a))-X;
     else
-        TH4_MI(iter)=atan2(a,0)-X;
+        TH4(iter)=atan2(a,0)-X;
     end
 
-    if TH4_MI(iter)>pi/2
-        TH4_MI(iter)=pi/2;
-    elseif TH4_MI(iter)<-pi/2
-        TH4_MI(iter)=-pi/2;
+    if TH4(iter)>pi/2
+        TH4(iter)=pi/2;
+    elseif TH4(iter)<-pi/2
+        TH4(iter)=-pi/2;
     end
 
-    Y(iter)=-sin(TH4_MI(iter))*alpha+cos(TH4_MI(iter))*gamma;
+
+    Y(iter)=-sin(TH4(iter))*alpha+cos(TH4(iter))*gamma;
     if Y(iter) == 0
         Y(iter)=0.00001;
     end
     if Y(iter)*Y(iter)+beta*beta-b*b<0
-        TH3_MI(iter)=atan2(0,b)-atan2(Y(iter),beta);
+        TH3(iter)=atan2(0,b)-atan2(Y(iter),beta);
     else
-        TH3_MI(iter)=atan2(sqrt(Y(iter)*Y(iter)+beta*beta-b*b),b)-atan2(Y(iter),beta);
+        TH3(iter)=atan2(sqrt(Y(iter)*Y(iter)+beta*beta-b*b),b)-atan2(Y(iter),beta);
     end
 
-    if TH3_MI(iter)>pi/2
-        TH3_MI(iter)=pi/2;
-    elseif TH3_MI(iter)<-pi/2
-        TH3_MI(iter)=-pi/2;
+    if TH3(iter)>pi/2
+        TH3(iter)=pi/2;
+    elseif TH3(iter)<-pi/2
+        TH3(iter)=-pi/2;
     end
 
-    TH4_MI(iter)=TH4_MI(iter)+pi/4;
+    TH4(iter)=TH4(iter)+pi/4;
+    
+    %% distance from thumb to index
+    distance(iter, 1) = sqrt(sum((Joint7Ref(1:3)-Joint7Ref_TH(1:3)).^2));
+    error(iter, 1) = distance(iter, 1);
+    error(iter, 1) = subs(error(iter, 1), [B2,B3,B5,B6,B2_TH,B3_TH,B5_TH,B6_TH], [TH1(iter),TH2(iter),TH3(iter),TH4(iter), TH1_TH(iter),TH2_TH(iter),TH3_TH(iter),TH4_TH(iter)]);
+    
+    %% calculate thumb device angle for thumb_middle distance
+    mag=sqrt(data3(iter+50,T1*3+1)^2+data3(iter+50,T1*3+2)^2+data3(iter+50,T1*3+3)^2);
+    a=data3(iter+50,T1*3+1)/mag;
+    b=data3(iter+50,T1*3+2)/mag;
+    
+    X=atan2(gamma,alpha);
+    if alpha*alpha+gamma*gamma-a*a>0
+        TH1_TH(iter+50)=atan2(sqrt(alpha*alpha+gamma*gamma-a*a),a)-X;
+    else
+        TH1_TH(iter+50)=atan2(0,a)-X;
+    end
 
-    TH1_MI(iter)=TH1_MI(iter)-off_TH1_MI;
-    TH2_MI(iter)=TH2_MI(iter)-off_TH2_MI;
-    TH3_MI(iter)=TH3_MI(iter)-off_TH3_MI;
-    TH4_MI(iter)=TH4_MI(iter)-off_TH4_MI;
+    if TH1_TH(iter+50)>pi/2
+        TH1_TH(iter+50)=pi/2;
+    elseif TH1_TH(iter+50)<-pi/2
+        TH1_TH(iter+50)=-pi/2;
+    end
+
+    Y(iter+50)=sin(TH1_TH(iter+50))*alpha+cos(TH1_TH(iter+50))*gamma;
+    if Y(iter+50)*Y(iter+50)+beta*beta-b*b<0
+        TH2_TH(iter+50)=atan2(b,0)-atan2(beta,Y(iter+50));
+    else
+        TH2_TH(iter+50)=atan2(b,sqrt(Y(iter+50)*Y(iter+50)+beta*beta-b*b))-atan2(beta,Y(iter+50));
+    end
+
+    if TH2_TH(iter+50)>pi/2
+        TH2_TH(iter+50)=pi/2;
+    elseif TH2_TH(iter+50)<-pi/2
+        TH2_TH(iter+50)=-pi/2;
+    end
+
     
-    A1_TH=q_TH_double(1); B1_TH=q_TH_double(2); C1_TH=q_TH_double(3); D1_TH=q_TH_double(4);
-    A2_TH=q_TH_double(5); B2_TH=TH1_TH(iter); C2_TH=q_TH_double(6); D2_TH=q_TH_double(7);
-    A3_TH=q_TH_double(8); B3_TH=TH2_TH(iter); C3_TH=l2_TH; D3_TH=0;
-    A4_TH=0; B4_TH=-pi/2; C4_TH=l3_TH; D4_TH=q_TH_double(9);
-    A5_TH=q_TH_double(10); B5_TH=TH3_TH(iter); C5_TH=q_TH_double(11); D5_TH=q_TH_double(12);
-    A6_TH=q_TH_double(13); B6_TH=TH4_TH(iter); C6_TH=l5_TH; D6_TH=0;
-    A7_TH=q_TH_double(14); B7_TH=q_TH_double(15); C7_TH=q_TH_double(16); D7_TH=q_TH_double(17);
-    A8_TH=l7_TH; B8_TH=pi/2; C8_TH=l8_TH; D8_TH=0; A0_TH=q_TH_double(18); B0_TH=q_TH_double(19); C0_TH=q_TH_double(20); D0_TH=q_TH_double(21); E0_TH=q_TH_double(22); F0_TH=q_TH_double(23);
+    mag=sqrt(data3(iter+50,T2*3+1)^2+data3(iter+50,T2*3+2)^2+data3(iter+50,T2*3+3)^2);
+    a=data3(iter+50,T2*3+1)/mag;
+    b=data3(iter+50,T2*3+2)/mag;
+
+    X=atan2(alpha,gamma);
+    if alpha*alpha+gamma*gamma-a*a>0
+        TH4_TH(iter+50)=atan2(a,sqrt(alpha*alpha+gamma*gamma-a*a))-X;
+    else
+        TH4_TH(iter+50)=atan2(a,0)-X;
+    end
+
+    if TH4_TH(iter+50)>pi/2
+        TH4_TH(iter+50)=pi/2;
+    elseif TH4_TH(iter+50)<-pi/2
+        TH4_TH(iter+50)=-pi/2;
+    end
+
+    Y(iter+50)=-sin(TH4_TH(iter+50))*alpha+cos(TH4_TH(iter+50))*gamma;
+    if Y(iter+50) == 0
+        Y(iter+50)=0.00001;
+    end
+    if Y(iter+50)*Y(iter+50)+beta*beta-b*b<0
+        TH3_TH(iter+50)=atan2(0,b)-atan2(Y(iter+50),beta);
+    else
+        TH3_TH(iter+50)=atan2(sqrt(Y(iter+50)*Y(iter+50)+beta*beta-b*b),b)-atan2(Y(iter+50),beta);
+    end
+
+    if TH3_TH(iter+50)>pi/2
+        TH3_TH(iter+50)=pi/2;
+    elseif TH3_TH(iter+50)<-pi/2
+        TH3_TH(iter+50)=-pi/2;
+    end
+
+    TH4_TH(iter+50)=TH4_TH(iter+50)+pi/4;
     
-    A1_MI=q_MI_double(1); B1_MI=q_MI_double(2); C1_MI=q_MI_double(3); D1_MI=q_MI_double(4);
-    A2_MI=q_MI_double(5); B2_MI=TH1_MI(iter); C2_MI=q_MI_double(6); D2_MI=q_MI_double(7);
-    A3_MI=q_MI_double(8); B3_MI=TH2_MI(iter); C3_MI=l2_MI; D3_MI=0;
-    A4_MI=0; B4_MI=-pi/2; C4_MI=l3_MI; D4_MI=q_MI_double(9);
-    A5_MI=q_MI_double(10); B5_MI=TH3_MI(iter); C5_MI=q_MI_double(11); D5_MI=q_MI_double(12);
-    A6_MI=q_MI_double(13); B6_MI=TH4_MI(iter); C6_MI=l5_MI; D6_MI=0;
-    A7_MI=q_MI_double(14); B7_MI=q_MI_double(15); C7_MI=q_MI_double(16); D7_MI=q_MI_double(17);
-    A8_MI=l7_MI; B8_MI=pi/2; C8_MI=l8_MI; D8_MI=0; A0_MI=q_MI_double(18); B0_MI=q_MI_double(19); C0_MI=q_MI_double(20); D0_MI=q_MI_double(21); E0_MI=q_MI_double(22); F0_MI=q_MI_double(23);
+    %% calculate middle device angle for thumb_middle distance
+    mag=sqrt(data3(iter+50,M1*3+1)^2+data3(iter+50,M1*3+2)^2+data3(iter+50,M1*3+3)^2);
+    a=data3(iter+50,M1*3+1)/mag;
+    b=data3(iter+50,M1*3+2)/mag;
+
+    X=atan2(gamma,alpha);
+    if alpha*alpha+gamma*gamma-a*a>0
+        TH1_MI(iter+50)=atan2(sqrt(alpha*alpha+gamma*gamma-a*a),a)-X;
+    else
+        TH1_MI(iter+50)=atan2(0,a)-X;
+    end
+
+    if TH1_MI(iter+50)>pi/2
+        TH1_MI(iter+50)=pi/2;
+    elseif TH1_MI(iter+50)<-pi/2
+        TH1_MI(iter+50)=-pi/2;
+    end
+
+    Y(iter+50)=sin(TH1_MI(iter+50))*alpha+cos(TH1_MI(iter+50))*gamma;
+    if Y(iter+50)*Y(iter+50)+beta*beta-b*b<0
+        TH2_MI(iter+50)=atan2(b,0)-atan2(beta,Y(iter+50));
+    else
+        TH2_MI(iter+50)=atan2(b,sqrt(Y(iter+50)*Y(iter+50)+beta*beta-b*b))-atan2(beta,Y(iter+50));
+    end
+
+    if TH2_MI(iter+50)>pi/2
+        TH2_MI(iter+50)=pi/2;
+    elseif TH2_MI(iter+50)<-pi/2
+        TH2_MI(iter+50)=-pi/2;
+    end
+    
+    mag=sqrt(data3(iter+50,M2*3+1)^2+data3(iter+50,M2*3+2)^2+data3(iter+50,M2*3+3)^2);
+    a=data3(iter+50,M2*3+1)/mag;
+    b=data3(iter+50,M2*3+2)/mag;
+    
+
+    X=atan2(alpha,gamma);
+    if alpha*alpha+gamma*gamma-a*a>0
+        TH4_MI(iter+50)=atan2(a,sqrt(alpha*alpha+gamma*gamma-a*a))-X;
+    else
+        TH4_MI(iter+50)=atan2(a,0)-X;
+    end
+
+    if TH4_MI(iter+50)>pi/2
+        TH4_MI(iter+50)=pi/2;
+    elseif TH4_MI(iter+50)<-pi/2
+        TH4_MI(iter+50)=-pi/2;
+    end
+
+    Y(iter+50)=-sin(TH4_MI(iter+50))*alpha+cos(TH4_MI(iter+50))*gamma;
+    if Y(iter+50) == 0
+        Y(iter+50)=0.00001;
+    end
+    if Y(iter+50)*Y(iter+50)+beta*beta-b*b<0
+        TH3_MI(iter+50)=atan2(0,b)-atan2(Y(iter+50),beta);
+    else
+        TH3_MI(iter+50)=atan2(sqrt(Y(iter+50)*Y(iter+50)+beta*beta-b*b),b)-atan2(Y(iter+50),beta);
+    end
+
+    if TH3_MI(iter+50)>pi/2
+        TH3_MI(iter+50)=pi/2;
+    elseif TH3_MI(iter+50)<-pi/2
+        TH3_MI(iter+50)=-pi/2;
+    end
+
+    TH4_MI(iter+50)=TH4_MI(iter+50)+pi/4;
+    
+   %% distance from thumb to middle
+    distance(iter+50, 1) = sqrt(sum((Joint7Ref_MI(1:3)-Joint7Ref_TH(1:3)).^2));
+    distance(iter+50, 1) = subs(distance(iter+50), [B2_TH, B3_TH, B5_TH, B6_TH,B2_MI, B3_MI, B5_MI, B6_MI], [TH1_TH(iter+50),TH2_TH(iter+50), TH3_TH(iter+50), TH4_TH(iter+50),  TH1_MI(iter+50),TH2_MI(iter+50), TH3_MI(iter+50), TH4_MI(iter+50)]);
+    error(iter, 1) = error(iter, 1)+distance(iter+50, 1);
+    
+end
+
+disp('start');
+
+parameter=[A1_TH;B1_TH;       C1_TH; D1_TH;
+           A2_TH; off_TH1_TH; C2_TH; D2_TH; 
+           A3_TH; off_TH2_TH; C3_TH; D3_TH;
+           A4_TH; B4_TH;      C4_TH; D4_TH;
+           A5_TH; off_TH3_TH; C5_TH; D5_TH;
+           A6_TH; off_TH4_TH; C6_TH; D6_TH;
+           A7_TH; B7_TH;      C7_TH; D7_TH;
+           A8_TH; B8_TH;      C8_TH; D8_TH;
+           A1; B1;      C1; D1;
+           A2; off_TH1; C2; D2; 
+           A3; off_TH2; C3; D3;
+           A4; B4;      C4; D4;
+           A5; off_TH3; C5; D5;
+           A6; off_TH4; C6; D6;
+           A7; B7;      C7; D7;
+           A8; B8;      C8; D8;
+           A1_MI; B1_MI;      C1_MI; D1_MI;
+           A2_MI; off_TH1_MI; C2_MI; D2_MI; 
+           A3_MI; off_TH2_MI; C3_MI; D3_MI;
+           A4_MI; B4_MI;      C4_MI; D4_MI;
+           A5_MI; off_TH3_MI; C5_MI; D5_MI;
+           A6_MI; off_TH4_MI; C6_MI; D6_MI;
+           A7_MI; B7_MI;      C7_MI; D7_MI;
+           A8_MI; B8_MI;      C8_MI; D8_MI;
+           A0_MI;A0_TH; B0_MI; B0_TH; C0_MI; C0_TH;D0_MI;D0_TH;E0_MI;E0_TH;F0_MI;F0_TH];
+
+fh = matlabFunction(error,'vars', {parameter});
+
+% optimization variable 초기값 설정
+%thumb
+A1_TH=0;B1_TH=0;    C1_TH=0;    D1_TH=-pi/2;            
+A2_TH=0;            C2_TH=l1_TH;D2_TH=pi/2;           
+A3_TH=0;            C3_TH=l2_TH;D3_TH=0;
+A4_TH=0;B4_TH=-pi/2;C4_TH=l3_TH;D4_TH=0;
+A5_TH=0;            C5_TH=l4_TH;D5_TH=0;
+A6_TH=0;            C6_TH=l5_TH;D6_TH=0;
+A7_TH=0;B7_TH=-pi/2;C7_TH=l6_TH;D7_TH=0;
+A8_TH=0;B8_TH= pi/2;C8_TH=l7_TH;D8_TH=0;
+off_TH1_TH=0;
+off_TH2_TH=0;
+off_TH3_TH=0;
+off_TH4_TH=0;
+%index
+A1=0;B1=0;    C1=0;D1=-pi/2;            
+A2=0;         C2=l1;D2=pi/2;           
+A3=0;         C3=l2;D3=0;
+A4=0;B4=-pi/2;C4=l3;D4=0;
+A5=0;         C5=l4;D5=0;
+A6=0;         C6=l5;D6=0;
+A7=0;B7=-pi/2;C7=l6;D7=0;
+A8=0;B8= pi/2;C8=l7;D8=0;
+off_TH1=0;
+off_TH2=0;
+off_TH3=0;
+off_TH4=0;
+%middle
+A1_MI=0;B1_MI=0;    C1_MI=0;    D1_MI=-pi/2;            
+A2_MI=0;            C2_MI=l1_MI;D2_MI=pi/2;           
+A3_MI=0;            C3_MI=l2_MI;D3_MI=0;
+A4_MI=0;B4_MI=-pi/2;C4_MI=l3_MI;D4_MI=0;
+A5_MI=0;            C5_MI=l4_MI;D5_MI=0;
+A6_MI=0;            C6_MI=l5_MI;D6_MI=0;
+A7_MI=0;B7_MI=-pi/2;C7_MI=l6_MI;D7_MI=0;
+A8_MI=0;B8_MI= pi/2;C8_MI=l7_MI;D8_MI=0;
+off_TH1_MI=0;
+off_TH2_MI=0;
+off_TH3_MI=0;
+off_TH4_MI=0;
+
+%origin position initialization(thumb and middle finger's origin)
+A0_TH=Origin_THParam(1);B0_TH=Origin_THParam(2);C0_TH=Origin_THParam(3);D0_TH=Origin_THParam(4);E0_TH=Origin_THParam(5);F0_TH=Origin_THParam(6);
+A0_MI=Origin_MIParam(1);B0_MI=Origin_MIParam(2);C0_MI=Origin_MIParam(3);D0_MI=Origin_MIParam(4);EO_MI=Origin_MIParam(5);F0_MI=Origin_MIParam(6);
+
+    
+options = optimoptions(@lsqnonlin,'Algorithm','trust-region-reflective', 'Display', 'iter', 'MaxFunctionEvaluations', 5000, 'MaxIterations', 4000);  
+output = lsqnonlin(fh,[A1_TH;A2_TH;A3_TH;A4_TH;A5_TH;A6_TH;A7_TH;A8_TH;B1_TH;off_TH1_TH;off_TH2_TH;B4_TH;off_TH3_TH;off_TH4_TH;B7_TH;B8_TH;C1_TH;C2_TH;C3_TH;C4_TH;C5_TH;C6_TH;C7_TH;C8_TH;D1_TH;D2_TH;D3_TH;D4_TH;D5_TH;D6_TH;D7_TH;D8_TH; ...
+A1;A2;A3;A4;A5;A6;A7;A8;B1;off_TH1;off_TH2;B4;off_TH3;off_TH4;B7;B8;C1;C2;C3;C4;C5;C6;C7;C8;D1;D2;D3;D4;D5;D6;D7;D8; ...
+A1_MI;A2_MI;A3_MI;A4_MI;A5_MI;A6_MI;A7_MI;A8_MI;B1_MI;off_TH1_MI;off_TH2_MI;B4_MI;off_TH3_MI;off_TH4_MI;B7_MI;B8_MI;C1_MI;C2_MI;C3_MI;C4_MI;C5_MI;C6_MI;C7_MI;C8_MI;D1_MI;D2_MI;D3_MI;D4_MI;D5_MI;D6_MI;D7_MI;D8_MI; ...
+A0_MI;A0_TH; B0_MI; B0_TH; C0_MI; C0_TH;D0_MI;D0_TH;E0_MI;E0_TH;F0_MI;F0_TH], [], [], options);    
+
+
+%     A1_TH=q_TH_double(1); B1_TH=q_TH_double(2); C1_TH=q_TH_double(3); D1_TH=q_TH_double(4);
+%     A2_TH=q_TH_double(5); B2_TH=TH1_TH(iter); C2_TH=q_TH_double(6); D2_TH=q_TH_double(7);
+%     A3_TH=q_TH_double(8); B3_TH=TH2_TH(iter); C3_TH=l2_TH; D3_TH=0;
+%     A4_TH=0; B4_TH=-pi/2; C4_TH=l3_TH; D4_TH=q_TH_double(9);
+%     A5_TH=q_TH_double(10); B5_TH=TH3_TH(iter); C5_TH=q_TH_double(11); D5_TH=q_TH_double(12);
+%     A6_TH=q_TH_double(13); B6_TH=TH4_TH(iter); C6_TH=l5_TH; D6_TH=0;
+%     A7_TH=q_TH_double(14); B7_TH=q_TH_double(15); C7_TH=q_TH_double(16); D7_TH=q_TH_double(17);
+%     A8_TH=l7_TH; B8_TH=pi/2; C8_TH=l8_TH; D8_TH=0; A0_TH=q_TH_double(18); B0_TH=q_TH_double(19); C0_TH=q_TH_double(20); D0_TH=q_TH_double(21); E0_TH=q_TH_double(22); F0_TH=q_TH_double(23);
+%     
+%     A1_MI=q_MI_double(1); B1_MI=q_MI_double(2); C1_MI=q_MI_double(3); D1_MI=q_MI_double(4);
+%     A2_MI=q_MI_double(5); B2_MI=TH1_MI(iter); C2_MI=q_MI_double(6); D2_MI=q_MI_double(7);
+%     A3_MI=q_MI_double(8); B3_MI=TH2_MI(iter); C3_MI=l2_MI; D3_MI=0;
+%     A4_MI=0; B4_MI=-pi/2; C4_MI=l3_MI; D4_MI=q_MI_double(9);
+%     A5_MI=q_MI_double(10); B5_MI=TH3_MI(iter); C5_MI=q_MI_double(11); D5_MI=q_MI_double(12);
+%     A6_MI=q_MI_double(13); B6_MI=TH4_MI(iter); C6_MI=l5_MI; D6_MI=0;
+%     A7_MI=q_MI_double(14); B7_MI=q_MI_double(15); C7_MI=q_MI_double(16); D7_MI=q_MI_double(17);
+%     A8_MI=l7_MI; B8_MI=pi/2; C8_MI=l8_MI; D8_MI=0; A0_MI=q_MI_double(18); B0_MI=q_MI_double(19); C0_MI=q_MI_double(20); D0_MI=q_MI_double(21); E0_MI=q_MI_double(22); F0_MI=q_MI_double(23);
    
-    Joint7_TH=  subs(Joint7Ref_TH);
-    Joint7_TH = vpa(Joint7_TH);
-    Joint7_MI= subs(Joint7Ref_MI);
-    Joint7_MI = vpa(Joint7_MI);
-    
-    for i=1:iteration
-        error_TH=Joint7_MI-Joint7_TH;
-
-        JacobianMat_TH=subs(JacobianMatRef_TH);
-        JacobianMat_TH=vpa(JacobianMat_TH);
-
-        dq_TH_=(JacobianMat_TH*JacobianMat_TH'+lambda*eye(3))\error_TH;
-        dq_TH=JacobianMat_TH'*dq_TH_;
-        q_TH_double=subs(qRef_TH);
-        q_TH_double=vpa(q_TH_double+dq_TH);
-
-        A1_TH=q_TH_double(1); B1_TH=q_TH_double(2); C1_TH=q_TH_double(3); D1_TH=q_TH_double(4);
-        A2_TH=q_TH_double(5); C2_TH=q_TH_double(6); D2_TH=q_TH_double(7);
-        A3_TH=q_TH_double(8); C3_TH=l2_TH; D3_TH=0;
-        A4_TH=0; B4_TH=-pi/2; C4_TH=l3_TH; D4_TH=q_TH_double(9);
-        A5_TH=q_TH_double(10); C5_TH=q_TH_double(11); D5_TH=q_TH_double(12);
-        A6_TH=q_TH_double(13); C6_TH=l5_TH; D6_TH=0;
-        A7_TH=q_TH_double(14); B7_TH=q_TH_double(15); C7_TH=q_TH_double(16); D7_TH=q_TH_double(17);
-        A8_TH=l7_TH; B8_TH=pi/2; C8_TH=l8_TH; D8_TH=0; A0_TH=q_TH_double(18); B0_TH=q_TH_double(19); C0_TH=q_TH_double(20); D0_TH=q_TH_double(21); E0_TH=q_TH_double(22); F0_TH=q_TH_double(23);
-
-        Joint7_TH=subs(Joint7Ref_TH);
-        Joint7_TH=vpa(Joint7_TH);
-        
-        error_MI=Joint7_TH-Joint7_MI;      
-        
-        JacobianMat_MI=subs(JacobianMatRef_MI);
-        %JacobianMat=double(JacobianMat);
-
-        dq_MI_=(JacobianMat_MI*JacobianMat_MI'+lambda*eye(3))\error_MI;
-        dq_MI=JacobianMat_MI'*dq_MI_;
-        q_MI_double=subs(qRef_MI);
-        q_MI_double=vpa(q_MI_double+dq_MI);
-
-        A1_MI=q_MI_double(1); B1_MI=q_MI_double(2); C1_MI=q_MI_double(3); D1_MI=q_MI_double(4);
-        A2_MI=q_MI_double(5); C2_MI=q_MI_double(6); D2_MI=q_MI_double(7);
-        A3_MI=q_MI_double(8); C3_MI=l2_MI; D3_MI=0;
-        A4_MI=0; B4_MI=-pi/2; C4_MI=l3_MI; D4_MI=q_MI_double(9);
-        A5_MI=q_MI_double(10); C5_MI=q_MI_double(11); D5_MI=q_MI_double(12);
-        A6_MI=q_MI_double(13); C6_MI=l5_MI; D6_MI=0;
-        A7_MI=q_MI_double(14); B7_MI=q_MI_double(15); C7_MI=q_MI_double(16); D7_MI=q_MI_double(17);
-        A8_MI=l7_MI; B8_MI=pi/2; C8_MI=l8_MI; D8_MI=0; A0_MI=q_MI_double(18); B0_MI=q_MI_double(19); C0_MI=q_MI_double(20); D0_MI=q_MI_double(21); E0_MI=q_MI_double(22); F0_MI=q_MI_double(23);
-
-        Joint7_MI=subs(Joint7Ref_MI);
-        Joint7_MI=vpa(Joint7_MI);
-    end
-end
-
-for iter=500:500:2000
-    
-    mag=sqrt(data3(iter,T1*3+1)^2+data3(iter,T1*3+2)^2+data3(iter,T1*3+3)^2);
-    a=data3(iter,T1*3+1)/mag;
-    b=data3(iter,T1*3+2)/mag;
-
-    X=atan2(gamma,alpha);
-    if alpha*alpha+gamma*gamma-a*a>0
-        TH1_TH(iter)=atan2(sqrt(alpha*alpha+gamma*gamma-a*a),a)-X;
-    else
-        TH1_TH(iter)=atan2(0,a)-X;
-    end
-
-    if TH1_TH(iter)>pi/2
-        TH1_TH(iter)=pi/2;
-    elseif TH1_TH(iter)<-pi/2
-        TH1_TH(iter)=-pi/2;
-    end
-
-    Y(iter)=sin(TH1_TH(iter))*alpha+cos(TH1_TH(iter))*gamma;
-    if Y(iter)*Y(iter)+beta*beta-b*b<0
-        TH2_TH(iter)=atan2(b,0)-atan2(beta,Y(iter));
-    else
-        TH2_TH(iter)=atan2(b,sqrt(Y(iter)*Y(iter)+beta*beta-b*b))-atan2(beta,Y(iter));
-    end
-
-    if TH2_TH(iter)>pi/2
-        TH2_TH(iter)=pi/2;
-    elseif TH2_TH(iter)<-pi/2
-        TH2_TH(iter)=-pi/2;
-    end
-
-    
-    mag=sqrt(data3(iter,T2*3+1)^2+data3(iter,T2*3+2)^2+data3(iter,T2*3+3)^2);
-    a=data3(iter,T2*3+1)/mag;
-    b=data3(iter,T2*3+2)/mag;
-
-    X=atan2(alpha,gamma);
-    if alpha*alpha+gamma*gamma-a*a>0
-        TH4_TH(iter)=atan2(a,sqrt(alpha*alpha+gamma*gamma-a*a))-X;
-    else
-        TH4_TH(iter)=atan2(a,0)-X;
-    end
-
-    if TH4_TH(iter)>pi/2
-        TH4_TH(iter)=pi/2;
-    elseif TH4_TH(iter)<-pi/2
-        TH4_TH(iter)=-pi/2;
-    end
-
-    Y(iter)=-sin(TH4_TH(iter))*alpha+cos(TH4_TH(iter))*gamma;
-    if Y(iter) == 0
-        Y(iter)=0.00001;
-    end
-    if Y(iter)*Y(iter)+beta*beta-b*b<0
-        TH3_TH(iter)=atan2(0,b)-atan2(Y(iter),beta);
-    else
-        TH3_TH(iter)=atan2(sqrt(Y(iter)*Y(iter)+beta*beta-b*b),b)-atan2(Y(iter),beta);
-    end
-
-    if TH3_TH(iter)>pi/2
-        TH3_TH(iter)=pi/2;
-    elseif TH3_TH(iter)<-pi/2
-        TH3_TH(iter)=-pi/2;
-    end
-
-    TH4_TH(iter)=TH4_TH(iter)+pi/4;
-
-    TH1_TH(iter)=TH1_TH(iter)-off_TH1_TH;
-    TH2_TH(iter)=TH2_TH(iter)-off_TH2_TH;
-    TH3_TH(iter)=TH3_TH(iter)-off_TH3_TH;
-    TH4_TH(iter)=TH4_TH(iter)-off_TH4_TH;
-    
-    mag=sqrt(data3(iter,I1*3+1)^2+data3(iter,I1*3+2)^2+data3(iter,I1*3+3)^2);
-    a=data3(iter,I1*3+1)/mag;
-    b=data3(iter,I1*3+2)/mag;
-
-    X=atan2(gamma,alpha);
-    if alpha*alpha+gamma*gamma-a*a>0
-        TH1(iter)=atan2(sqrt(alpha*alpha+gamma*gamma-a*a),a)-X;
-    else
-        TH1(iter)=atan2(0,a)-X;
-    end
-
-    if TH1(iter)>pi/2
-        TH1(iter)=pi/2;
-    elseif TH1(iter)<-pi/2
-        TH1(iter)=-pi/2;
-    end
-
-    Y(iter)=-sin(TH1(iter))*alpha+cos(TH1(iter))*gamma;
-    if Y(iter)*Y(iter)+beta*beta-b*b<0
-        TH2(iter)=atan2(b,0)-atan2(beta,Y(iter));
-    else
-        TH2(iter)=atan2(b,sqrt(Y(iter)*Y(iter)+beta*beta-b*b))-atan2(beta,Y(iter));
-    end
-
-    if TH2(iter)>pi/2
-        TH2(iter)=pi/2;
-    elseif TH2(iter)<-pi/2
-        TH2(iter)=-pi/2;
-    end
-
-    
-    mag=sqrt(data3(iter,I2*3+1)^2+data3(iter,I2*3+2)^2+data3(iter,I2*3+3)^2);
-    a=data3(iter,I2*3+1)/mag;
-    b=data3(iter,I2*3+2)/mag;
-
-    X=atan2(alpha,gamma);
-    if alpha*alpha+gamma*gamma-a*a>0
-        TH4(iter)=atan2(a,sqrt(alpha*alpha+gamma*gamma-a*a))-X;
-    else
-        TH4(iter)=atan2(a,0)-X;
-    end
-
-    if TH4(iter)>pi/2
-        TH4(iter)=pi/2;
-    elseif TH4(iter)<-pi/2
-        TH4(iter)=-pi/2;
-    end
-
-
-    Y(iter)=-sin(TH4(iter))*alpha+cos(TH4(iter))*gamma;
-    if Y(iter) == 0
-        Y(iter)=0.00001;
-    end
-    if Y(iter)*Y(iter)+beta*beta-b*b<0
-        TH3(iter)=atan2(0,b)-atan2(Y(iter),beta);
-    else
-        TH3(iter)=atan2(sqrt(Y(iter)*Y(iter)+beta*beta-b*b),b)-atan2(Y(iter),beta);
-    end
-
-    if TH3(iter)>pi/2
-        TH3(iter)=pi/2;
-    elseif TH3(iter)<-pi/2
-        TH3(iter)=-pi/2;
-    end
-
-    TH4(iter)=TH4(iter)+pi/4;
-
-    TH1(iter)=TH1(iter)-off_TH1;
-    TH2(iter)=TH2(iter)-off_TH2;
-    TH3(iter)=TH3(iter)-off_TH3;
-    TH4(iter)=TH4(iter)-off_TH4;
-
-    A1_TH=q_TH_double(1); B1_TH=q_TH_double(2); C1_TH=q_TH_double(3); D1_TH=q_TH_double(4);
-    A2_TH=q_TH_double(5); B2_TH=TH1_TH(iter); C2_TH=q_TH_double(6); D2_TH=q_TH_double(7);
-    A3_TH=q_TH_double(8); B3_TH=TH2_TH(iter); C3_TH=l2_TH; D3_TH=0;
-    A4_TH=0; B4_TH=-pi/2; C4_TH=l3_TH; D4_TH=q_TH_double(9);
-    A5_TH=q_TH_double(10); B5_TH=TH3_TH(iter); C5_TH=q_TH_double(11); D5_TH=q_TH_double(12);
-    A6_TH=q_TH_double(13); B6_TH=TH4_TH(iter); C6_TH=l5_TH; D6_TH=0;
-    A7_TH=q_TH_double(14); B7_TH=q_TH_double(15); C7_TH=q_TH_double(16); D7_TH=q_TH_double(17);
-    A8_TH=l7_TH; B8_TH=pi/2; C8_TH=l8_TH; D8_TH=0; A0_TH=q_TH_double(18); B0_TH=q_TH_double(19); C0_TH=q_TH_double(20); D0_TH=q_TH_double(21); E0_TH=q_TH_double(22); F0_TH=q_TH_double(23);
-
-    A1=q_double(1); B1=q_double(2); C1=q_double(3); D1=q_double(4);
-    A2=q_double(5); B2=TH1(iter); C2=q_double(6); D2=q_double(7);
-    A3=q_double(8); B3=TH2(iter); C3=l2; D3=0;
-    A4=0; B4=-pi/2; C4=l3; D4=q_double(9);
-    A5=q_double(10); B5=TH3(iter); C5=q_double(11); D5=q_double(12);
-    A6=q_double(13); B6=TH4(iter); C6=l5; D6=0;
-    A7=q_double(14); B7=q_double(15); C7=q_double(16); D7=q_double(17);
-    A8=l7; B8=pi/2; C8=l8; D8=0;
-
-    Joint7_TH=  subs(Joint7Ref_TH);
-    Joint7_TH = vpa(Joint7_TH);
-    Joint7= subs(Joint7Ref);
-    Joint7 = vpa(Joint7);
-    
-    for i=1:iteration
-        
-        error=Joint7_TH-Joint7;
-        
-        JacobianMat=subs(JacobianMatRef);
-        %JacobianMat=double(JacobianMat);
-
-        dq_=(JacobianMat*JacobianMat'+lambda*eye(3))\error;
-        dq=JacobianMat'*dq_;
-        q_double=subs(qRef);
-        q_double=vpa(q_double+dq);
-
-        A1=q_double(1); B1=q_double(2); C1=q_double(3); D1=q_double(4);
-        A2=q_double(5); C2=q_double(6); D2=q_double(7);
-        A3=q_double(8); C3=l2; D3=0;
-        A4=0; B4=-pi/2; C4=l3; D4=q_double(9);
-        A5=q_double(10); C5=q_double(11); D5=q_double(12);
-        A6=q_double(13); C6=l5; D6=0;
-        A7=q_double(14); B7=q_double(15); C7=q_double(16); D7=q_double(17);
-        A8=l7; B8=pi/2; C8=l8; D8=0;
-    
-        Joint7=subs(Joint7Ref);
-        Joint7=vpa(Joint7);
-    end
-end
-DHoff=[subs(q_double) subs(q_TH_double) subs(q_MI_double)];
-
-for iter=500:500:2000
-    mag=sqrt(data3(iter,T1*3+1)^2+data3(iter,T1*3+2)^2+data3(iter,T1*3+3)^2);
-    a=data3(iter,T1*3+1)/mag;
-    b=data3(iter,T1*3+2)/mag;
-
-    X=atan2(gamma,alpha);
-    if alpha*alpha+gamma*gamma-a*a>0
-        TH1_TH(iter)=atan2(sqrt(alpha*alpha+gamma*gamma-a*a),a)-X;
-    else
-        TH1_TH(iter)=atan2(0,a)-X;
-    end
-
-    if TH1_TH(iter)>pi/2
-        TH1_TH(iter)=pi/2;
-    elseif TH1_TH(iter)<-pi/2
-        TH1_TH(iter)=-pi/2;
-    end
-
-    Y(iter)=sin(TH1_TH(iter))*alpha+cos(TH1_TH(iter))*gamma;
-    if Y(iter)*Y(iter)+beta*beta-b*b<0
-        TH2_TH(iter)=atan2(b,0)-atan2(beta,Y(iter));
-    else
-        TH2_TH(iter)=atan2(b,sqrt(Y(iter)*Y(iter)+beta*beta-b*b))-atan2(beta,Y(iter));
-    end
-
-    if TH2_TH(iter)>pi/2
-        TH2_TH(iter)=pi/2;
-    elseif TH2_TH(iter)<-pi/2
-        TH2_TH(iter)=-pi/2;
-    end
-
-    
-    mag=sqrt(data3(iter,T2*3+1)^2+data3(iter,T2*3+2)^2+data3(iter,T2*3+3)^2);
-    a=data3(iter,T2*3+1)/mag;
-    b=data3(iter,T2*3+2)/mag;
-
-    X=atan2(alpha,gamma);
-    if alpha*alpha+gamma*gamma-a*a>0
-        TH4_TH(iter)=atan2(a,sqrt(alpha*alpha+gamma*gamma-a*a))-X;
-    else
-        TH4_TH(iter)=atan2(a,0)-X;
-    end
-
-    if TH4_TH(iter)>pi/2
-        TH4_TH(iter)=pi/2;
-    elseif TH4_TH(iter)<-pi/2
-        TH4_TH(iter)=-pi/2;
-    end
-
-    Y(iter)=-sin(TH4_TH(iter))*alpha+cos(TH4_TH(iter))*gamma;
-    if Y(iter) == 0
-        Y(iter)=0.00001;
-    end
-    if Y(iter)*Y(iter)+beta*beta-b*b<0
-        TH3_TH(iter)=atan2(0,b)-atan2(Y(iter),beta);
-    else
-        TH3_TH(iter)=atan2(sqrt(Y(iter)*Y(iter)+beta*beta-b*b),b)-atan2(Y(iter),beta);
-    end
-
-    if TH3_TH(iter)>pi/2
-        TH3_TH(iter)=pi/2;
-    elseif TH3_TH(iter)<-pi/2
-        TH3_TH(iter)=-pi/2;
-    end
-
-    TH4_TH(iter)=TH4_TH(iter)+pi/4;
-
-    TH1_TH(iter)=TH1_TH(iter)-off_TH1_TH;
-    TH2_TH(iter)=TH2_TH(iter)-off_TH2_TH;
-    TH3_TH(iter)=TH3_TH(iter)-off_TH3_TH;
-    TH4_TH(iter)=TH4_TH(iter)-off_TH4_TH;
-    
-    mag=sqrt(data3(iter,I1*3+1)^2+data3(iter,I1*3+2)^2+data3(iter,I1*3+3)^2);
-    a=data3(iter,I1*3+1)/mag;
-    b=data3(iter,I1*3+2)/mag;
-
-    X=atan2(gamma,alpha);
-    if alpha*alpha+gamma*gamma-a*a>0
-        TH1(iter)=atan2(sqrt(alpha*alpha+gamma*gamma-a*a),a)-X;
-    else
-        TH1(iter)=atan2(0,a)-X;
-    end
-
-    if TH1(iter)>pi/2
-        TH1(iter)=pi/2;
-    elseif TH1(iter)<-pi/2
-        TH1(iter)=-pi/2;
-    end
-
-    Y(iter)=-sin(TH1(iter))*alpha+cos(TH1(iter))*gamma;
-    if Y(iter)*Y(iter)+beta*beta-b*b<0
-        TH2(iter)=atan2(b,0)-atan2(beta,Y(iter));
-    else
-        TH2(iter)=atan2(b,sqrt(Y(iter)*Y(iter)+beta*beta-b*b))-atan2(beta,Y(iter));
-    end
-
-    if TH2(iter)>pi/2
-        TH2(iter)=pi/2;
-    elseif TH2(iter)<-pi/2
-        TH2(iter)=-pi/2;
-    end
-
-    
-    mag=sqrt(data3(iter,I2*3+1)^2+data3(iter,I2*3+2)^2+data3(iter,I2*3+3)^2);
-    a=data3(iter,I2*3+1)/mag;
-    b=data3(iter,I2*3+2)/mag;
-
-    X=atan2(alpha,gamma);
-    if alpha*alpha+gamma*gamma-a*a>0
-        TH4(iter)=atan2(a,sqrt(alpha*alpha+gamma*gamma-a*a))-X;
-    else
-        TH4(iter)=atan2(a,0)-X;
-    end
-
-    if TH4(iter)>pi/2
-        TH4(iter)=pi/2;
-    elseif TH4(iter)<-pi/2
-        TH4(iter)=-pi/2;
-    end
-
-
-    Y(iter)=-sin(TH4(iter))*alpha+cos(TH4(iter))*gamma;
-    if Y(iter) == 0
-        Y(iter)=0.00001;
-    end
-    if Y(iter)*Y(iter)+beta*beta-b*b<0
-        TH3(iter)=atan2(0,b)-atan2(Y(iter),beta);
-    else
-        TH3(iter)=atan2(sqrt(Y(iter)*Y(iter)+beta*beta-b*b),b)-atan2(Y(iter),beta);
-    end
-
-    if TH3(iter)>pi/2
-        TH3(iter)=pi/2;
-    elseif TH3(iter)<-pi/2
-        TH3(iter)=-pi/2;
-    end
-
-    TH4(iter)=TH4(iter)+pi/4;
-
-    TH1(iter)=TH1(iter)-off_TH1;
-    TH2(iter)=TH2(iter)-off_TH2;
-    TH3(iter)=TH3(iter)-off_TH3;
-    TH4(iter)=TH4(iter)-off_TH4;
-    
-    A1_TH=q_TH_double(1); B1_TH=q_TH_double(2); C1_TH=q_TH_double(3); D1_TH=q_TH_double(4);
-    A2_TH=q_TH_double(5); B2_TH=TH1_TH(iter); C2_TH=q_TH_double(6); D2_TH=q_TH_double(7);
-    A3_TH=q_TH_double(8); B3_TH=TH2_TH(iter); C3_TH=l2_TH; D3_TH=0;
-    A4_TH=0; B4_TH=-pi/2; C4_TH=l3_TH; D4_TH=q_TH_double(9);
-    A5_TH=q_TH_double(10); B5_TH=TH3_TH(iter); C5_TH=q_TH_double(11); D5_TH=q_TH_double(12);
-    A6_TH=q_TH_double(13); B6_TH=TH4_TH(iter); C6_TH=l5_TH; D6_TH=0;
-    A7_TH=q_TH_double(14); B7_TH=q_TH_double(15); C7_TH=q_TH_double(16); D7_TH=q_TH_double(17);
-    A8_TH=l7_TH; B8_TH=pi/2; C8_TH=l8_TH; D8_TH=0; A0_TH=q_TH_double(18); B0_TH=q_TH_double(19); C0_TH=q_TH_double(20); D0_TH=q_TH_double(21); E0_TH=q_TH_double(22); F0_TH=q_TH_double(23);
-
-    A1=q_double(1); B1=q_double(2); C1=q_double(3); D1=q_double(4);
-    A2=q_double(5); B2=TH1(iter); C2=q_double(6); D2=q_double(7);
-    A3=q_double(8); B3=TH2(iter); C3=l2; D3=0;
-    A4=0; B4=-pi/2; C4=l3; D4=q_double(9);
-    A5=q_double(10); B5=TH3(iter); C5=q_double(11); D5=q_double(12);
-    A6=q_double(13); B6=TH4(iter); C6=l5; D6=0;
-    A7=q_double(14); B7=q_double(15); C7=q_double(16); D7=q_double(17);
-    A8=l7; B8=pi/2; C8=l8; D8=0;
-    
-    Joint7_TH=  subs(Joint7Ref_TH);
-    Joint7_TH = vpa(Joint7_TH);
-    Joint7= subs(Joint7Ref);
-    Joint7 = vpa(Joint7);
-    
-    Results(:,iter/500)=Joint7_TH-Joint7;
-end
-
-for iter=2500:500:4000
     
     
-     mag=sqrt(data3(iter,T1*3+1)^2+data3(iter,T1*3+2)^2+data3(iter,T1*3+3)^2);
-    a=data3(iter,T1*3+1)/mag;
-    b=data3(iter,T1*3+2)/mag;
-    
+%     for i=1:iteration
+%         error_TH=Joint7_MI-Joint7_TH;
+% 
+%         JacobianMat_TH=subs(JacobianMatRef_TH);
+%         JacobianMat_TH=vpa(JacobianMat_TH);
+% 
+%         dq_TH_=(JacobianMat_TH*JacobianMat_TH'+lambda*eye(3))\error_TH;
+%         dq_TH=JacobianMat_TH'*dq_TH_;
+%         q_TH_double=subs(qRef_TH);
+%         q_TH_double=vpa(q_TH_double+dq_TH);
+% 
+%         A1_TH=q_TH_double(1); B1_TH=q_TH_double(2); C1_TH=q_TH_double(3); D1_TH=q_TH_double(4);
+%         A2_TH=q_TH_double(5); C2_TH=q_TH_double(6); D2_TH=q_TH_double(7);
+%         A3_TH=q_TH_double(8); C3_TH=l2_TH; D3_TH=0;
+%         A4_TH=0; B4_TH=-pi/2; C4_TH=l3_TH; D4_TH=q_TH_double(9);
+%         A5_TH=q_TH_double(10); C5_TH=q_TH_double(11); D5_TH=q_TH_double(12);
+%         A6_TH=q_TH_double(13); C6_TH=l5_TH; D6_TH=0;
+%         A7_TH=q_TH_double(14); B7_TH=q_TH_double(15); C7_TH=q_TH_double(16); D7_TH=q_TH_double(17);
+%         A8_TH=l7_TH; B8_TH=pi/2; C8_TH=l8_TH; D8_TH=0; A0_TH=q_TH_double(18); B0_TH=q_TH_double(19); C0_TH=q_TH_double(20); D0_TH=q_TH_double(21); E0_TH=q_TH_double(22); F0_TH=q_TH_double(23);
+% 
+%         Joint7_TH=subs(Joint7Ref_TH);
+%         Joint7_TH=vpa(Joint7_TH);
+%         
+%         error_MI=Joint7_TH-Joint7_MI;      
+%         
+%         JacobianMat_MI=subs(JacobianMatRef_MI);
+%         %JacobianMat=double(JacobianMat);
+% 
+%         dq_MI_=(JacobianMat_MI*JacobianMat_MI'+lambda*eye(3))\error_MI;
+%         dq_MI=JacobianMat_MI'*dq_MI_;
+%         q_MI_double=subs(qRef_MI);
+%         q_MI_double=vpa(q_MI_double+dq_MI);
+% 
+%         A1_MI=q_MI_double(1); B1_MI=q_MI_double(2); C1_MI=q_MI_double(3); D1_MI=q_MI_double(4);
+%         A2_MI=q_MI_double(5); C2_MI=q_MI_double(6); D2_MI=q_MI_double(7);
+%         A3_MI=q_MI_double(8); C3_MI=l2_MI; D3_MI=0;
+%         A4_MI=0; B4_MI=-pi/2; C4_MI=l3_MI; D4_MI=q_MI_double(9);
+%         A5_MI=q_MI_double(10); C5_MI=q_MI_double(11); D5_MI=q_MI_double(12);
+%         A6_MI=q_MI_double(13); C6_MI=l5_MI; D6_MI=0;
+%         A7_MI=q_MI_double(14); B7_MI=q_MI_double(15); C7_MI=q_MI_double(16); D7_MI=q_MI_double(17);
+%         A8_MI=l7_MI; B8_MI=pi/2; C8_MI=l8_MI; D8_MI=0; A0_MI=q_MI_double(18); B0_MI=q_MI_double(19); C0_MI=q_MI_double(20); D0_MI=q_MI_double(21); E0_MI=q_MI_double(22); F0_MI=q_MI_double(23);
+% 
+%         Joint7_MI=subs(Joint7Ref_MI);
+%         Joint7_MI=vpa(Joint7_MI);
+%     end
 
-    X=atan2(gamma,alpha);
-    if alpha*alpha+gamma*gamma-a*a>0
-        TH1_TH(iter)=atan2(sqrt(alpha*alpha+gamma*gamma-a*a),a)-X;
-    else
-        TH1_TH(iter)=atan2(0,a)-X;
-    end
-
-    if TH1_TH(iter)>pi/2
-        TH1_TH(iter)=pi/2;
-    elseif TH1_TH(iter)<-pi/2
-        TH1_TH(iter)=-pi/2;
-    end
-
-    Y(iter)=sin(TH1_TH(iter))*alpha+cos(TH1_TH(iter))*gamma;
-    if Y(iter)*Y(iter)+beta*beta-b*b<0
-        TH2_TH(iter)=atan2(b,0)-atan2(beta,Y(iter));
-    else
-        TH2_TH(iter)=atan2(b,sqrt(Y(iter)*Y(iter)+beta*beta-b*b))-atan2(beta,Y(iter));
-    end
-
-    if TH2_TH(iter)>pi/2
-        TH2_TH(iter)=pi/2;
-    elseif TH2_TH(iter)<-pi/2
-        TH2_TH(iter)=-pi/2;
-    end
-
-    
-    mag=sqrt(data3(iter,T2*3+1)^2+data3(iter,T2*3+2)^2+data3(iter,T2*3+3)^2);
-    a=data3(iter,T2*3+1)/mag;
-    b=data3(iter,T2*3+2)/mag;
-
-    X=atan2(alpha,gamma);
-    if alpha*alpha+gamma*gamma-a*a>0
-        TH4_TH(iter)=atan2(a,sqrt(alpha*alpha+gamma*gamma-a*a))-X;
-    else
-        TH4_TH(iter)=atan2(a,0)-X;
-    end
-
-    if TH4_TH(iter)>pi/2
-        TH4_TH(iter)=pi/2;
-    elseif TH4_TH(iter)<-pi/2
-        TH4_TH(iter)=-pi/2;
-    end
-
-    Y(iter)=-sin(TH4_TH(iter))*alpha+cos(TH4_TH(iter))*gamma;
-    if Y(iter) == 0
-        Y(iter)=0.00001;
-    end
-    if Y(iter)*Y(iter)+beta*beta-b*b<0
-        TH3_TH(iter)=atan2(0,b)-atan2(Y(iter),beta);
-    else
-        TH3_TH(iter)=atan2(sqrt(Y(iter)*Y(iter)+beta*beta-b*b),b)-atan2(Y(iter),beta);
-    end
-
-    if TH3_TH(iter)>pi/2
-        TH3_TH(iter)=pi/2;
-    elseif TH3_TH(iter)<-pi/2
-        TH3_TH(iter)=-pi/2;
-    end
-
-    TH4_TH(iter)=TH4_TH(iter)+pi/4;
-
-    TH1_TH(iter)=TH1_TH(iter)-off_TH1_TH;
-    TH2_TH(iter)=TH2_TH(iter)-off_TH2_TH;
-    TH3_TH(iter)=TH3_TH(iter)-off_TH3_TH;
-    TH4_TH(iter)=TH4_TH(iter)-off_TH4_TH;
-    
-    mag=sqrt(data3(iter,M1*3+1)^2+data3(iter,M1*3+2)^2+data3(iter,M1*3+3)^2);
-    a=data3(iter,M1*3+1)/mag;
-    b=data3(iter,M1*3+2)/mag;
-
-    X=atan2(gamma,alpha);
-    if alpha*alpha+gamma*gamma-a*a>0
-        TH1_MI(iter)=atan2(sqrt(alpha*alpha+gamma*gamma-a*a),a)-X;
-    else
-        TH1_MI(iter)=atan2(0,a)-X;
-    end
-
-    if TH1_MI(iter)>pi/2
-        TH1_MI(iter)=pi/2;
-    elseif TH1_MI(iter)<-pi/2
-        TH1_MI(iter)=-pi/2;
-    end
-
-    Y(iter)=sin(TH1_MI(iter))*alpha+cos(TH1_MI(iter))*gamma;
-    if Y(iter)*Y(iter)+beta*beta-b*b<0
-        TH2_MI(iter)=atan2(b,0)-atan2(beta,Y(iter));
-    else
-        TH2_MI(iter)=atan2(b,sqrt(Y(iter)*Y(iter)+beta*beta-b*b))-atan2(beta,Y(iter));
-    end
-
-    if TH2_MI(iter)>pi/2
-        TH2_MI(iter)=pi/2;
-    elseif TH2_MI(iter)<-pi/2
-        TH2_MI(iter)=-pi/2;
-    end
-    
-    mag=sqrt(data3(iter,M2*3+1)^2+data3(iter,M2*3+2)^2+data3(iter,M2*3+3)^2);
-    a=data3(iter,M2*3+1)/mag;
-    b=data3(iter,M2*3+2)/mag;
-    
-
-    X=atan2(alpha,gamma);
-    if alpha*alpha+gamma*gamma-a*a>0
-        TH4_MI(iter)=atan2(a,sqrt(alpha*alpha+gamma*gamma-a*a))-X;
-    else
-        TH4_MI(iter)=atan2(a,0)-X;
-    end
-
-    if TH4_MI(iter)>pi/2
-        TH4_MI(iter)=pi/2;
-    elseif TH4_MI(iter)<-pi/2
-        TH4_MI(iter)=-pi/2;
-    end
-
-    Y(iter)=-sin(TH4_MI(iter))*alpha+cos(TH4_MI(iter))*gamma;
-    if Y(iter) == 0
-        Y(iter)=0.00001;
-    end
-    if Y(iter)*Y(iter)+beta*beta-b*b<0
-        TH3_MI(iter)=atan2(0,b)-atan2(Y(iter),beta);
-    else
-        TH3_MI(iter)=atan2(sqrt(Y(iter)*Y(iter)+beta*beta-b*b),b)-atan2(Y(iter),beta);
-    end
-
-    if TH3_MI(iter)>pi/2
-        TH3_MI(iter)=pi/2;
-    elseif TH3_MI(iter)<-pi/2
-        TH3_MI(iter)=-pi/2;
-    end
-
-    TH4_MI(iter)=TH4_MI(iter)+pi/4;
-
-    TH1_MI(iter)=TH1_MI(iter)-off_TH1_MI;
-    TH2_MI(iter)=TH2_MI(iter)-off_TH2_MI;
-    TH3_MI(iter)=TH3_MI(iter)-off_TH3_MI;
-    TH4_MI(iter)=TH4_MI(iter)-off_TH4_MI;
-    
-    A1_TH=q_TH_double(1); B1_TH=q_TH_double(2); C1_TH=q_TH_double(3); D1_TH=q_TH_double(4);
-    A2_TH=q_TH_double(5); B2_TH=TH1_TH(iter); C2_TH=q_TH_double(6); D2_TH=q_TH_double(7);
-    A3_TH=q_TH_double(8); B3_TH=TH2_TH(iter); C3_TH=l2_TH; D3_TH=0;
-    A4_TH=0; B4_TH=-pi/2; C4_TH=l3_TH; D4_TH=q_TH_double(9);
-    A5_TH=q_TH_double(10); B5_TH=TH3_TH(iter); C5_TH=q_TH_double(11); D5_TH=q_TH_double(12);
-    A6_TH=q_TH_double(13); B6_TH=TH4_TH(iter); C6_TH=l5_TH; D6_TH=0;
-    A7_TH=q_TH_double(14); B7_TH=q_TH_double(15); C7_TH=q_TH_double(16); D7_TH=q_TH_double(17);
-    A8_TH=l7_TH; B8_TH=pi/2; C8_TH=l8_TH; D8_TH=0; A0_TH=q_TH_double(18); B0_TH=q_TH_double(19); C0_TH=q_TH_double(20); D0_TH=q_TH_double(21); E0_TH=q_TH_double(22); F0_TH=q_TH_double(23);
-    
-    A1_MI=q_MI_double(1); B1_MI=q_MI_double(2); C1_MI=q_MI_double(3); D1_MI=q_MI_double(4);
-    A2_MI=q_MI_double(5); B2_MI=TH1_MI(iter); C2_MI=q_MI_double(6); D2_MI=q_MI_double(7);
-    A3_MI=q_MI_double(8); B3_MI=TH2_MI(iter); C3_MI=l2_MI; D3_MI=0;
-    A4_MI=0; B4_MI=-pi/2; C4_MI=l3_MI; D4_MI=q_MI_double(9);
-    A5_MI=q_MI_double(10); B5_MI=TH3_MI(iter); C5_MI=q_MI_double(11); D5_MI=q_MI_double(12);
-    A6_MI=q_MI_double(13); B6_MI=TH4_MI(iter); C6_MI=l5_MI; D6_MI=0;
-    A7_MI=q_MI_double(14); B7_MI=q_MI_double(15); C7_MI=q_MI_double(16); D7_MI=q_MI_double(17);
-    A8_MI=l7_MI; B8_MI=pi/2; C8_MI=l8_MI; D8_MI=0; A0_MI=q_MI_double(18); B0_MI=q_MI_double(19); C0_MI=q_MI_double(20); D0_MI=q_MI_double(21); E0_MI=q_MI_double(22); F0_MI=q_MI_double(23);
- 
-    Joint7_TH=  subs(Joint7Ref_TH);
-    Joint7_TH = vpa(Joint7_TH);
-    Joint7_MI= subs(Joint7Ref_MI);
-    Joint7_MI = vpa(Joint7_MI);
-    
-    Results(:,iter/500)=Joint7_TH-Joint7_MI;
-end
-
-DHinit-double(DHoff)
+% 
+% for iter=1:1:50
+%     
+%     %thumb device angle
+%     mag=sqrt(data3(iter,T1*3+1)^2+data3(iter,T1*3+2)^2+data3(iter,T1*3+3)^2);
+%     a=data3(iter,T1*3+1)/mag;
+%     b=data3(iter,T1*3+2)/mag;
+% 
+%     X=atan2(gamma,alpha);
+%     if alpha*alpha+gamma*gamma-a*a>0
+%         TH1_TH(iter)=atan2(sqrt(alpha*alpha+gamma*gamma-a*a),a)-X;
+%     else
+%         TH1_TH(iter)=atan2(0,a)-X;
+%     end
+% 
+%     if TH1_TH(iter)>pi/2
+%         TH1_TH(iter)=pi/2;
+%     elseif TH1_TH(iter)<-pi/2
+%         TH1_TH(iter)=-pi/2;
+%     end
+% 
+%     Y(iter)=sin(TH1_TH(iter))*alpha+cos(TH1_TH(iter))*gamma;
+%     if Y(iter)*Y(iter)+beta*beta-b*b<0
+%         TH2_TH(iter)=atan2(b,0)-atan2(beta,Y(iter));
+%     else
+%         TH2_TH(iter)=atan2(b,sqrt(Y(iter)*Y(iter)+beta*beta-b*b))-atan2(beta,Y(iter));
+%     end
+% 
+%     if TH2_TH(iter)>pi/2
+%         TH2_TH(iter)=pi/2;
+%     elseif TH2_TH(iter)<-pi/2
+%         TH2_TH(iter)=-pi/2;
+%     end
+% 
+%     
+%     mag=sqrt(data3(iter,T2*3+1)^2+data3(iter,T2*3+2)^2+data3(iter,T2*3+3)^2);
+%     a=data3(iter,T2*3+1)/mag;
+%     b=data3(iter,T2*3+2)/mag;
+% 
+%     X=atan2(alpha,gamma);
+%     if alpha*alpha+gamma*gamma-a*a>0
+%         TH4_TH(iter)=atan2(a,sqrt(alpha*alpha+gamma*gamma-a*a))-X;
+%     else
+%         TH4_TH(iter)=atan2(a,0)-X;
+%     end
+% 
+%     if TH4_TH(iter)>pi/2
+%         TH4_TH(iter)=pi/2;
+%     elseif TH4_TH(iter)<-pi/2
+%         TH4_TH(iter)=-pi/2;
+%     end
+% 
+%     Y(iter)=-sin(TH4_TH(iter))*alpha+cos(TH4_TH(iter))*gamma;
+%     if Y(iter) == 0
+%         Y(iter)=0.00001;
+%     end
+%     if Y(iter)*Y(iter)+beta*beta-b*b<0
+%         TH3_TH(iter)=atan2(0,b)-atan2(Y(iter),beta);
+%     else
+%         TH3_TH(iter)=atan2(sqrt(Y(iter)*Y(iter)+beta*beta-b*b),b)-atan2(Y(iter),beta);
+%     end
+% 
+%     if TH3_TH(iter)>pi/2
+%         TH3_TH(iter)=pi/2;
+%     elseif TH3_TH(iter)<-pi/2
+%         TH3_TH(iter)=-pi/2;
+%     end
+% 
+%     TH4_TH(iter)=TH4_TH(iter)+pi/4;
+% 
+%     %Index device angle
+%     mag=sqrt(data3(iter,I1*3+1)^2+data3(iter,I1*3+2)^2+data3(iter,I1*3+3)^2);
+%     a=data3(iter,I1*3+1)/mag;
+%     b=data3(iter,I1*3+2)/mag;
+% 
+%     X=atan2(gamma,alpha);
+%     if alpha*alpha+gamma*gamma-a*a>0
+%         TH1(iter)=atan2(sqrt(alpha*alpha+gamma*gamma-a*a),a)-X;
+%     else
+%         TH1(iter)=atan2(0,a)-X;
+%     end
+% 
+%     if TH1(iter)>pi/2
+%         TH1(iter)=pi/2;
+%     elseif TH1(iter)<-pi/2
+%         TH1(iter)=-pi/2;
+%     end
+% 
+%     Y(iter)=-sin(TH1(iter))*alpha+cos(TH1(iter))*gamma;
+%     if Y(iter)*Y(iter)+beta*beta-b*b<0
+%         TH2(iter)=atan2(b,0)-atan2(beta,Y(iter));
+%     else
+%         TH2(iter)=atan2(b,sqrt(Y(iter)*Y(iter)+beta*beta-b*b))-atan2(beta,Y(iter));
+%     end
+% 
+%     if TH2(iter)>pi/2
+%         TH2(iter)=pi/2;
+%     elseif TH2(iter)<-pi/2
+%         TH2(iter)=-pi/2;
+%     end
+% 
+%     
+%     mag=sqrt(data3(iter,I2*3+1)^2+data3(iter,I2*3+2)^2+data3(iter,I2*3+3)^2);
+%     a=data3(iter,I2*3+1)/mag;
+%     b=data3(iter,I2*3+2)/mag;
+% 
+%     X=atan2(alpha,gamma);
+%     if alpha*alpha+gamma*gamma-a*a>0
+%         TH4(iter)=atan2(a,sqrt(alpha*alpha+gamma*gamma-a*a))-X;
+%     else
+%         TH4(iter)=atan2(a,0)-X;
+%     end
+% 
+%     if TH4(iter)>pi/2
+%         TH4(iter)=pi/2;
+%     elseif TH4(iter)<-pi/2
+%         TH4(iter)=-pi/2;
+%     end
+% 
+% 
+%     Y(iter)=-sin(TH4(iter))*alpha+cos(TH4(iter))*gamma;
+%     if Y(iter) == 0
+%         Y(iter)=0.00001;
+%     end
+%     if Y(iter)*Y(iter)+beta*beta-b*b<0
+%         TH3(iter)=atan2(0,b)-atan2(Y(iter),beta);
+%     else
+%         TH3(iter)=atan2(sqrt(Y(iter)*Y(iter)+beta*beta-b*b),b)-atan2(Y(iter),beta);
+%     end
+% 
+%     if TH3(iter)>pi/2
+%         TH3(iter)=pi/2;
+%     elseif TH3(iter)<-pi/2
+%         TH3(iter)=-pi/2;
+%     end
+% 
+%     TH4(iter)=TH4(iter)+pi/4;
+% 
+%     A1_TH=q_TH_double(1); B1_TH=q_TH_double(2); C1_TH=q_TH_double(3); D1_TH=q_TH_double(4);
+%     A2_TH=q_TH_double(5); B2_TH=TH1_TH(iter); C2_TH=q_TH_double(6); D2_TH=q_TH_double(7);
+%     A3_TH=q_TH_double(8); B3_TH=TH2_TH(iter); C3_TH=l2_TH; D3_TH=0;
+%     A4_TH=0; B4_TH=-pi/2; C4_TH=l3_TH; D4_TH=q_TH_double(9);
+%     A5_TH=q_TH_double(10); B5_TH=TH3_TH(iter); C5_TH=q_TH_double(11); D5_TH=q_TH_double(12);
+%     A6_TH=q_TH_double(13); B6_TH=TH4_TH(iter); C6_TH=l5_TH; D6_TH=0;
+%     A7_TH=q_TH_double(14); B7_TH=q_TH_double(15); C7_TH=q_TH_double(16); D7_TH=q_TH_double(17);
+%     A8_TH=l7_TH; B8_TH=pi/2; C8_TH=l8_TH; D8_TH=0; A0_TH=q_TH_double(18); B0_TH=q_TH_double(19); C0_TH=q_TH_double(20); D0_TH=q_TH_double(21); E0_TH=q_TH_double(22); F0_TH=q_TH_double(23);
+% 
+%     A1=q_double(1); B1=q_double(2); C1=q_double(3); D1=q_double(4);
+%     A2=q_double(5); B2=TH1(iter); C2=q_double(6); D2=q_double(7);
+%     A3=q_double(8); B3=TH2(iter); C3=l2; D3=0;
+%     A4=0; B4=-pi/2; C4=l3; D4=q_double(9);
+%     A5=q_double(10); B5=TH3(iter); C5=q_double(11); D5=q_double(12);
+%     A6=q_double(13); B6=TH4(iter); C6=l5; D6=0;
+%     A7=q_double(14); B7=q_double(15); C7=q_double(16); D7=q_double(17);
+%     A8=l7; B8=pi/2; C8=l8; D8=0;
+% 
+%     Joint7_TH=  subs(Joint7Ref_TH);
+%     Joint7_TH = vpa(Joint7_TH);
+%     Joint7= subs(Joint7Ref);
+%     Joint7 = vpa(Joint7);
+%     
+%     for i=1:iteration
+%         
+%         error=Joint7_TH-Joint7;
+%         
+%         JacobianMat=subs(JacobianMatRef);
+%         %JacobianMat=double(JacobianMat);
+% 
+%         dq_=(JacobianMat*JacobianMat'+lambda*eye(3))\error;
+%         dq=JacobianMat'*dq_;
+%         q_double=subs(qRef);
+%         q_double=vpa(q_double+dq);
+% 
+%         A1=q_double(1); B1=q_double(2); C1=q_double(3); D1=q_double(4);
+%         A2=q_double(5); C2=q_double(6); D2=q_double(7);
+%         A3=q_double(8); C3=l2; D3=0;
+%         A4=0; B4=-pi/2; C4=l3; D4=q_double(9);
+%         A5=q_double(10); C5=q_double(11); D5=q_double(12);
+%         A6=q_double(13); C6=l5; D6=0;
+%         A7=q_double(14); B7=q_double(15); C7=q_double(16); D7=q_double(17);
+%         A8=l7; B8=pi/2; C8=l8; D8=0;
+%     
+%         Joint7=subs(Joint7Ref);
+%         Joint7=vpa(Joint7);
+%     end
+% end
+% DHoff=[subs(q_double) subs(q_TH_double) subs(q_MI_double)];
+% 
+% for iter=500:500:2000
+%     mag=sqrt(data3(iter,T1*3+1)^2+data3(iter,T1*3+2)^2+data3(iter,T1*3+3)^2);
+%     a=data3(iter,T1*3+1)/mag;
+%     b=data3(iter,T1*3+2)/mag;
+% 
+%     X=atan2(gamma,alpha);
+%     if alpha*alpha+gamma*gamma-a*a>0
+%         TH1_TH(iter)=atan2(sqrt(alpha*alpha+gamma*gamma-a*a),a)-X;
+%     else
+%         TH1_TH(iter)=atan2(0,a)-X;
+%     end
+% 
+%     if TH1_TH(iter)>pi/2
+%         TH1_TH(iter)=pi/2;
+%     elseif TH1_TH(iter)<-pi/2
+%         TH1_TH(iter)=-pi/2;
+%     end
+% 
+%     Y(iter)=sin(TH1_TH(iter))*alpha+cos(TH1_TH(iter))*gamma;
+%     if Y(iter)*Y(iter)+beta*beta-b*b<0
+%         TH2_TH(iter)=atan2(b,0)-atan2(beta,Y(iter));
+%     else
+%         TH2_TH(iter)=atan2(b,sqrt(Y(iter)*Y(iter)+beta*beta-b*b))-atan2(beta,Y(iter));
+%     end
+% 
+%     if TH2_TH(iter)>pi/2
+%         TH2_TH(iter)=pi/2;
+%     elseif TH2_TH(iter)<-pi/2
+%         TH2_TH(iter)=-pi/2;
+%     end
+% 
+%     
+%     mag=sqrt(data3(iter,T2*3+1)^2+data3(iter,T2*3+2)^2+data3(iter,T2*3+3)^2);
+%     a=data3(iter,T2*3+1)/mag;
+%     b=data3(iter,T2*3+2)/mag;
+% 
+%     X=atan2(alpha,gamma);
+%     if alpha*alpha+gamma*gamma-a*a>0
+%         TH4_TH(iter)=atan2(a,sqrt(alpha*alpha+gamma*gamma-a*a))-X;
+%     else
+%         TH4_TH(iter)=atan2(a,0)-X;
+%     end
+% 
+%     if TH4_TH(iter)>pi/2
+%         TH4_TH(iter)=pi/2;
+%     elseif TH4_TH(iter)<-pi/2
+%         TH4_TH(iter)=-pi/2;
+%     end
+% 
+%     Y(iter)=-sin(TH4_TH(iter))*alpha+cos(TH4_TH(iter))*gamma;
+%     if Y(iter) == 0
+%         Y(iter)=0.00001;
+%     end
+%     if Y(iter)*Y(iter)+beta*beta-b*b<0
+%         TH3_TH(iter)=atan2(0,b)-atan2(Y(iter),beta);
+%     else
+%         TH3_TH(iter)=atan2(sqrt(Y(iter)*Y(iter)+beta*beta-b*b),b)-atan2(Y(iter),beta);
+%     end
+% 
+%     if TH3_TH(iter)>pi/2
+%         TH3_TH(iter)=pi/2;
+%     elseif TH3_TH(iter)<-pi/2
+%         TH3_TH(iter)=-pi/2;
+%     end
+% 
+%     TH4_TH(iter)=TH4_TH(iter)+pi/4;
+% 
+%     TH1_TH(iter)=TH1_TH(iter)-off_TH1_TH;
+%     TH2_TH(iter)=TH2_TH(iter)-off_TH2_TH;
+%     TH3_TH(iter)=TH3_TH(iter)-off_TH3_TH;
+%     TH4_TH(iter)=TH4_TH(iter)-off_TH4_TH;
+%     
+%     mag=sqrt(data3(iter,I1*3+1)^2+data3(iter,I1*3+2)^2+data3(iter,I1*3+3)^2);
+%     a=data3(iter,I1*3+1)/mag;
+%     b=data3(iter,I1*3+2)/mag;
+% 
+%     X=atan2(gamma,alpha);
+%     if alpha*alpha+gamma*gamma-a*a>0
+%         TH1(iter)=atan2(sqrt(alpha*alpha+gamma*gamma-a*a),a)-X;
+%     else
+%         TH1(iter)=atan2(0,a)-X;
+%     end
+% 
+%     if TH1(iter)>pi/2
+%         TH1(iter)=pi/2;
+%     elseif TH1(iter)<-pi/2
+%         TH1(iter)=-pi/2;
+%     end
+% 
+%     Y(iter)=-sin(TH1(iter))*alpha+cos(TH1(iter))*gamma;
+%     if Y(iter)*Y(iter)+beta*beta-b*b<0
+%         TH2(iter)=atan2(b,0)-atan2(beta,Y(iter));
+%     else
+%         TH2(iter)=atan2(b,sqrt(Y(iter)*Y(iter)+beta*beta-b*b))-atan2(beta,Y(iter));
+%     end
+% 
+%     if TH2(iter)>pi/2
+%         TH2(iter)=pi/2;
+%     elseif TH2(iter)<-pi/2
+%         TH2(iter)=-pi/2;
+%     end
+% 
+%     
+%     mag=sqrt(data3(iter,I2*3+1)^2+data3(iter,I2*3+2)^2+data3(iter,I2*3+3)^2);
+%     a=data3(iter,I2*3+1)/mag;
+%     b=data3(iter,I2*3+2)/mag;
+% 
+%     X=atan2(alpha,gamma);
+%     if alpha*alpha+gamma*gamma-a*a>0
+%         TH4(iter)=atan2(a,sqrt(alpha*alpha+gamma*gamma-a*a))-X;
+%     else
+%         TH4(iter)=atan2(a,0)-X;
+%     end
+% 
+%     if TH4(iter)>pi/2
+%         TH4(iter)=pi/2;
+%     elseif TH4(iter)<-pi/2
+%         TH4(iter)=-pi/2;
+%     end
+% 
+% 
+%     Y(iter)=-sin(TH4(iter))*alpha+cos(TH4(iter))*gamma;
+%     if Y(iter) == 0
+%         Y(iter)=0.00001;
+%     end
+%     if Y(iter)*Y(iter)+beta*beta-b*b<0
+%         TH3(iter)=atan2(0,b)-atan2(Y(iter),beta);
+%     else
+%         TH3(iter)=atan2(sqrt(Y(iter)*Y(iter)+beta*beta-b*b),b)-atan2(Y(iter),beta);
+%     end
+% 
+%     if TH3(iter)>pi/2
+%         TH3(iter)=pi/2;
+%     elseif TH3(iter)<-pi/2
+%         TH3(iter)=-pi/2;
+%     end
+% 
+%     TH4(iter)=TH4(iter)+pi/4;
+% 
+%     TH1(iter)=TH1(iter)-off_TH1;
+%     TH2(iter)=TH2(iter)-off_TH2;
+%     TH3(iter)=TH3(iter)-off_TH3;
+%     TH4(iter)=TH4(iter)-off_TH4;
+%     
+%     A1_TH=q_TH_double(1); B1_TH=q_TH_double(2); C1_TH=q_TH_double(3); D1_TH=q_TH_double(4);
+%     A2_TH=q_TH_double(5); B2_TH=TH1_TH(iter); C2_TH=q_TH_double(6); D2_TH=q_TH_double(7);
+%     A3_TH=q_TH_double(8); B3_TH=TH2_TH(iter); C3_TH=l2_TH; D3_TH=0;
+%     A4_TH=0; B4_TH=-pi/2; C4_TH=l3_TH; D4_TH=q_TH_double(9);
+%     A5_TH=q_TH_double(10); B5_TH=TH3_TH(iter); C5_TH=q_TH_double(11); D5_TH=q_TH_double(12);
+%     A6_TH=q_TH_double(13); B6_TH=TH4_TH(iter); C6_TH=l5_TH; D6_TH=0;
+%     A7_TH=q_TH_double(14); B7_TH=q_TH_double(15); C7_TH=q_TH_double(16); D7_TH=q_TH_double(17);
+%     A8_TH=l7_TH; B8_TH=pi/2; C8_TH=l8_TH; D8_TH=0; A0_TH=q_TH_double(18); B0_TH=q_TH_double(19); C0_TH=q_TH_double(20); D0_TH=q_TH_double(21); E0_TH=q_TH_double(22); F0_TH=q_TH_double(23);
+% 
+%     A1=q_double(1); B1=q_double(2); C1=q_double(3); D1=q_double(4);
+%     A2=q_double(5); B2=TH1(iter); C2=q_double(6); D2=q_double(7);
+%     A3=q_double(8); B3=TH2(iter); C3=l2; D3=0;
+%     A4=0; B4=-pi/2; C4=l3; D4=q_double(9);
+%     A5=q_double(10); B5=TH3(iter); C5=q_double(11); D5=q_double(12);
+%     A6=q_double(13); B6=TH4(iter); C6=l5; D6=0;
+%     A7=q_double(14); B7=q_double(15); C7=q_double(16); D7=q_double(17);
+%     A8=l7; B8=pi/2; C8=l8; D8=0;
+%     
+%     Joint7_TH=  subs(Joint7Ref_TH);
+%     Joint7_TH = vpa(Joint7_TH);
+%     Joint7= subs(Joint7Ref);
+%     Joint7 = vpa(Joint7);
+%     
+%     Results(:,iter/500)=Joint7_TH-Joint7;
+% end
+% 
+% for iter=2500:500:4000
+%     
+%     
+%      mag=sqrt(data3(iter,T1*3+1)^2+data3(iter,T1*3+2)^2+data3(iter,T1*3+3)^2);
+%     a=data3(iter,T1*3+1)/mag;
+%     b=data3(iter,T1*3+2)/mag;
+%     
+% 
+%     X=atan2(gamma,alpha);
+%     if alpha*alpha+gamma*gamma-a*a>0
+%         TH1_TH(iter)=atan2(sqrt(alpha*alpha+gamma*gamma-a*a),a)-X;
+%     else
+%         TH1_TH(iter)=atan2(0,a)-X;
+%     end
+% 
+%     if TH1_TH(iter)>pi/2
+%         TH1_TH(iter)=pi/2;
+%     elseif TH1_TH(iter)<-pi/2
+%         TH1_TH(iter)=-pi/2;
+%     end
+% 
+%     Y(iter)=sin(TH1_TH(iter))*alpha+cos(TH1_TH(iter))*gamma;
+%     if Y(iter)*Y(iter)+beta*beta-b*b<0
+%         TH2_TH(iter)=atan2(b,0)-atan2(beta,Y(iter));
+%     else
+%         TH2_TH(iter)=atan2(b,sqrt(Y(iter)*Y(iter)+beta*beta-b*b))-atan2(beta,Y(iter));
+%     end
+% 
+%     if TH2_TH(iter)>pi/2
+%         TH2_TH(iter)=pi/2;
+%     elseif TH2_TH(iter)<-pi/2
+%         TH2_TH(iter)=-pi/2;
+%     end
+% 
+%     
+%     mag=sqrt(data3(iter,T2*3+1)^2+data3(iter,T2*3+2)^2+data3(iter,T2*3+3)^2);
+%     a=data3(iter,T2*3+1)/mag;
+%     b=data3(iter,T2*3+2)/mag;
+% 
+%     X=atan2(alpha,gamma);
+%     if alpha*alpha+gamma*gamma-a*a>0
+%         TH4_TH(iter)=atan2(a,sqrt(alpha*alpha+gamma*gamma-a*a))-X;
+%     else
+%         TH4_TH(iter)=atan2(a,0)-X;
+%     end
+% 
+%     if TH4_TH(iter)>pi/2
+%         TH4_TH(iter)=pi/2;
+%     elseif TH4_TH(iter)<-pi/2
+%         TH4_TH(iter)=-pi/2;
+%     end
+% 
+%     Y(iter)=-sin(TH4_TH(iter))*alpha+cos(TH4_TH(iter))*gamma;
+%     if Y(iter) == 0
+%         Y(iter)=0.00001;
+%     end
+%     if Y(iter)*Y(iter)+beta*beta-b*b<0
+%         TH3_TH(iter)=atan2(0,b)-atan2(Y(iter),beta);
+%     else
+%         TH3_TH(iter)=atan2(sqrt(Y(iter)*Y(iter)+beta*beta-b*b),b)-atan2(Y(iter),beta);
+%     end
+% 
+%     if TH3_TH(iter)>pi/2
+%         TH3_TH(iter)=pi/2;
+%     elseif TH3_TH(iter)<-pi/2
+%         TH3_TH(iter)=-pi/2;
+%     end
+% 
+%     TH4_TH(iter)=TH4_TH(iter)+pi/4;
+% 
+%     
+%     
+% 
+%     TH1_MI(iter)=TH1_MI(iter)-off_TH1_MI;
+%     TH2_MI(iter)=TH2_MI(iter)-off_TH2_MI;
+%     TH3_MI(iter)=TH3_MI(iter)-off_TH3_MI;
+%     TH4_MI(iter)=TH4_MI(iter)-off_TH4_MI;
+%     
+%     A1_TH=q_TH_double(1); B1_TH=q_TH_double(2); C1_TH=q_TH_double(3); D1_TH=q_TH_double(4);
+%     A2_TH=q_TH_double(5); B2_TH=TH1_TH(iter); C2_TH=q_TH_double(6); D2_TH=q_TH_double(7);
+%     A3_TH=q_TH_double(8); B3_TH=TH2_TH(iter); C3_TH=l2_TH; D3_TH=0;
+%     A4_TH=0; B4_TH=-pi/2; C4_TH=l3_TH; D4_TH=q_TH_double(9);
+%     A5_TH=q_TH_double(10); B5_TH=TH3_TH(iter); C5_TH=q_TH_double(11); D5_TH=q_TH_double(12);
+%     A6_TH=q_TH_double(13); B6_TH=TH4_TH(iter); C6_TH=l5_TH; D6_TH=0;
+%     A7_TH=q_TH_double(14); B7_TH=q_TH_double(15); C7_TH=q_TH_double(16); D7_TH=q_TH_double(17);
+%     A8_TH=l7_TH; B8_TH=pi/2; C8_TH=l8_TH; D8_TH=0; A0_TH=q_TH_double(18); B0_TH=q_TH_double(19); C0_TH=q_TH_double(20); D0_TH=q_TH_double(21); E0_TH=q_TH_double(22); F0_TH=q_TH_double(23);
+%     
+%     A1_MI=q_MI_double(1); B1_MI=q_MI_double(2); C1_MI=q_MI_double(3); D1_MI=q_MI_double(4);
+%     A2_MI=q_MI_double(5); B2_MI=TH1_MI(iter); C2_MI=q_MI_double(6); D2_MI=q_MI_double(7);
+%     A3_MI=q_MI_double(8); B3_MI=TH2_MI(iter); C3_MI=l2_MI; D3_MI=0;
+%     A4_MI=0; B4_MI=-pi/2; C4_MI=l3_MI; D4_MI=q_MI_double(9);
+%     A5_MI=q_MI_double(10); B5_MI=TH3_MI(iter); C5_MI=q_MI_double(11); D5_MI=q_MI_double(12);
+%     A6_MI=q_MI_double(13); B6_MI=TH4_MI(iter); C6_MI=l5_MI; D6_MI=0;
+%     A7_MI=q_MI_double(14); B7_MI=q_MI_double(15); C7_MI=q_MI_double(16); D7_MI=q_MI_double(17);
+%     A8_MI=l7_MI; B8_MI=pi/2; C8_MI=l8_MI; D8_MI=0; A0_MI=q_MI_double(18); B0_MI=q_MI_double(19); C0_MI=q_MI_double(20); D0_MI=q_MI_double(21); E0_MI=q_MI_double(22); F0_MI=q_MI_double(23);
+%  
+%     Joint7_TH=  subs(Joint7Ref_TH);
+%     Joint7_TH = vpa(Joint7_TH);
+%     Joint7_MI= subs(Joint7Ref_MI);
+%     Joint7_MI = vpa(Joint7_MI);
+%     
+%     Results(:,iter/500)=Joint7_TH-Joint7_MI;
+% end
+% 
+% DHinit-double(DHoff)

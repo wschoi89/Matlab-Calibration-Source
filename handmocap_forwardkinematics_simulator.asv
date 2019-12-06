@@ -9,10 +9,10 @@ disp('start')
 % angle_TH2 = -30:20:30;
 % angle_TH3 = -30:20:30;
 % angle_TH4 =  -30:20:30;
-angle_TH1 = -60:15:60;
-angle_TH2 = -60:15:60;
-angle_TH3 = -60:15:60;
-angle_TH4 = -60:15:60;
+angle_TH1 = -20:10:20;
+angle_TH2 = -60:10:60;
+angle_TH3 = -60:10:60;
+angle_TH4 = -60:10:60;
 % angle_TH1 = -0:10:0;
 % angle_TH2 = -0:10:0;
 % angle_TH3 = -0:10:0;
