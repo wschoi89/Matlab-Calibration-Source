@@ -1,7 +1,0 @@
-iteration    : diff_x	 diff_y	 diff_z	 distance
-iteration 1 : -2.459iteration -1.985268e+00 : -5.513iteration 6.354432e+00 : iteration    : diff_x	 diff_y	 diff_z	 distance
-iteration 2 : -0.340iteration 6.636513e-01 : -0.091iteration 7.512176e-01 : iteration    : diff_x	 diff_y	 diff_z	 distance
-iteration 3 : -0.105iteration 3.152530e-01 : 0.002iteration 3.321663e-01 : iteration    : diff_x	 diff_y	 diff_z	 distance
-iteration 4 : -0.041iteration 1.275773e-01 : 0.001iteration 1.340854e-01 : iteration    : diff_x	 diff_y	 diff_z	 distance
-iteration 5 : -0.017iteration 5.114601e-02 : 0.000iteration 5.376665e-02 : iteration    : diff_x	 diff_y	 diff_z	 distance
-iteration 1 : -0.993iteration 1.935686e-01 : -0.923iteration 1.369209e+00 : 
