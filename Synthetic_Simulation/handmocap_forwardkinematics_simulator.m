@@ -1,41 +1,53 @@
 %hand mocap kinematics simulator
+
 clear
 clc
 
 disp('start')
 
-%angle range for forward kinematics simulator
-% angle_TH1 = -20:20:20;
-% angle_TH2 = -30:20:30;
-% angle_TH3 = -30:20:30;
-% angle_TH4 =  -30:20:30;
-angle_TH1 = -60:15:60;
-angle_TH2 = -60:15:60;
-angle_TH3 = -60:15:60;
-angle_TH4 = -60:15:60;
-% angle_TH1 = -0:10:0;
-% angle_TH2 = -0:10:0;
-% angle_TH3 = -0:10:0;
-% angle_TH4 =  -0:10:0;
+% flag for whether it visualize kinematics graph or not
+plot_visualization = true;
+
+% angle range for forward kinematics simulator
+
+angle_TH1 = -20:40:-20;
+angle_TH2 = 0:30:0;
+angle_TH3 = 0:30:0;
+angle_TH4 = 0:30:0;
+
+% set offset for DH parameters and sensor rotation
+
+DHparameter_offset = zeros(7, 4);
+
+angle_offset = [10, 10, 10, 10];
+
+DHparameter_offset(1,1)=3.0;DHparameter_offset(1,2)=0.3;    DHparameter_offset(1,3)=3.0;     DHparameter_offset(1,4)=0.3;
+DHparameter_offset(2,1)=3.0;                              DHparameter_offset(2,3)=3.0;   DHparameter_offset(2,4)=0.3;
+DHparameter_offset(3,1)=2.0;                              DHparameter_offset(3,3)=2.0;   DHparameter_offset(3,4)=0.2;
+
+DHparameter_offset(5,1)=3.0;                              DHparameter_offset(5,3)=3.0;   DHparameter_offset(5,4)=0.3;
+DHparameter_offset(6,1)=2.0;                              DHparameter_offset(6,3)=2.0;   DHparameter_offset(6,4)=0.2;
+
 
 
 %iteration number
 count=1;
 
-num_row = length(angle_TH1)*length(angle_TH2)*length(angle_TH3)*length(angle_TH4);
+% the number of iteration for simulation
+num_data = length(angle_TH1)*length(angle_TH2)*length(angle_TH3)*length(angle_TH4);
 
 %data consists of 14 columns(angle(4), offset angle(4), tip position(cad)(3), tip position(reflecting offset)(3))
-data = zeros(num_row, 14);
+data = zeros(num_data, 14);
+
 for i=1:length(angle_TH1)
     for j=1:length(angle_TH2)
         for k=1:length(angle_TH3)
             for m=1:length(angle_TH4)
             
                 %create origin coordinate
-%                 figure
-                %full screen 
-                set(gcf, 'Position', get(0, 'Screensize'));
-                set(gca,'DataAspectRatio',[1 1 1])
+%               %full screen 
+%                 set(gcf, 'Position', get(0, 'Screensize'));
+%                 set(gca,'DataAspectRatio',[1 1 1])
                
                 %load link lengths for thumb, index, and middle devices
                 arr_links = loadLinkLength();
@@ -45,20 +57,20 @@ for i=1:length(angle_TH1)
                 
                 % initialize offset angle as zeros for non-offset forward
                 % kinematics plot
-                angle_offset = [0, 0, 0, 0];
+                
 
                 %convert degree to radian
                 angle_device = angle_device*pi/180;
-                angle_offset = angle_offset*pi/180;
+                
 
                 %DH table
-                DHRef = [0 0                               0             -pi/2;
-                         0 angle_device(1)+angle_offset(1) arr_links(1,1) pi/2;
-                         0 angle_device(2)+angle_offset(2) arr_links(2,1) 0;
-                         0 -pi/2                           arr_links(3,1) 0;
-                         0 angle_device(3)+angle_offset(3) arr_links(4,1) 0;
-                         0 angle_device(4)+angle_offset(4) arr_links(5,1) 0;
-                         0 -pi/2                           arr_links(6,1) 0;];
+                DHRef = [0 0               0             -pi/2;
+                         0 angle_device(1) arr_links(1,1) pi/2;
+                         0 angle_device(2) arr_links(2,1) 0;
+                         0 -pi/2           arr_links(3,1) 0;
+                         0 angle_device(3) arr_links(4,1) 0;
+                         0 angle_device(4) arr_links(5,1) 0;
+                         0 -pi/2           arr_links(6,1) 0;];
 
                 Origin = eye(4);
                 %transformation matrix
@@ -80,74 +92,75 @@ for i=1:length(angle_TH1)
                 frame6 = frame5*R56; pos_frame6 = [frame6(1,4);frame6(2,4);frame6(3,4);];
                 frame7 = frame6*R67; pos_frame7 = [frame7(1,4);frame7(2,4);frame7(3,4);];
 
+                
                 % upper figure for non-offset forward kinematics plot(X-Y)
-%                 subplot(2,1,1)
-%                 %set origin coordiante using RGB 
-%                 plot3([0 10],[0 0],[0 0],'r.-','LineWidth', 2);
-%                 hold on
-%                 plot3([0 0],[0 10],[0 0],'g.-', 'LineWidth', 2);
-%                 hold on
-%                 plot3([0 0],[0 0],[0 10],'b.-', 'LineWidth', 2);
-%                 hold on
-%                 % plot links for forward kinematics
-%                 plot3([pos_frame1(1) pos_frame2(1)],[pos_frame1(2) pos_frame2(2)],[pos_frame1(3) pos_frame2(3)],'black.-', 'LineWidth', 2);
-%                 hold on
-%                 plot3([pos_frame2(1) pos_frame3(1)],[pos_frame2(2) pos_frame3(2)],[pos_frame2(3) pos_frame3(3)],'black.-', 'LineWidth', 2);
-%                 hold on
-%                 plot3([pos_frame3(1) pos_frame4(1)],[pos_frame3(2) pos_frame4(2)],[pos_frame3(3) pos_frame4(3)],'black.-', 'LineWidth', 2);
-%                 hold on
-%                 plot3([pos_frame4(1) pos_frame5(1)],[pos_frame4(2) pos_frame5(2)],[pos_frame4(3) pos_frame5(3)],'black.-', 'LineWidth', 2);
-%                 hold on
-%                 plot3([pos_frame5(1) pos_frame6(1)],[pos_frame5(2) pos_frame6(2)],[pos_frame5(3) pos_frame6(3)],'black.-', 'LineWidth', 2);
-%                 hold on
-%                 plot3([pos_frame6(1) pos_frame7(1)],[pos_frame6(2) pos_frame7(2)],[pos_frame6(3) pos_frame7(3)],'black.-', 'LineWidth', 2);
-%                 hold on
-%                 
-%                 % rotate view for X-Y plane
-%                 view(0, 90);
-% 
-%                 % upper figure for non-offset forward kinematics plot(X-Z)
-%                 subplot(2,1,2)
-%                 %set origin coordinate
-%                 plot3([0 10],[0 0],[0 0],'r.-');
-%                 hold on
-%                 plot3([0 0],[0 10],[0 0],'g.-');
-%                 hold on
-%                 plot3([0 0],[0 0],[0 10],'b.-');
-%                 hold on
-%                 plot3([pos_frame1(1) pos_frame2(1)],[pos_frame1(2) pos_frame2(2)],[pos_frame1(3) pos_frame2(3)],'black.-', 'LineWidth', 2);
-%                 hold on
-%                 plot3([pos_frame2(1) pos_frame3(1)],[pos_frame2(2) pos_frame3(2)],[pos_frame2(3) pos_frame3(3)],'black.-', 'LineWidth', 2);
-%                 hold on
-%                 plot3([pos_frame3(1) pos_frame4(1)],[pos_frame3(2) pos_frame4(2)],[pos_frame3(3) pos_frame4(3)],'black.-', 'LineWidth', 2);
-%                 hold on
-%                 plot3([pos_frame4(1) pos_frame5(1)],[pos_frame4(2) pos_frame5(2)],[pos_frame4(3) pos_frame5(3)],'black.-', 'LineWidth', 2);
-%                 hold on
-%                 plot3([pos_frame5(1) pos_frame6(1)],[pos_frame5(2) pos_frame6(2)],[pos_frame5(3) pos_frame6(3)],'black.-', 'LineWidth', 2);
-%                 hold on
-%                 plot3([pos_frame6(1) pos_frame7(1)],[pos_frame6(2) pos_frame7(2)],[pos_frame6(3) pos_frame7(3)],'black.-', 'LineWidth', 2);
-%                 hold on
-%                 
-%                 view(0, -180);title({'X-Z', strcat('angle : ', num2str(angle_device(1)*180/pi), ', ', num2str(angle_device(2)*180/pi), ', ', num2str(angle_device(3)*180/pi), ', ', num2str(angle_device(4)*180/pi))});
+                
+                if plot_visualization == true
+                    
+                    upper_axes = subplot(2,1,1);
+                    %set origin coordiante using RGB 
+                    plot3([0 10],[0 0],[0 0],'r.-','LineWidth', 2);
+                    hold on
+                    plot3([0 0],[0 10],[0 0],'g.-', 'LineWidth', 2);
+                    hold on
+                    plot3([0 0],[0 0],[0 10],'b.-', 'LineWidth', 2);
+                    hold on
+                    
+                    % plot links for forward kinematics
+                    plot3([pos_frame1(1) pos_frame2(1)],[pos_frame1(2) pos_frame2(2)],[pos_frame1(3) pos_frame2(3)],'black.-', 'LineWidth', 2);
+                    hold on
+                    plot3([pos_frame2(1) pos_frame3(1)],[pos_frame2(2) pos_frame3(2)],[pos_frame2(3) pos_frame3(3)],'black.-', 'LineWidth', 2);
+                    hold on
+                    plot3([pos_frame3(1) pos_frame4(1)],[pos_frame3(2) pos_frame4(2)],[pos_frame3(3) pos_frame4(3)],'black.-', 'LineWidth', 2);
+                    hold on
+                    plot3([pos_frame4(1) pos_frame5(1)],[pos_frame4(2) pos_frame5(2)],[pos_frame4(3) pos_frame5(3)],'black.-', 'LineWidth', 2);
+                    hold on
+                    plot3([pos_frame5(1) pos_frame6(1)],[pos_frame5(2) pos_frame6(2)],[pos_frame5(3) pos_frame6(3)],'black.-', 'LineWidth', 2);
+                    hold on
+                    endEffector_noOffset_xz= plot3([pos_frame6(1) pos_frame7(1)],[pos_frame6(2) pos_frame7(2)],[pos_frame6(3) pos_frame7(3)],'black.-', 'LineWidth', 2);
+                    hold on
+                    
+                    
+                    % rotate view for X-Y plane
+                    view(0, 90);
+
+                    % upper figure for non-offset forward kinematics plot(X-Z)
+                    lower_axes=subplot(2,1,2);
+                    %set origin coordinate
+                    plot3([0 10],[0 0],[0 0],'r.-');
+                    hold on
+                    plot3([0 0],[0 10],[0 0],'g.-');
+                    hold on
+                    plot3([0 0],[0 0],[0 10],'b.-');
+                    hold on
+                  
+                    plot3([pos_frame1(1) pos_frame2(1)],[pos_frame1(2) pos_frame2(2)],[pos_frame1(3) pos_frame2(3)],'black.-', 'LineWidth', 2);
+                    hold on
+                    plot3([pos_frame2(1) pos_frame3(1)],[pos_frame2(2) pos_frame3(2)],[pos_frame2(3) pos_frame3(3)],'black.-', 'LineWidth', 2);
+                    hold on
+                    plot3([pos_frame3(1) pos_frame4(1)],[pos_frame3(2) pos_frame4(2)],[pos_frame3(3) pos_frame4(3)],'black.-', 'LineWidth', 2);
+                    hold on
+                    plot3([pos_frame4(1) pos_frame5(1)],[pos_frame4(2) pos_frame5(2)],[pos_frame4(3) pos_frame5(3)],'black.-', 'LineWidth', 2);
+                    hold on
+                    plot3([pos_frame5(1) pos_frame6(1)],[pos_frame5(2) pos_frame6(2)],[pos_frame5(3) pos_frame6(3)],'black.-', 'LineWidth', 2);
+                    hold on
+                    endEffector_noOffset_xy=plot3([pos_frame6(1) pos_frame7(1)],[pos_frame6(2) pos_frame7(2)],[pos_frame6(3) pos_frame7(3)],'black.-', 'LineWidth', 2);
+                    hold on
+                    
+                    view(0, -180);
+%                     title({'X-Z', strcat('angle : ', num2str(angle_device(1)*180/pi), ', ', num2str(angle_device(2)*180/pi), ', ', num2str(angle_device(3)*180/pi), ', ', num2str(angle_device(4)*180/pi))});
+                end
                 data(count, 9:11) = pos_frame7;
                 
                 
-                %plot offset-reflecting link position
-                %hand mocap device angle for one finger
+                
+                
+                
+                %% plot offset-reflecting link position
+                  %hand mocap device angle for one finger
 
                 angle_device = [angle_TH1(i), angle_TH2(j), angle_TH3(k), angle_TH4(m)];
-                angle_offset = [10, 10, 10, 10];
-                DHparameter_offset = zeros(7, 4);
                 
-                 DHparameter_offset(1,1)=3;DHparameter_offset(1,2)=0.3;  DHparameter_offset(1,3)=3;     DHparameter_offset(1,4)=0.3;
-                DHparameter_offset(2,1)=3.0;                              DHparameter_offset(2,3)=3.0;     DHparameter_offset(2,4)=0.3;
-                DHparameter_offset(3,1)=2.0;                              DHparameter_offset(3,3)=2.0;     DHparameter_offset(3,4)=0.2;
-
-
-                DHparameter_offset(5,1)=3.0;                            DHparameter_offset(5,3)=3.0;   DHparameter_offset(5,4)=0.3;
-                DHparameter_offset(6,1)=2.0;                            DHparameter_offset(6,3)=2.0;   DHparameter_offset(6,4)=0.2;
-                
-
                 %convert degree to radian
                 angle_device = angle_device*pi/180;
                 angle_offset = angle_offset*pi/180;
@@ -185,58 +198,59 @@ for i=1:length(angle_TH1)
                 frame7_offset = frame6_offset*R67_offset; pos_frame7_offset = [frame7_offset(1,4);frame7_offset(2,4);frame7_offset(3,4);];
 
 
-%                 subplot(2,1,1)
-%                 %set origin coordinate
-% %                 plot3([0 10],[0 0],[0 0],'r.-');
-% %                 hold on
-% %                 plot3([0 0],[0 10],[0 0],'g.-');
-% %                 hold on
-% %                 plot3([0 0],[0 0],[0 10],'b.-');
-% %                 hold on
-%                 plot3([pos_frame1_offset(1) pos_frame2_offset(1)],[pos_frame1_offset(2) pos_frame2_offset(2)],[pos_frame1_offset(3) pos_frame2_offset(3)],'r.-', 'LineWidth', 2);
+                subplot(2,1,1)
+                %set origin coordinate
+%                 plot3([0 10],[0 0],[0 0],'r.-');
 %                 hold on
-%                 plot3([pos_frame2_offset(1) pos_frame3_offset(1)],[pos_frame2_offset(2) pos_frame3_offset(2)],[pos_frame2_offset(3) pos_frame3_offset(3)],'r.-', 'LineWidth', 2);
+%                 plot3([0 0],[0 10],[0 0],'g.-');
 %                 hold on
-%                 plot3([pos_frame3_offset(1) pos_frame4_offset(1)],[pos_frame3_offset(2) pos_frame4_offset(2)],[pos_frame3_offset(3) pos_frame4_offset(3)],'r.-', 'LineWidth', 2);
+%                 plot3([0 0],[0 0],[0 10],'b.-');
 %                 hold on
-%                 plot3([pos_frame4_offset(1) pos_frame5_offset(1)],[pos_frame4_offset(2) pos_frame5_offset(2)],[pos_frame4_offset(3) pos_frame5_offset(3)],'r.-', 'LineWidth', 2);
-%                 hold on
-%                 plot3([pos_frame5_offset(1) pos_frame6_offset(1)],[pos_frame5_offset(2) pos_frame6_offset(2)],[pos_frame5_offset(3) pos_frame6_offset(3)],'r.-', 'LineWidth', 2);
-%                 hold on
-%                 plot3([pos_frame6_offset(1) pos_frame7_offset(1)],[pos_frame6_offset(2) pos_frame7_offset(2)],[pos_frame6_offset(3) pos_frame7_offset(3)],'r.-', 'LineWidth', 2);
+                plot3([pos_frame1_offset(1) pos_frame2_offset(1)],[pos_frame1_offset(2) pos_frame2_offset(2)],[pos_frame1_offset(3) pos_frame2_offset(3)],'r.-', 'LineWidth', 2);
+                hold on
+                plot3([pos_frame2_offset(1) pos_frame3_offset(1)],[pos_frame2_offset(2) pos_frame3_offset(2)],[pos_frame2_offset(3) pos_frame3_offset(3)],'r.-', 'LineWidth', 2);
+                hold on
+                plot3([pos_frame3_offset(1) pos_frame4_offset(1)],[pos_frame3_offset(2) pos_frame4_offset(2)],[pos_frame3_offset(3) pos_frame4_offset(3)],'r.-', 'LineWidth', 2);
+                hold on
+                plot3([pos_frame4_offset(1) pos_frame5_offset(1)],[pos_frame4_offset(2) pos_frame5_offset(2)],[pos_frame4_offset(3) pos_frame5_offset(3)],'r.-', 'LineWidth', 2);
+                hold on
+                plot3([pos_frame5_offset(1) pos_frame6_offset(1)],[pos_frame5_offset(2) pos_frame6_offset(2)],[pos_frame5_offset(3) pos_frame6_offset(3)],'r.-', 'LineWidth', 2);
+                hold on
+                endEffector_Offset_xz = plot3([pos_frame6_offset(1) pos_frame7_offset(1)],[pos_frame6_offset(2) pos_frame7_offset(2)],[pos_frame6_offset(3) pos_frame7_offset(3)],'r.-', 'LineWidth', 2);
 %                 legend('Offset')
-%                 hold on
-%                 view(0, 90);
-%                 distance = sqrt(sum((pos_frame7-pos_frame7_offset).^2));
+                hold on
+                view(0, 90);
+                distance = sqrt(sum((pos_frame7-pos_frame7_offset).^2));
 %                 title({'X-Y', 'distance: ', num2str(distance), strcat('pos: ', num2str(pos_frame7(1)), ', ', num2str(pos_frame7(2)), ', ', num2str(pos_frame7(3)), strcat(', offset pos :', num2str(pos_frame7_offset(1)), ', ', num2str(pos_frame7_offset(2)), ', ', num2str(pos_frame7_offset(3))))});
-%                 
-%                 xlim([-50 200]);ylim([-200 50]);zlim([-100 100]);
-%                 
-%                 
-%                 subplot(2,1,2)
-%                 %set origin coordinate
-% %                 plot3([0 10],[0 0],[0 0],'r.-');
-% %                 hold on
-% %                 plot3([0 0],[0 10],[0 0],'g.-');
-% %                 hold on
-% %                 plot3([0 0],[0 0],[0 10],'b.-');
-% %                 hold on
-%                 plot3([pos_frame1_offset(1) pos_frame2_offset(1)],[pos_frame1_offset(2) pos_frame2_offset(2)],[pos_frame1_offset(3) pos_frame2_offset(3)],'r.-', 'LineWidth', 2);
+                
+                xlim([-50 200]);ylim([-200 50]);zlim([-100 100]);
+                
+                
+                subplot(2,1,2)
+                %set origin coordinate
+%                 plot3([0 10],[0 0],[0 0],'r.-');
 %                 hold on
-%                 plot3([pos_frame2_offset(1) pos_frame3_offset(1)],[pos_frame2_offset(2) pos_frame3_offset(2)],[pos_frame2_offset(3) pos_frame3_offset(3)],'r.-', 'LineWidth', 2);
+%                 plot3([0 0],[0 10],[0 0],'g.-');
 %                 hold on
-%                 plot3([pos_frame3_offset(1) pos_frame4_offset(1)],[pos_frame3_offset(2) pos_frame4_offset(2)],[pos_frame3_offset(3) pos_frame4_offset(3)],'r.-', 'LineWidth', 2);
+%                 plot3([0 0],[0 0],[0 10],'b.-');
 %                 hold on
-%                 plot3([pos_frame4_offset(1) pos_frame5_offset(1)],[pos_frame4_offset(2) pos_frame5_offset(2)],[pos_frame4_offset(3) pos_frame5_offset(3)],'r.-', 'LineWidth', 2);
-%                 hold on
-%                 plot3([pos_frame5_offset(1) pos_frame6_offset(1)],[pos_frame5_offset(2) pos_frame6_offset(2)],[pos_frame5_offset(3) pos_frame6_offset(3)],'r.-', 'LineWidth', 2);
-%                 hold on
-%                 plot3([pos_frame6_offset(1) pos_frame7_offset(1)],[pos_frame6_offset(2) pos_frame7_offset(2)],[pos_frame6_offset(3) pos_frame7_offset(3)],'r.-', 'LineWidth', 2);
-%                 legend('Offset')
-%                 hold on
-%                 view(0, -180);title({'offset X-Z', strcat('offset angle : ', num2str(angle_offset(1)*180/pi), ', ', num2str(angle_offset(2)*180/pi), ', ', num2str(angle_offset(3)*180/pi), ', ', num2str(angle_offset(4)*180/pi))});
-%                 % set figure axis limit
-%                 xlim([-50 200]);ylim([-200 50]);zlim([-100 100]);
+                plot3([pos_frame1_offset(1) pos_frame2_offset(1)],[pos_frame1_offset(2) pos_frame2_offset(2)],[pos_frame1_offset(3) pos_frame2_offset(3)],'r.-', 'LineWidth', 2);
+                hold on
+                plot3([pos_frame2_offset(1) pos_frame3_offset(1)],[pos_frame2_offset(2) pos_frame3_offset(2)],[pos_frame2_offset(3) pos_frame3_offset(3)],'r.-', 'LineWidth', 2);
+                hold on
+                plot3([pos_frame3_offset(1) pos_frame4_offset(1)],[pos_frame3_offset(2) pos_frame4_offset(2)],[pos_frame3_offset(3) pos_frame4_offset(3)],'r.-', 'LineWidth', 2);
+                hold on
+                plot3([pos_frame4_offset(1) pos_frame5_offset(1)],[pos_frame4_offset(2) pos_frame5_offset(2)],[pos_frame4_offset(3) pos_frame5_offset(3)],'r.-', 'LineWidth', 2);
+                hold on
+                plot3([pos_frame5_offset(1) pos_frame6_offset(1)],[pos_frame5_offset(2) pos_frame6_offset(2)],[pos_frame5_offset(3) pos_frame6_offset(3)],'r.-', 'LineWidth', 2);
+                hold on
+                endEffector_Offset_xy=plot3([pos_frame6_offset(1) pos_frame7_offset(1)],[pos_frame6_offset(2) pos_frame7_offset(2)],[pos_frame6_offset(3) pos_frame7_offset(3)],'r.-', 'LineWidth', 2);
+                hold on
+%                 legend('offset O')
+                view(0, -180);
+%                 title({'offset X-Z', strcat('offset angle : ', num2str(angle_offset(1)*180/pi), ', ', num2str(angle_offset(2)*180/pi), ', ', num2str(angle_offset(3)*180/pi), ', ', num2str(angle_offset(4)*180/pi))});
+                % set figure axis limit
+                xlim([-50 200]);ylim([-200 50]);zlim([-100 100]);
                 
 %                 saveas(gcf, strcat(num2str(count),'.jpg'));
                 data(count, 1:4) = angle_device;
@@ -245,18 +259,21 @@ for i=1:length(angle_TH1)
                 
                 count=count+1;
                 
-                
-                
-%                 subplot(2, 1, 1)
-%                 cla reset
-%                 subplot(2, 1, 2)
-%                 cla reset
+%                 
+%                 
+% %                 subplot(2, 1, 1)
+% %                 cla reset
+% %                 subplot(2, 1, 2)
+% %                 cla reset
                 
             end
         end
     end
 end
 
+legend(upper_axes, [endEffector_noOffset_xz endEffector_Offset_xz ], {'OFFSET X','OFFSET O'});
+legend(lower_axes, [endEffector_noOffset_xy endEffector_Offset_xy], {'OFFSET X','OFFSET O'});
+% endEffector_noOffset_xy
 save('matlab.mat', 'data');
 disp('end')
-close all
+% close all
