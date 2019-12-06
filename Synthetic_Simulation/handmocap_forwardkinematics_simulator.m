@@ -47,7 +47,7 @@ for i=1:length(angle_TH1)
                 %create origin coordinate
 %               %full screen 
 %                 set(gcf, 'Position', get(0, 'Screensize'));
-%                 set(gca,'DataAspectRatio',[1 1 1])
+                
                
                 %load link lengths for thumb, index, and middle devices
                 arr_links = loadLinkLength();
@@ -98,6 +98,7 @@ for i=1:length(angle_TH1)
                 if plot_visualization == true
                     
                     upper_axes = subplot(2,1,1);
+                    
                     %set origin coordiante using RGB 
                     plot3([0 10],[0 0],[0 0],'r.-','LineWidth', 2);
                     hold on
@@ -118,6 +119,23 @@ for i=1:length(angle_TH1)
                     plot3([pos_frame5(1) pos_frame6(1)],[pos_frame5(2) pos_frame6(2)],[pos_frame5(3) pos_frame6(3)],'black.-', 'LineWidth', 2);
                     hold on
                     endEffector_noOffset_xz= plot3([pos_frame6(1) pos_frame7(1)],[pos_frame6(2) pos_frame7(2)],[pos_frame6(3) pos_frame7(3)],'black.-', 'LineWidth', 2);
+                    hold on
+                    xlim([-50 200]);ylim([-200 50]);zlim([-100 100]);
+                    
+                    % plot points at joints
+                    plot3(pos_frame1(1),pos_frame1(2),pos_frame1(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [0 0 0], 'MarkerEdgeColor', [0 0 0])
+                    hold on
+                    plot3(pos_frame2(1),pos_frame2(2),pos_frame2(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [0 0 0], 'MarkerEdgeColor', [0 0 0])
+                    hold on
+                    plot3(pos_frame3(1),pos_frame3(2),pos_frame3(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [0 0 0], 'MarkerEdgeColor', [0 0 0])
+                    hold on
+                    plot3(pos_frame4(1),pos_frame4(2),pos_frame4(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [0 0 0], 'MarkerEdgeColor', [0 0 0])
+                    hold on
+                    plot3(pos_frame5(1),pos_frame5(2),pos_frame5(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [0 0 0], 'MarkerEdgeColor', [0 0 0])
+                    hold on
+                    plot3(pos_frame6(1),pos_frame6(2),pos_frame6(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [0 0 0], 'MarkerEdgeColor', [0 0 0])
+                    hold on
+                    plot3(pos_frame7(1),pos_frame7(2),pos_frame7(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [0 1 0], 'MarkerEdgeColor', [0 0 0])
                     hold on
                     
                     
@@ -147,6 +165,23 @@ for i=1:length(angle_TH1)
                     endEffector_noOffset_xy=plot3([pos_frame6(1) pos_frame7(1)],[pos_frame6(2) pos_frame7(2)],[pos_frame6(3) pos_frame7(3)],'black.-', 'LineWidth', 2);
                     hold on
                     
+                    % plot points at joints
+                    plot3(pos_frame1(1),pos_frame1(2),pos_frame1(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [0 0 0], 'MarkerEdgeColor', [0 0 0])
+                    hold on
+                    plot3(pos_frame2(1),pos_frame2(2),pos_frame2(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [0 0 0], 'MarkerEdgeColor', [0 0 0])
+                    hold on
+                    plot3(pos_frame3(1),pos_frame3(2),pos_frame3(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [0 0 0], 'MarkerEdgeColor', [0 0 0])
+                    hold on
+                    plot3(pos_frame4(1),pos_frame4(2),pos_frame4(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [0 0 0], 'MarkerEdgeColor', [0 0 0])
+                    hold on
+                    plot3(pos_frame5(1),pos_frame5(2),pos_frame5(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [0 0 0], 'MarkerEdgeColor', [0 0 0])
+                    hold on
+                    plot3(pos_frame6(1),pos_frame6(2),pos_frame6(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [0 0 0], 'MarkerEdgeColor', [0 0 0])
+                    hold on
+                    plot3(pos_frame7(1),pos_frame7(2),pos_frame7(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [0 1 0], 'MarkerEdgeColor', [0 0 0])
+                    hold on
+                    
+                    xlim([-50 200]);ylim([-200 50]);zlim([-100 100]);
                     view(0, -180);
 %                     title({'X-Z', strcat('angle : ', num2str(angle_device(1)*180/pi), ', ', num2str(angle_device(2)*180/pi), ', ', num2str(angle_device(3)*180/pi), ', ', num2str(angle_device(4)*180/pi))});
                 end
@@ -198,6 +233,7 @@ for i=1:length(angle_TH1)
                 frame7_offset = frame6_offset*R67_offset; pos_frame7_offset = [frame7_offset(1,4);frame7_offset(2,4);frame7_offset(3,4);];
 
 
+            if plot_visualization == true
                 subplot(2,1,1)
                 %set origin coordinate
 %                 plot3([0 10],[0 0],[0 0],'r.-');
@@ -217,8 +253,24 @@ for i=1:length(angle_TH1)
                 plot3([pos_frame5_offset(1) pos_frame6_offset(1)],[pos_frame5_offset(2) pos_frame6_offset(2)],[pos_frame5_offset(3) pos_frame6_offset(3)],'r.-', 'LineWidth', 2);
                 hold on
                 endEffector_Offset_xz = plot3([pos_frame6_offset(1) pos_frame7_offset(1)],[pos_frame6_offset(2) pos_frame7_offset(2)],[pos_frame6_offset(3) pos_frame7_offset(3)],'r.-', 'LineWidth', 2);
-%                 legend('Offset')
                 hold on
+                
+                % plot points at joints
+                plot3(pos_frame1_offset(1),pos_frame1_offset(2),pos_frame1_offset(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [1 0 0], 'MarkerEdgeColor', [1 0 0])
+                hold on
+                plot3(pos_frame2_offset(1),pos_frame2_offset(2),pos_frame2_offset(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [1 0 0], 'MarkerEdgeColor', [1 0 0])
+                hold on
+                plot3(pos_frame3_offset(1),pos_frame3_offset(2),pos_frame3_offset(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [1 0 0], 'MarkerEdgeColor', [1 0 0])
+                hold on
+                plot3(pos_frame4_offset(1),pos_frame4_offset(2),pos_frame4_offset(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [1 0 0], 'MarkerEdgeColor', [1 0 0])
+                hold on
+                plot3(pos_frame5_offset(1),pos_frame5_offset(2),pos_frame5_offset(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [1 0 0], 'MarkerEdgeColor', [1 0 0])
+                hold on
+                plot3(pos_frame6_offset(1),pos_frame6_offset(2),pos_frame6_offset(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [1 0 0], 'MarkerEdgeColor', [1 0 0])
+                hold on
+                plot3(pos_frame7_offset(1),pos_frame7_offset(2),pos_frame7_offset(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [1 1 0], 'MarkerEdgeColor', [1 0 0])
+                hold on
+                
                 view(0, 90);
                 distance = sqrt(sum((pos_frame7-pos_frame7_offset).^2));
 %                 title({'X-Y', 'distance: ', num2str(distance), strcat('pos: ', num2str(pos_frame7(1)), ', ', num2str(pos_frame7(2)), ', ', num2str(pos_frame7(3)), strcat(', offset pos :', num2str(pos_frame7_offset(1)), ', ', num2str(pos_frame7_offset(2)), ', ', num2str(pos_frame7_offset(3))))});
@@ -246,11 +298,28 @@ for i=1:length(angle_TH1)
                 hold on
                 endEffector_Offset_xy=plot3([pos_frame6_offset(1) pos_frame7_offset(1)],[pos_frame6_offset(2) pos_frame7_offset(2)],[pos_frame6_offset(3) pos_frame7_offset(3)],'r.-', 'LineWidth', 2);
                 hold on
-%                 legend('offset O')
+
+                % plot points at joints
+                plot3(pos_frame1_offset(1),pos_frame1_offset(2),pos_frame1_offset(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [1 0 0], 'MarkerEdgeColor', [1 0 0])
+                hold on
+                plot3(pos_frame2_offset(1),pos_frame2_offset(2),pos_frame2_offset(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [1 0 0], 'MarkerEdgeColor', [1 0 0])
+                hold on
+                plot3(pos_frame3_offset(1),pos_frame3_offset(2),pos_frame3_offset(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [1 0 0], 'MarkerEdgeColor', [1 0 0])
+                hold on
+                plot3(pos_frame4_offset(1),pos_frame4_offset(2),pos_frame4_offset(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [1 0 0], 'MarkerEdgeColor', [1 0 0])
+                hold on
+                plot3(pos_frame5_offset(1),pos_frame5_offset(2),pos_frame5_offset(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [1 0 0], 'MarkerEdgeColor', [1 0 0])
+                hold on
+                plot3(pos_frame6_offset(1),pos_frame6_offset(2),pos_frame6_offset(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [1 0 0], 'MarkerEdgeColor', [1 0 0])
+                hold on
+                plot3(pos_frame7_offset(1),pos_frame7_offset(2),pos_frame7_offset(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [1 1 0], 'MarkerEdgeColor', [1 0 0])
+                hold on
+                
                 view(0, -180);
 %                 title({'offset X-Z', strcat('offset angle : ', num2str(angle_offset(1)*180/pi), ', ', num2str(angle_offset(2)*180/pi), ', ', num2str(angle_offset(3)*180/pi), ', ', num2str(angle_offset(4)*180/pi))});
                 % set figure axis limit
                 xlim([-50 200]);ylim([-200 50]);zlim([-100 100]);
+            end
                 
 %                 saveas(gcf, strcat(num2str(count),'.jpg'));
                 data(count, 1:4) = angle_device;
@@ -271,8 +340,11 @@ for i=1:length(angle_TH1)
     end
 end
 
-legend(upper_axes, [endEffector_noOffset_xz endEffector_Offset_xz ], {'OFFSET X','OFFSET O'});
-legend(lower_axes, [endEffector_noOffset_xy endEffector_Offset_xy], {'OFFSET X','OFFSET O'});
+% add legend depending on visualization flag
+if plot_visualization == true
+    legend(upper_axes, [endEffector_noOffset_xz endEffector_Offset_xz], {'OFFSET X','OFFSET O'});
+    legend(lower_axes, [endEffector_noOffset_xy endEffector_Offset_xy], {'OFFSET X','OFFSET O'});
+end
 % endEffector_noOffset_xy
 save('matlab.mat', 'data');
 disp('end')
