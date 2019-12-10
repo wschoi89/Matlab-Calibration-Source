@@ -6,29 +6,46 @@ clc
 disp('start')
 
 % flag for whether it visualize kinematics graph or not
-plot_visualization = true;
-
+bool_plot_visualization = 1;
+bool_plot_offset = 1;
 % angle range for forward kinematics simulator
 
-angle_TH1 = -20:40:-20;
-angle_TH2 = 0:30:0;
-angle_TH3 = 0:30:0;
-angle_TH4 = 0:30:0;
+angle_TH1 = -20:20:20;
+angle_TH2 = -30:30:30;
+angle_TH3 = -30:60:30;
+angle_TH4 = 0:45:90;
+
+
+
+%set offset angles by using random number generator between -20 and 20
+
+angle_random = -20+40*rand(2);
+angle_offset = [angle_random(1), angle_random(2), angle_random(3), angle_random(4)];
+angle_offset = angle_offset*pi/180;
+%set offset DH parameter lengths between -5 and 5 (mm)
+length_DHoffset = -5+10*rand(1,10);
+%set offset DH parameter angles between -20 and 20 (degree)
+angle_DHoffset = -20+40*rand(1,6);
+angle_DHoffset = angle_DHoffset*pi/180;
+
+% concatenate above two arrays to save it. final shape is (1,16) array
+
+
 
 % set offset for DH parameters and sensor rotation
-
 DHparameter_offset = zeros(7, 4);
 
-angle_offset = [10, 10, 10, 10];
+% assign offset values at DHparamter table
+DHparameter_offset(1,1)=length_DHoffset(1); DHparameter_offset(1,2)=angle_DHoffset(1); DHparameter_offset(1,3)=length_DHoffset(2);  DHparameter_offset(1,4)=angle_DHoffset(2);
+DHparameter_offset(2,1)=length_DHoffset(3);                                            DHparameter_offset(2,3)=length_DHoffset(4);  DHparameter_offset(2,4)=angle_DHoffset(3);
+DHparameter_offset(3,1)=length_DHoffset(5);                                            DHparameter_offset(3,3)=length_DHoffset(6);  DHparameter_offset(3,4)=angle_DHoffset(4);
 
-DHparameter_offset(1,1)=3.0;DHparameter_offset(1,2)=0.3;    DHparameter_offset(1,3)=3.0;     DHparameter_offset(1,4)=0.3;
-DHparameter_offset(2,1)=3.0;                              DHparameter_offset(2,3)=3.0;   DHparameter_offset(2,4)=0.3;
-DHparameter_offset(3,1)=2.0;                              DHparameter_offset(3,3)=2.0;   DHparameter_offset(3,4)=0.2;
+DHparameter_offset(5,1)=length_DHoffset(7);                                            DHparameter_offset(5,3)=length_DHoffset(8);  DHparameter_offset(5,4)=angle_DHoffset(5);
+DHparameter_offset(6,1)=length_DHoffset(9);                                            DHparameter_offset(6,3)=length_DHoffset(10); DHparameter_offset(6,4)=angle_DHoffset(6);
 
-DHparameter_offset(5,1)=3.0;                              DHparameter_offset(5,3)=3.0;   DHparameter_offset(5,4)=0.3;
-DHparameter_offset(6,1)=2.0;                              DHparameter_offset(6,3)=2.0;   DHparameter_offset(6,4)=0.2;
-
-
+concat_DHoffset = cat(2, angle_offset, nonzeros(reshape(DHparameter_offset', [1,28]))');  %units are 
+save('offset.mat', 'concat_DHoffset');
+disp('offset data was saved in offset.mat file');
 
 %iteration number
 count=1;
@@ -95,7 +112,7 @@ for i=1:length(angle_TH1)
                 
                 % upper figure for non-offset forward kinematics plot(X-Y)
                 
-                if plot_visualization == true
+                if bool_plot_visualization == true
                     
                     upper_axes = subplot(2,1,1);
                     
@@ -142,7 +159,7 @@ for i=1:length(angle_TH1)
                     % rotate view for X-Y plane
                     view(0, 90);
 
-                    % upper figure for non-offset forward kinematics plot(X-Z)
+                    % lower figure for non-offset forward kinematics plot(X-Z)
                     lower_axes=subplot(2,1,2);
                     %set origin coordinate
                     plot3([0 10],[0 0],[0 0],'r.-');
@@ -181,15 +198,13 @@ for i=1:length(angle_TH1)
                     plot3(pos_frame7(1),pos_frame7(2),pos_frame7(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [0 1 0], 'MarkerEdgeColor', [0 0 0])
                     hold on
                     
-                    xlim([-50 200]);ylim([-200 50]);zlim([-100 100]);
+%                     xlim([-50 200]);ylim([-200 50]);zlim([-100 100]);
                     view(0, -180);
-%                     title({'X-Z', strcat('angle : ', num2str(angle_device(1)*180/pi), ', ', num2str(angle_device(2)*180/pi), ', ', num2str(angle_device(3)*180/pi), ', ', num2str(angle_device(4)*180/pi))});
+
                 end
                 data(count, 9:11) = pos_frame7;
-                
-                
-                
-                
+                data(count, 15:18) = angle_device;
+                                
                 
                 %% plot offset-reflecting link position
                   %hand mocap device angle for one finger
@@ -198,7 +213,7 @@ for i=1:length(angle_TH1)
                 
                 %convert degree to radian
                 angle_device = angle_device*pi/180;
-                angle_offset = angle_offset*pi/180;
+%                 angle_offset = angle_offset*pi/180;
 
                 % add angle offset
                 DHRef_offset = [0 0                               0             -pi/2;
@@ -233,15 +248,9 @@ for i=1:length(angle_TH1)
                 frame7_offset = frame6_offset*R67_offset; pos_frame7_offset = [frame7_offset(1,4);frame7_offset(2,4);frame7_offset(3,4);];
 
 
-            if plot_visualization == true
+            if bool_plot_visualization == true && bool_plot_offset == true
                 subplot(2,1,1)
-                %set origin coordinate
-%                 plot3([0 10],[0 0],[0 0],'r.-');
-%                 hold on
-%                 plot3([0 0],[0 10],[0 0],'g.-');
-%                 hold on
-%                 plot3([0 0],[0 0],[0 10],'b.-');
-%                 hold on
+                
                 plot3([pos_frame1_offset(1) pos_frame2_offset(1)],[pos_frame1_offset(2) pos_frame2_offset(2)],[pos_frame1_offset(3) pos_frame2_offset(3)],'r.-', 'LineWidth', 2);
                 hold on
                 plot3([pos_frame2_offset(1) pos_frame3_offset(1)],[pos_frame2_offset(2) pos_frame3_offset(2)],[pos_frame2_offset(3) pos_frame3_offset(3)],'r.-', 'LineWidth', 2);
@@ -272,9 +281,11 @@ for i=1:length(angle_TH1)
                 hold on
                 
                 view(0, 90);
-                distance = sqrt(sum((pos_frame7-pos_frame7_offset).^2));
-%                 title({'X-Y', 'distance: ', num2str(distance), strcat('pos: ', num2str(pos_frame7(1)), ', ', num2str(pos_frame7(2)), ', ', num2str(pos_frame7(3)), strcat(', offset pos :', num2str(pos_frame7_offset(1)), ', ', num2str(pos_frame7_offset(2)), ', ', num2str(pos_frame7_offset(3))))});
                 
+                %distance between end-effectors
+                distance = sqrt(sum((pos_frame7-pos_frame7_offset).^2));
+
+                title({'X-Y', strcat('angle: ', num2str(angle_TH1), ', ', num2str(angle_TH2), ', ', num2str(angle_TH3), ', ', num2str(angle_TH4))});
                 xlim([-50 200]);ylim([-200 50]);zlim([-100 100]);
                 
                 
@@ -316,9 +327,10 @@ for i=1:length(angle_TH1)
                 hold on
                 
                 view(0, -180);
+                title({'X-Z', strcat('distance between end-effectors: ', num2str(distance), ' mm')});
 %                 title({'offset X-Z', strcat('offset angle : ', num2str(angle_offset(1)*180/pi), ', ', num2str(angle_offset(2)*180/pi), ', ', num2str(angle_offset(3)*180/pi), ', ', num2str(angle_offset(4)*180/pi))});
                 % set figure axis limit
-                xlim([-50 200]);ylim([-200 50]);zlim([-100 100]);
+%                 xlim([-50 200]);ylim([-200 50]);zlim([-100 100]);
             end
                 
 %                 saveas(gcf, strcat(num2str(count),'.jpg'));
@@ -330,10 +342,10 @@ for i=1:length(angle_TH1)
                 
 %                 
 %                 
-% %                 subplot(2, 1, 1)
-% %                 cla reset
-% %                 subplot(2, 1, 2)
-% %                 cla reset
+%                 subplot(2, 1, 1)
+%                 cla reset
+%                 subplot(2, 1, 2)
+%                 cla reset
                 
             end
         end
@@ -341,11 +353,12 @@ for i=1:length(angle_TH1)
 end
 
 % add legend depending on visualization flag
-if plot_visualization == true
+if bool_plot_visualization == true && bool_plot_offset == true
     legend(upper_axes, [endEffector_noOffset_xz endEffector_Offset_xz], {'OFFSET X','OFFSET O'});
     legend(lower_axes, [endEffector_noOffset_xy endEffector_Offset_xy], {'OFFSET X','OFFSET O'});
 end
 % endEffector_noOffset_xy
-save('matlab.mat', 'data');
-disp('end')
+save('data.mat', 'data');
+disp('data was saved in data.mat file')
+disp('finish')
 % close all
