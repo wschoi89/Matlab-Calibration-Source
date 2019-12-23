@@ -13,20 +13,19 @@ options = optimoptions(@lsqnonlin,'Algorithm', 'levenberg-marquardt','Display', 
 % shuffle data and divide into training(70) and test data(30)
 
 [row, col] = size(data);
-data = data(randperm(row),:);
-num_trainingData = 1;
+num_trainingData = round(row*0.7);
 num_testData = row-num_trainingData;
 trainingData = data(1:num_trainingData, :);
 testData = data(num_trainingData+1:end, :);
 
-output=lsqnonlin(@pos_endEffector_onlySensorOffset, [0,0,0,0],[],[],options, trainingData);
+optimized_parameter=lsqnonlin(@pos_endEffector_onlySensorOffset, [0,0,0,0],[],[],options, trainingData);
 % 
 % % compare output for all paramters(20)
-output = output';
-compare_results = [concat_DHoffset' output concat_DHoffset'-output]
+optimized_parameter = optimized_parameter';
+compare_results = [concat_DHoffset' optimized_parameter concat_DHoffset'-optimized_parameter]
 
-output = output';
-save('parameter_output.mat', 'output');
+optimized_parameter = optimized_parameter';
+save(strcat('optimized_parameter_', num2str(row), '.mat'), 'optimized_parameter');
 
 % compare output for DH angles(6)
 % concat_DHoffset_angle = concat_DHoffset(15:20);
