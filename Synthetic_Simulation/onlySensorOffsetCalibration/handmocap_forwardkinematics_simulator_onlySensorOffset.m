@@ -10,8 +10,10 @@ bool_plot_offset = 0;
 % angle range for forward kinematics simulator
 % set joint angles, TH1, TH2, TH3  by using random number generator between -30 and 30
 % set joint angle,  TH4 by using random number generator between 0 and 90
-
-combination_sample = [2,2,2,2];
+ 
+num_sample = 2;
+% factorize num_sample into four combination samples 
+combination_sample = assignDataDistribution(num_sample);
 
 angle_TH1 = -30+60*rand(combination_sample(1), 1);
 angle_TH2 = -30+60*rand(combination_sample(2), 1);
@@ -51,8 +53,9 @@ DHparameter_offset(6,1)=length_DHoffset(9);                                     
 concat_DHoffset = angle_offset;
 
 
-save('offset.mat', 'concat_DHoffset');
-disp('offset data was saved in offset.mat file');
+% save(strcat('offset.mat', 'concat_DHoffset'));
+save(strcat('offset_', num2str(num_sample),'.mat'), 'concat_DHoffset');
+disp(strcat('offset data was saved in offset_', num2str(num_sample),'.mat file'));
 
 %iteration number
 count=1;
@@ -210,7 +213,7 @@ for i=1:length(angle_TH1)
 
                 end
                 data(count, 9:11) = pos_frame7;
-                data(count, 15:18) = angle_device;
+
                                 
                 
                 %% plot offset-reflecting link position
@@ -220,7 +223,6 @@ for i=1:length(angle_TH1)
                 
                 %convert degree to radian
                 angle_device = angle_device*pi/180;
-%                 angle_offset = angle_offset*pi/180;
 
                 % add angle offset
                 DHRef_offset = [0 0                               0             -pi/2;
@@ -340,7 +342,6 @@ for i=1:length(angle_TH1)
 %                 xlim([-50 200]);ylim([-200 50]);zlim([-100 100]);
             end
                 
-%                 saveas(gcf, strcat(num2str(count),'.jpg'));
                 data(count, 1:4) = angle_device;
                 data(count, 5:8) = angle_offset;
                 data(count, 12:14) = pos_frame7_offset;
@@ -364,8 +365,19 @@ if bool_plot_visualization == true && bool_plot_offset == true
     legend(upper_axes, [endEffector_noOffset_xz endEffector_Offset_xz], {'OFFSET X','OFFSET O'});
     legend(lower_axes, [endEffector_noOffset_xy endEffector_Offset_xy], {'OFFSET X','OFFSET O'});
 end
-% endEffector_noOffset_xy
-save('data.mat', 'data');
-disp('data was saved in data.mat file')
-disp('finish')
+
+% shuffle data in rows and save
+% shuffle data and divide into training(70) and test data(30)
+
+[row, col] = size(data);
+data = data(randperm(row),:);
+save(strcat('data_', num2str(num_sample), '.mat'), 'data');
+
+disp(strcat('data was saved in data_', num2str(num_sample), '.mat file'));
+% disp('finish')
 % close all
+
+% for autonomous calibration
+% nonSymbolic_onlySensorOffset
+% validate_testData_onlySensorOffset
+
