@@ -1,19 +1,24 @@
 
-% disp('start')
-% load data.mat
+% validate using test data and optimized parameter
+testData = testData;
 
-data = testData;
+
 %iteration number
 count=1;
 
-% num_row = length(angle_TH1)*length(angle_TH2)*length(angle_TH3)*length(angle_TH4);
-num_row = size(data, 1);
+num_row = size(testData, 1);
 
-%data consists of 18 columns(angle(4), offset angle(4), tip
-%position(cad)(3), tip position(reflecting offset)(3), joint angle(4))
+%data consists of 14 columns(angle(4), offset angle(4), tip
+%position(cad)(3), tip position(reflecting offset)(3))
 
+%summation of difference for x, y, z, and distance 
 sum_distance = 0;
-for i=1:size(data, 1)
+sum_x = 0;
+sum_y = 0;
+sum_z = 0;
+
+
+for i=1:size(testData, 1)
             
                 %create origin coordinate
 %                 figure
@@ -25,7 +30,7 @@ for i=1:size(data, 1)
                 arr_links = loadLinkLength();
 
                 % hand mocap device angle for one finger
-                angle_device = [data(i, 15),data(i, 16),data(i,17),data(i,18)];
+                angle_device = [testData(i, 1),testData(i, 2),testData(i,3),testData(i,4)];
                 
                 % initialize offset angle as zeros for non-offset forward
                 % kinematics plot
@@ -36,9 +41,10 @@ for i=1:size(data, 1)
 %                 angle_offset = angle_offset*pi/180;
                 
                 DH_offset_simulationResult = zeros(7, 4);
-                load parameter_output.mat
+                file_optimized_parameter = strcat('optimized_parameter_', num2str(row),'.mat');
+                load(file_optimized_parameter)
                 angle_offset = zeros(1,4);
-                simulationResult = output;
+                simulationResult = optimized_parameter;
                 angle_offset(1) = simulationResult(1);
                 angle_offset(2) = simulationResult(2);
                 angle_offset(3) = simulationResult(3);
@@ -159,14 +165,17 @@ for i=1:size(data, 1)
                 
                 view(0, -180);
 				%title({'X-Z', strcat('angle : ', num2str(angle_device(1)*180/pi), ', ', num2str(angle_device(2)*180/pi), ', ', num2str(angle_device(3)*180/pi), ', ', num2str(angle_device(4)*180/pi))});
-                data(count, 9:11) = pos_frame7;
+                testData(count, 9:11) = pos_frame7;
                 
                 
                 %plot offset-reflecting link position
                 %hand mocap device angle for one finger
 
-                angle_device = [data(i, 15),data(i, 16),data(i,17),data(i,18)];
-                load offset.mat
+                angle_device = [testData(i, 1),testData(i, 2),testData(i,3),testData(i,4)];
+                
+                file_offset = strcat('offset_', num2str(row),'.mat');
+                load(file_offset)
+                                               
                 angle_offset = [concat_DHoffset(1), concat_DHoffset(2), concat_DHoffset(3), concat_DHoffset(4)];
                 DHparameter_offset = zeros(7, 4);
 
@@ -292,19 +301,20 @@ for i=1:size(data, 1)
                 % set figure axis limit
                 xlim([-50 200]);ylim([-200 50]);zlim([-100 100]);
                 
-                
-%                 data(count, 1:4) = angle_device;
-%                 data(count, 5:8) = angle_offset;
-%                 data(count, 12:14) = pos_frame7_offset;
-                
-               
-                
                 legend(upper_axes, [endEffector_optimization_xz endEffector_offset_xz], {'Optimized OFFSET','Global OFFSET'});
                 legend(lower_axes, [endEffector_optimization_xy endEffector_offset_xy], {'Optimized OFFSET','Global OFFSET'});
                 
                 %distance between end-effectors
+                distance_x = pos_frame7(1)-pos_frame7_offset(1);
+                distance_y = pos_frame7(2)-pos_frame7_offset(2);
+                distance_z = pos_frame7(3)-pos_frame7_offset(3);
+                
                 distance = sqrt(sum((pos_frame7-pos_frame7_offset).^2));
+                sum_x = sum_x + distance_x;
+                sum_y = sum_y + distance_y;
+                sum_z = sum_z + distance_z;
                 sum_distance = sum_distance + distance;         
+                
                 subplot(2, 1, 1)
                 title({'X-Y', strcat('distance: ', num2str(distance), ' mm')});
 %                 saveas(gcf, strcat(num2str(count),'.jpg'));
@@ -316,6 +326,12 @@ for i=1:size(data, 1)
 
 end
 
-average_distance = sum_distance / size(data, 1)
+average_x_error = sum_x / size(testData, 1)
+average_y_error = sum_y / size(testData, 1)
+average_z_error = sum_z / size(testData, 1)
+average_distanceError = sum_distance / size(testData, 1)
 
+error = [num_data average_x_error average_y_error average_z_error average_distance];
+save(strcat('error_', num2str(num_data),'.mat'), 'error');
+close all
 
