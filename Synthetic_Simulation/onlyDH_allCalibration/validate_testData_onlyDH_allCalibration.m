@@ -314,11 +314,13 @@ for iter=1:num_iteration
                 end
                 
                 %distance between end-effectors
-                distance_x = pos_frame7(1)-pos_frame7_offset(1);
-                distance_y = pos_frame7(2)-pos_frame7_offset(2);
-                distance_z = pos_frame7(3)-pos_frame7_offset(3);
+                distance_x = abs(pos_frame7(1)-pos_frame7_offset(1));
+                distance_y = abs(pos_frame7(2)-pos_frame7_offset(2));
+                distance_z = abs(pos_frame7(3)-pos_frame7_offset(3));
                 
                 distance = sqrt(sum((pos_frame7-pos_frame7_offset).^2));
+                
+                
                 sum_x = sum_x + distance_x;
                 sum_y = sum_y + distance_y;
                 sum_z = sum_z + distance_z;
