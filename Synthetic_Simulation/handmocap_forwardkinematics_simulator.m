@@ -10,12 +10,10 @@ bool_plot_visualization = 1;
 bool_plot_offset = 1;
 % angle range for forward kinematics simulator
 
-angle_TH1 = -20:20:20;
-angle_TH2 = -30:30:30;
+angle_TH1 = -30:60:30;
+angle_TH2 = -30:60:30;
 angle_TH3 = -30:60:30;
-angle_TH4 = 0:45:90;
-
-
+angle_TH4 = 0:90:90;
 
 %set offset angles by using random number generator between -20 and 20
 
@@ -24,9 +22,12 @@ angle_offset = [angle_random(1), angle_random(2), angle_random(3), angle_random(
 angle_offset = angle_offset*pi/180;
 %set offset DH parameter lengths between -5 and 5 (mm)
 length_DHoffset = -5+10*rand(1,10);
+% length_DHoffset = zeros(1,10);
 %set offset DH parameter angles between -20 and 20 (degree)
 angle_DHoffset = -20+40*rand(1,6);
 angle_DHoffset = angle_DHoffset*pi/180;
+% angle_DHoffset = zeros(1, 6);
+
 
 % concatenate above two arrays to save it. final shape is (1,16) array
 
@@ -43,7 +44,9 @@ DHparameter_offset(3,1)=length_DHoffset(5);                                     
 DHparameter_offset(5,1)=length_DHoffset(7);                                            DHparameter_offset(5,3)=length_DHoffset(8);  DHparameter_offset(5,4)=angle_DHoffset(5);
 DHparameter_offset(6,1)=length_DHoffset(9);                                            DHparameter_offset(6,3)=length_DHoffset(10); DHparameter_offset(6,4)=angle_DHoffset(6);
 
-concat_DHoffset = cat(2, angle_offset, nonzeros(reshape(DHparameter_offset', [1,28]))');  %units are 
+concat_DHoffset = cat(2, angle_offset, nonzeros(reshape(DHparameter_offset', [1,28]))');  
+
+
 save('offset.mat', 'concat_DHoffset');
 disp('offset data was saved in offset.mat file');
 
