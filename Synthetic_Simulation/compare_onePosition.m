@@ -1,30 +1,21 @@
 %hand mocap kinematics simulator
-% clear
-% clc
+clear
+clc
 
 disp('start')
-
-%angle range for forward kinematics simulator
-% angle_TH1 = -20:20:20;
-% angle_TH2 = -30:20:30;
-% angle_TH3 = -30:20:30;
-% angle_TH4 =  -30:20:30;
-angle_TH1 = -0:10:-0;
-angle_TH2 = -0:10:-0;
-angle_TH3 = -0:10:-0;
-angle_TH4 =  -40:10:-40;
+load data.mat
 
 %iteration number
 count=1;
 
-num_row = length(angle_TH1)*length(angle_TH2)*length(angle_TH3)*length(angle_TH4);
+% num_row = length(angle_TH1)*length(angle_TH2)*length(angle_TH3)*length(angle_TH4);
+num_row = size(data, 1);
 
-%data consists of 14 columns(angle(4), offset angle(4), tip position(cad)(3), tip position(reflecting offset)(3))
-data = zeros(num_row, 14);
-for i=1:length(angle_TH1)
-    for j=1:length(angle_TH2)
-        for k=1:length(angle_TH3)
-            for m=1:length(angle_TH4)
+%data consists of 18 columns(angle(4), offset angle(4), tip
+%position(cad)(3), tip position(reflecting offset)(3), joint angle(4))
+
+sum_distance = 0;
+for i=1:size(data, 1)
             
                 %create origin coordinate
 %                 figure
@@ -36,20 +27,20 @@ for i=1:length(angle_TH1)
                 arr_links = loadLinkLength();
 
                 % hand mocap device angle for one finger
-                angle_device = [angle_TH1(i), angle_TH2(j), angle_TH3(k), angle_TH4(m)];
+                angle_device = [data(i, 15),data(i, 16),data(i,17),data(i,18)];
                 
                 % initialize offset angle as zeros for non-offset forward
                 % kinematics plot
 %                 angle_offset = [0, 0, 0, 0];
 
                 %convert degree to radian
-                angle_device = angle_device*pi/180;
+%                 angle_device = angle_device*pi/180;
 %                 angle_offset = angle_offset*pi/180;
                 
                 DH_offset_simulationResult = zeros(7, 4);
                 load parameter_output.mat
                 angle_offset = zeros(1,4);
-                simulationResult = ans;
+                simulationResult = output;
                 angle_offset(1) = simulationResult(1);
                 angle_offset(2) = simulationResult(2);
                 angle_offset(3) = simulationResult(3);
@@ -104,7 +95,7 @@ for i=1:length(angle_TH1)
                 frame7 = frame6*R67; pos_frame7 = [frame7(1,4);frame7(2,4);frame7(3,4);];
 
 %                 upper figure for non-offset forward kinematics plot(X-Y)
-                subplot(2,1,1)
+                upper_axes=subplot(2,1,1);
                 %set origin coordiante using RGB 
                 plot3([0 10],[0 0],[0 0],'r.-','LineWidth', 2);
                 hold on
@@ -123,23 +114,23 @@ for i=1:length(angle_TH1)
                 hold on
                 plot3([pos_frame5(1) pos_frame6(1)],[pos_frame5(2) pos_frame6(2)],[pos_frame5(3) pos_frame6(3)],'black.-', 'LineWidth', 2);
                 hold on
-                plot3([pos_frame6(1) pos_frame7(1)],[pos_frame6(2) pos_frame7(2)],[pos_frame6(3) pos_frame7(3)],'black.-', 'LineWidth', 2);
+                endEffector_optimization_xz=plot3([pos_frame6(1) pos_frame7(1)],[pos_frame6(2) pos_frame7(2)],[pos_frame6(3) pos_frame7(3)],'black.-', 'LineWidth', 2);
                 hold on
                 
                 % plot points at joints
-                plot3(pos_frame1(1),pos_frame1(2),pos_frame1(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [0 0 0])
+                plot3(pos_frame1(1),pos_frame1(2),pos_frame1(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [0 0 0],'MarkerEdgeColor', [0 0 0])
                 hold on
-                plot3(pos_frame2(1),pos_frame2(2),pos_frame2(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [0 0 0])
+                plot3(pos_frame2(1),pos_frame2(2),pos_frame2(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [0 0 0],'MarkerEdgeColor', [0 0 0])
                 hold on
-                plot3(pos_frame3(1),pos_frame3(2),pos_frame3(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [0 0 0])
+                plot3(pos_frame3(1),pos_frame3(2),pos_frame3(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [0 0 0],'MarkerEdgeColor', [0 0 0])
                 hold on
-                plot3(pos_frame4(1),pos_frame4(2),pos_frame4(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [0 0 0])
+                plot3(pos_frame4(1),pos_frame4(2),pos_frame4(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [0 0 0],'MarkerEdgeColor', [0 0 0])
                 hold on
-                plot3(pos_frame5(1),pos_frame5(2),pos_frame5(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [0 0 0])
+                plot3(pos_frame5(1),pos_frame5(2),pos_frame5(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [0 0 0],'MarkerEdgeColor', [0 0 0])
                 hold on
-                plot3(pos_frame6(1),pos_frame6(2),pos_frame6(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [0 0 0])
+                plot3(pos_frame6(1),pos_frame6(2),pos_frame6(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [0 0 0],'MarkerEdgeColor', [0 0 0])
                 hold on
-                plot3(pos_frame7(1),pos_frame7(2),pos_frame7(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [0 0 0])
+                plot3(pos_frame7(1),pos_frame7(2),pos_frame7(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [0 0 0],'MarkerEdgeColor', [0 0 0])
                 hold on
                 
                 
@@ -147,8 +138,8 @@ for i=1:length(angle_TH1)
                 % rotate view for X-Y plane
                 view(0, 90);
 
-%                 upper figure for non-offset forward kinematics plot(X-Z)
-                subplot(2,1,2)
+%               % lower figure for non-offset forward kinematics plot(X-Z)
+                lower_axes=subplot(2,1,2);
                 %set origin coordinate
                 plot3([0 10],[0 0],[0 0],'r.-');
                 hold on
@@ -166,47 +157,49 @@ for i=1:length(angle_TH1)
                 hold on
                 plot3([pos_frame5(1) pos_frame6(1)],[pos_frame5(2) pos_frame6(2)],[pos_frame5(3) pos_frame6(3)],'black.-', 'LineWidth', 2);
                 hold on
-                plot3([pos_frame6(1) pos_frame7(1)],[pos_frame6(2) pos_frame7(2)],[pos_frame6(3) pos_frame7(3)],'black.-', 'LineWidth', 2);
+                endEffector_optimization_xy=plot3([pos_frame6(1) pos_frame7(1)],[pos_frame6(2) pos_frame7(2)],[pos_frame6(3) pos_frame7(3)],'black.-', 'LineWidth', 2);
                 hold on
                 
                 % plot points at joints
-                plot3(pos_frame1(1),pos_frame1(2),pos_frame1(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [0 0 0])
+                plot3(pos_frame1(1),pos_frame1(2),pos_frame1(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [0 0 0], 'MarkerEdgeColor', [0 0 0])
                 hold on
-                plot3(pos_frame2(1),pos_frame2(2),pos_frame2(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [0 0 0])
+                plot3(pos_frame2(1),pos_frame2(2),pos_frame2(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [0 0 0], 'MarkerEdgeColor', [0 0 0])
                 hold on
-                plot3(pos_frame3(1),pos_frame3(2),pos_frame3(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [0 0 0])
+                plot3(pos_frame3(1),pos_frame3(2),pos_frame3(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [0 0 0], 'MarkerEdgeColor', [0 0 0])
                 hold on
-                plot3(pos_frame4(1),pos_frame4(2),pos_frame4(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [0 0 0])
+                plot3(pos_frame4(1),pos_frame4(2),pos_frame4(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [0 0 0], 'MarkerEdgeColor', [0 0 0])
                 hold on
-                plot3(pos_frame5(1),pos_frame5(2),pos_frame5(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [0 0 0])
+                plot3(pos_frame5(1),pos_frame5(2),pos_frame5(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [0 0 0], 'MarkerEdgeColor', [0 0 0])
                 hold on
-                plot3(pos_frame6(1),pos_frame6(2),pos_frame6(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [0 0 0])
+                plot3(pos_frame6(1),pos_frame6(2),pos_frame6(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [0 0 0], 'MarkerEdgeColor', [0 0 0])
                 hold on
-                plot3(pos_frame7(1),pos_frame7(2),pos_frame7(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [0 0 0])
+                plot3(pos_frame7(1),pos_frame7(2),pos_frame7(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [0 0 0], 'MarkerEdgeColor', [0 0 0])
                 hold on
                 
-                view(0, -180);title({'X-Z', strcat('angle : ', num2str(angle_device(1)*180/pi), ', ', num2str(angle_device(2)*180/pi), ', ', num2str(angle_device(3)*180/pi), ', ', num2str(angle_device(4)*180/pi))});
+                view(0, -180);
+				%title({'X-Z', strcat('angle : ', num2str(angle_device(1)*180/pi), ', ', num2str(angle_device(2)*180/pi), ', ', num2str(angle_device(3)*180/pi), ', ', num2str(angle_device(4)*180/pi))});
                 data(count, 9:11) = pos_frame7;
                 
                 
                 %plot offset-reflecting link position
                 %hand mocap device angle for one finger
 
-                angle_device = [angle_TH1(i), angle_TH2(j), angle_TH3(k), angle_TH4(m)];
-                angle_offset = [10, 10, 10, 10];
+                angle_device = [data(i, 15),data(i, 16),data(i,17),data(i,18)];
+                load offset.mat
+                angle_offset = [concat_DHoffset(1), concat_DHoffset(2), concat_DHoffset(3), concat_DHoffset(4)];
                 DHparameter_offset = zeros(7, 4);
                 
-                 DHparameter_offset(1,1)=3;DHparameter_offset(1,2)=0.3;  DHparameter_offset(1,3)=3;     DHparameter_offset(1,4)=0.3;
-                DHparameter_offset(2,1)=3.0;                              DHparameter_offset(2,3)=3.0;     DHparameter_offset(2,4)=0.3;
-                DHparameter_offset(3,1)=2.0;                              DHparameter_offset(3,3)=2.0;     DHparameter_offset(3,4)=0.2;
+                DHparameter_offset(1,1)=concat_DHoffset(5);DHparameter_offset(1,2)=concat_DHoffset(6);DHparameter_offset(1,3)=concat_DHoffset(7);DHparameter_offset(1,4)=concat_DHoffset(8);
+                DHparameter_offset(2,1)=concat_DHoffset(9);                                           DHparameter_offset(2,3)=concat_DHoffset(10);DHparameter_offset(2,4)=concat_DHoffset(11);
+                DHparameter_offset(3,1)=concat_DHoffset(12);                                          DHparameter_offset(3,3)=concat_DHoffset(13);DHparameter_offset(3,4)=concat_DHoffset(14);
 
 
-                DHparameter_offset(5,1)=3.0;                            DHparameter_offset(5,3)=3.0;   DHparameter_offset(5,4)=0.3;
-                DHparameter_offset(6,1)=2.0;                            DHparameter_offset(6,3)=2.0;   DHparameter_offset(6,4)=0.2;
+                DHparameter_offset(5,1)=concat_DHoffset(15);                            DHparameter_offset(5,3)=concat_DHoffset(16);   DHparameter_offset(5,4)=concat_DHoffset(17);
+                DHparameter_offset(6,1)=concat_DHoffset(18);                            DHparameter_offset(6,3)=concat_DHoffset(19);   DHparameter_offset(6,4)=concat_DHoffset(20);
                 
                 %convert degree to radian
-                angle_device = angle_device*pi/180;
-                angle_offset = angle_offset*pi/180;
+%                 angle_device = angle_device*pi/180;
+                
 
                 % add angle offset
                 DHRef_offset = [0 0                               0             -pi/2;
@@ -259,8 +252,8 @@ for i=1:length(angle_TH1)
                 hold on
                 plot3([pos_frame5_offset(1) pos_frame6_offset(1)],[pos_frame5_offset(2) pos_frame6_offset(2)],[pos_frame5_offset(3) pos_frame6_offset(3)],'r.-', 'LineWidth', 2);
                 hold on
-                plot3([pos_frame6_offset(1) pos_frame7_offset(1)],[pos_frame6_offset(2) pos_frame7_offset(2)],[pos_frame6_offset(3) pos_frame7_offset(3)],'r.-', 'LineWidth', 2);
-                legend('Offset')
+                endEffector_offset_xz=plot3([pos_frame6_offset(1) pos_frame7_offset(1)],[pos_frame6_offset(2) pos_frame7_offset(2)],[pos_frame6_offset(3) pos_frame7_offset(3)],'r.-', 'LineWidth', 2);
+                
                 hold on
                 
                 % plot points at joints
@@ -281,7 +274,7 @@ for i=1:length(angle_TH1)
                 
                 view(0, 90);
                 distance = sqrt(sum((pos_frame7-pos_frame7_offset).^2));
-                title({'X-Y', 'distance: ', num2str(distance), strcat('pos: ', num2str(pos_frame7(1)), ', ', num2str(pos_frame7(2)), ', ', num2str(pos_frame7(3)), strcat(', offset pos :', num2str(pos_frame7_offset(1)), ', ', num2str(pos_frame7_offset(2)), ', ', num2str(pos_frame7_offset(3))))});
+%                 title({'X-Y', 'distance: ', num2str(distance), strcat('pos: ', num2str(pos_frame7(1)), ', ', num2str(pos_frame7(2)), ', ', num2str(pos_frame7(3)), strcat(', offset pos :', num2str(pos_frame7_offset(1)), ', ', num2str(pos_frame7_offset(2)), ', ', num2str(pos_frame7_offset(3))))});
                 
                 xlim([-50 200]);ylim([-200 50]);zlim([-100 100]);
                 
@@ -304,8 +297,8 @@ for i=1:length(angle_TH1)
                 hold on
                 plot3([pos_frame5_offset(1) pos_frame6_offset(1)],[pos_frame5_offset(2) pos_frame6_offset(2)],[pos_frame5_offset(3) pos_frame6_offset(3)],'r.-', 'LineWidth', 2);
                 hold on
-                plot3([pos_frame6_offset(1) pos_frame7_offset(1)],[pos_frame6_offset(2) pos_frame7_offset(2)],[pos_frame6_offset(3) pos_frame7_offset(3)],'r.-', 'LineWidth', 2);
-                legend('Offset')
+                endEffector_offset_xy=plot3([pos_frame6_offset(1) pos_frame7_offset(1)],[pos_frame6_offset(2) pos_frame7_offset(2)],[pos_frame6_offset(3) pos_frame7_offset(3)],'r.-', 'LineWidth', 2);
+                
                 hold on
                 % plot points at joints
                 plot3(pos_frame1_offset(1),pos_frame1_offset(2),pos_frame1_offset(3), '-o', 'MarkerSize', 8, 'MarkerFaceColor', [1 0 0])
@@ -325,28 +318,35 @@ for i=1:length(angle_TH1)
                 
                 
                 
-                view(0, -180);title({'offset X-Z', strcat('offset angle : ', num2str(angle_offset(1)*180/pi), ', ', num2str(angle_offset(2)*180/pi), ', ', num2str(angle_offset(3)*180/pi), ', ', num2str(angle_offset(4)*180/pi))});
+                view(0, -180);
+%                 title({'offset X-Z', strcat('offset angle : ', num2str(angle_offset(1)*180/pi), ', ', num2str(angle_offset(2)*180/pi), ', ', num2str(angle_offset(3)*180/pi), ', ', num2str(angle_offset(4)*180/pi))});
                 % set figure axis limit
                 xlim([-50 200]);ylim([-200 50]);zlim([-100 100]);
                 
-%                 saveas(gcf, strcat(num2str(count),'.jpg'));
-                data(count, 1:4) = angle_device;
-                data(count, 5:8) = angle_offset;
-                data(count, 12:14) = pos_frame7_offset;
                 
-                count=count+1;
+%                 data(count, 1:4) = angle_device;
+%                 data(count, 5:8) = angle_offset;
+%                 data(count, 12:14) = pos_frame7_offset;
                 
+               
                 
+                legend(upper_axes, [endEffector_optimization_xz endEffector_offset_xz], {'Optimized OFFSET','Global OFFSET'});
+                legend(lower_axes, [endEffector_optimization_xy endEffector_offset_xy], {'Optimized OFFSET','Global OFFSET'});
                 
-%                 subplot(2, 1, 1)
-%                 cla reset
-%                 subplot(2, 1, 2)
-%                 cla reset
+                %distance between end-effectors
+                distance = sqrt(sum((pos_frame7-pos_frame7_offset).^2));
+                sum_distance = sum_distance + distance;         
+                subplot(2, 1, 1)
+                title({'X-Y', strcat('distance: ', num2str(distance), ' mm')});
+                saveas(gcf, strcat(num2str(count),'.jpg'));
+                 count=count+1;
+                cla reset
+                subplot(2, 1, 2)
+                cla reset
                 
-            end
-        end
-    end
+
 end
 
-save('matlab.mat', 'data');
-disp('end')
+average_distance = sum_distance / size(data, 1)
+
+
