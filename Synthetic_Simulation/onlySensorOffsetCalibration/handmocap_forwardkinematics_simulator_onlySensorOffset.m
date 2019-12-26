@@ -11,7 +11,7 @@ bool_plot_offset = 0;
 % set joint angles, TH1, TH2, TH3  by using random number generator between -30 and 30
 % set joint angle,  TH4 by using random number generator between 0 and 90
  
-num_sample = 2;
+num_sample = 500;
 % factorize num_sample into four combination samples 
 combination_sample = assignDataDistribution(num_sample);
 
@@ -20,8 +20,7 @@ angle_TH2 = -30+60*rand(combination_sample(2), 1);
 angle_TH3 = -30+60*rand(combination_sample(3), 1);
 angle_TH4 =     90*rand(combination_sample(4), 1);
 
-%set offset angles by using random number generator between -20 and 20
-
+%set 4 offset angles by using random number generator between -20 and 20
 angle_random = -20+40*rand(2);
 angle_offset = [angle_random(1), angle_random(2), angle_random(3), angle_random(4)];
 angle_offset = angle_offset*pi/180;
@@ -52,7 +51,6 @@ DHparameter_offset(6,1)=length_DHoffset(9);                                     
 % concat_DHoffset = cat(2, angle_offset, length_DHoffset, angle_DHoffset);  
 concat_DHoffset = angle_offset;
 
-
 % save(strcat('offset.mat', 'concat_DHoffset'));
 save(strcat('offset_', num2str(num_sample),'.mat'), 'concat_DHoffset');
 disp(strcat('offset data was saved in offset_', num2str(num_sample),'.mat file'));
@@ -71,11 +69,6 @@ for i=1:length(angle_TH1)
         for k=1:length(angle_TH3)
             for m=1:length(angle_TH4)
             
-                %create origin coordinate
-%               %full screen 
-%                 set(gcf, 'Position', get(0, 'Screensize'));
-                
-               
                 %load link lengths for thumb, index, and middle devices
                 arr_links = loadLinkLength();
 
@@ -378,6 +371,6 @@ disp(strcat('data was saved in data_', num2str(num_sample), '.mat file'));
 % close all
 
 % for autonomous calibration
-% nonSymbolic_onlySensorOffset
-% validate_testData_onlySensorOffset
+nonSymbolic_onlySensorOffset
+validate_testData_onlySensorOffset
 
