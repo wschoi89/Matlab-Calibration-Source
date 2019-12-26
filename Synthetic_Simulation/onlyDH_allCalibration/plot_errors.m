@@ -23,7 +23,7 @@ end
 errors_row_sorted = sortrows(errors);
 
 % plot X-axis error
-% plot(errors_row_sorted(:,1), abs(errors_row_sorted(:,2)))
+plot(errors_row_sorted(:,1), abs(errors_row_sorted(:,2)))
 errorbar(errors_row_sorted(:,1), abs(errors_row_sorted(:,2)),abs(errors_row_sorted(:,6)))
 hold on
 % plot Y-axis error
