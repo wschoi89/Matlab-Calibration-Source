@@ -1,8 +1,4 @@
 
-% validate using test data and optimized parameter
-testData = testData;
-
-
 %iteration number
 count=1;
 
@@ -329,9 +325,9 @@ end
 average_x_error = sum_x / size(testData, 1)
 average_y_error = sum_y / size(testData, 1)
 average_z_error = sum_z / size(testData, 1)
-average_distanceError = sum_distance / size(testData, 1)
+average_distance_error = sum_distance / size(testData, 1)
 
-error = [num_data average_x_error average_y_error average_z_error average_distance];
+error = [num_data average_x_error average_y_error average_z_error average_distance_error];
 save(strcat('error_', num2str(num_data),'.mat'), 'error');
 close all
 
