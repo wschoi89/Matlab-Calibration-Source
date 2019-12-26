@@ -21,16 +21,24 @@ end
 % sort the rows of a matrix in ascending order based on the elemtns in the
 % first column
 errors_row_sorted = sortrows(errors);
+errors_row_sorted(:,1) = round(0.7*errors_row_sorted(:,1));
 
-plot(errors_row_sorted(:,1), errors_row_sorted(:,2))
+
+% plot X-axis error
+plot(errors_row_sorted(:,1), abs(errors_row_sorted(:,2)))
 hold on
-plot(errors_row_sorted(:,1), errors_row_sorted(:,3))
+% plot Y-axis error
+plot(errors_row_sorted(:,1), abs(errors_row_sorted(:,3)))
 hold on
-plot(errors_row_sorted(:,1), errors_row_sorted(:,4))
+% plot Z-axis error
+plot(errors_row_sorted(:,1), abs(errors_row_sorted(:,4)))
 hold on
+% plot distance error
 plot(errors_row_sorted(:,1), errors_row_sorted(:,5))
 
-
+legend x y z distance
+xlabel('the number of position')
+ylabel('distance error(mm)')
 
 
 
