@@ -5,9 +5,19 @@ close all
 
 
 %file open for offset data recording
-fileID = fopen('191108_threefinger.csv', 'w');
+if mkdir('DAQ')==false
+    mkdir('DAQ');
+end
+
+fileID = fopen('DAQ/200102_DAQ_T1_I1_M1.csv', 'w');
+num_iteration = 100;
 disp('Start in 5 seconds!')
-flag_show = 0;
+
+% set initial interation number as zero
+iter = 0;
+
+% data preallocation 
+data_for_plot = zeros(100, 18);
 
 %close existing memory of port object
 if ~isempty(instrfind)
@@ -21,7 +31,7 @@ hex_prefix = 64;
 hex_postfix = 255;
 
 %open serial port
-ser = serial('COM8');
+ser = serial('COM3');
 ser.Baudrate = 115200;
 fopen(ser);
 
@@ -78,70 +88,29 @@ while(true)
             [bx{4}, by{4}, bz{4}] = getMagneticValue(sensor4);
             [bx{5}, by{5}, bz{5}] = getMagneticValue(sensor5);
             [bx{6}, by{6}, bz{6}] = getMagneticValue(sensor6);
+                      
             
+            fprintf('iter %d: ', iter);
+            fprintf(' sensor 1 X value: %04.3f, %04.3f, %04.3f, sensor2 X value: %04.3f, %04.3f, %04.3f', bx{1}, by{1}, bz{1}, bx{2}, by{2}, bz{2})
+            fprintf(' sensor 3: %04.3f, %04.3f, %04.3f, sensor4 : %04.3f, %04.3f, %04.3f', bx{3}, by{3}, bz{3}, bx{4}, by{4}, bz{4})
+            fprintf(' sensor 5: %04.3f, %04.3f, %04.3f, sensor6 : %04.3f, %04.3f, %04.3f\n', bx{5}, by{5}, bz{5}, bx{6}, by{6}, bz{6})
+                     
+           iter = iter + 1;
            
-            
-           %% SAVE data
-           if flag_show == 0
-                fprintf(' sensor1 X value: %+3.3f, sensor2 X value: %+3.3f, count_bx = %d\n', bx{1}, bx{2}, count_bx)
-           elseif flag_show == 1
-                fprintf(' sensor3 X value: %+3.3f, sensor4 X value: %+3.3f, count_bx = %d\n', bx{3}, bx{4}, count_bx)
-           elseif flag_show == 3
-                fprintf(' sensor5 X value: %+3.3f, sensor6 X value: %+3.3f, count_bx = %d\n', bx{5}, bx{6}, count_bx)
-           else
-                fprintf('finished\n')
-                exit
+           data_for_plot(iter, :) = [ bx{1} by{1} bz{1} bx{2} by{2} bz{2} bx{3} by{3} bz{3} bx{4} by{4} bz{4} bx{5} by{5} bz{5} bx{6} by{6} bz{6}];
+           plot(data_for_plot)
+           legend bx1 by1 bz1 bx2 by2 bz2 bx3 by3 bz3 bx4 by4 bz4 bx5 by5 bz5 bx6 by6 bz6
+           fprintf(fileID, '%04.3f,%04.3f,%04.3f,', bx{1}, by{1}, bz{1});
+           fprintf(fileID, '%04.3f,%04.3f,%04.3f,', bx{2}, by{2}, bz{2});
+           fprintf(fileID, '%04.3f,%04.3f,%04.3f,', bx{3}, by{3}, bz{3});
+           fprintf(fileID, '%04.3f,%04.3f,%04.3f,', bx{4}, by{4}, bz{4});
+           fprintf(fileID, '%04.3f,%04.3f,%04.3f,', bx{5}, by{5}, bz{5});
+           fprintf(fileID, '%04.3f,%04.3f,%04.3f', bx{6}, by{6}, bz{6});
+           fprintf(fileID, '\n');
+           
+            if iter == num_iteration
+              break; 
            end
-%             fprintf(' sensor 1 X value: %04.3f, %04.3f, %04.3f, sensor2 X value: %04.3f, %04.3f, %04.3f', bx{1}, by{1}, bz{1}, bx{2}, by{2}, bz{2})
-%             fprintf(' sensor 3: %04.3f, %04.3f, %04.3f, sensor4 : %04.3f, %04.3f, %04.3f', bx{3}, by{3}, bz{3}, bx{4}, by{4}, bz{4})
-%             fprintf(' sensor 5: %04.3f, %04.3f, %04.3f, sensor6 : %04.3f, %04.3f, %04.3f\n', bx{5}, by{5}, bz{5}, bx{6}, by{6}, bz{6})
-            
-            if bx{1} == 0 && bx{2} == 0 && flag_show == 0 
-                for idx=1:1:6
-                    fprintf(fileID, '%04.3f,%04.3f,%04.3f,', bx{idx}, by{idx}, bz{idx});
-                end
-                fprintf(fileID, '\n');
-                count_bx = count_bx + 1;
-                if count_bx == 10
-                    flag_show = bitor(flag_show, 1);
-                    count_bx = 0;
-                end
-            end
-            
-            if bx{3} == 0 && bx{4} == 0 && flag_show == 1 
-                for idx=1:1:6
-                    fprintf(fileID, '%04.3f,%04.3f,%04.3f,', bx{idx}, by{idx}, bz{idx});
-                end
-                fprintf(fileID, '\n');
-                count_bx = count_bx + 1;
-                if count_bx == 10
-                    flag_show = bitor(flag_show, 2);
-                    count_bx = 0;
-                end
-            end
-            
-            if bx{5} == 0 && bx{6} == 0 && flag_show == 3
-                for idx=1:1:6
-                    fprintf(fileID, '%04.3f,%04.3f,%04.3f,', bx{idx}, by{idx}, bz{idx});
-                end
-                fprintf(fileID, '\n');
-                count_bx = count_bx + 1;
-                if count_bx == 10
-                    flag_show = bitor(flag_show, 4);
-                     count_bx = 0;
-                     break;
-                end
-                
-            end
-                
-                    
-%                 fprintf(fileID, '%04.3f,%04.3f,%04.3f', bx{1}, by{1}, bz{1});
-%                 fprintf(fileID, '%04.3f,%04.3f,%04.3f', bx{2}, by{1}, bz{1});
-%                 fprintf(fileID, '%04.3f,%04.3f,%04.3f', bx{3}, by{1}, bz{1});
-%                 fprintf(fileID, '%04.3f,%04.3f,%04.3f', bx{4}, by{1}, bz{1});
-%                 fprintf(fileID, '%04.3f,%04.3f,%04.3f', bx{5}, by{1}, bz{1});
-%                 fprintf(fileID, '%04.3f,%04.3f,%04.3f', bx{6}, by{1}, bz{1});
-            
             
            
                         
