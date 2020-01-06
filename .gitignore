@@ -1,3 +1,4 @@
 *.asv
 *.jpg
 *.mat
+!Synthetic_Simulation/ThreeFingers/pos_calibration.mat
