@@ -65,7 +65,14 @@ plotThreeFingers(Origin, pos_frame)
 % load positions for CAD zig
 load pos_calibration.mat
 
-
+% plot positions for CAD zig
+color_position = {[0 0 0], [1 0 0], [0 0 1]};
+for finger=1:num_fingers
+    for row=1:size(pos_calibZig{1,finger}, 1)
+        plot3(pos_calibZig{1,finger}(row,1), pos_calibZig{1,finger}(row,2), pos_calibZig{1,finger}(row,3), '-o','MarkerSize',4,'MarkerFaceColor', color_position{finger}, 'MarkerEdgeColor', color_position{finger})
+        hold on
+    end
+end
 
 
 
