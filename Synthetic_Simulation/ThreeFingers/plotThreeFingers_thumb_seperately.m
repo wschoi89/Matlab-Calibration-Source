@@ -32,7 +32,7 @@ DH_ref = [0 0     0   -pi/2;
           0 0      0   0;
           0 0      0   0;
           0 -pi/2  0   0;];
-
+ 
 DH_table = zeros(num_DHjoints, num_param_per_joint, num_fingers);
 mat_transform = cell(1, num_DHjoints, num_fingers);
 frame = cell(1, 7, 3);
@@ -180,6 +180,33 @@ for n_pos=1:num_zigThumbPos
             DH_temp(5,2)=jointAngles_temp(row_sample,4*(finger-1)+3);
             DH_temp(6,2)=jointAngles_temp(row_sample,4*(finger-1)+4);
             DH_temp(2:end,3) = arr_links(:,finger);
+            % add calibrated parameters
+            if finger==1
+                load optimized_parameter_thumb.mat
+            elseif finger==2
+                load optimized_parameter_index.mat
+            elseif finger==3
+                load optimized_parameter_middle.mat
+            end
+                DH_temp(2,2)=DH_temp(2,2)+list_optParam(1);
+                DH_temp(3,2)=DH_temp(3,2)+list_optParam(2);
+                DH_temp(5,2)=DH_temp(5,2)+list_optParam(3);
+                DH_temp(6,2)=DH_temp(6,2)+list_optParam(4);
+                
+                DH_temp(1,1)=DH_temp(1,1)+list_optParam(5);                DH_temp(1,3)=DH_temp(1,3)+list_optParam(6);
+                DH_temp(2,1)=DH_temp(2,1)+list_optParam(7);                DH_temp(2,3)=DH_temp(2,3)+list_optParam(8);
+                DH_temp(3,1)=DH_temp(3,1)+list_optParam(9);                DH_temp(3,3)=DH_temp(3,3)+list_optParam(10);
+                DH_temp(5,1)=DH_temp(5,1)+list_optParam(11);               DH_temp(5,3)=DH_temp(5,3)+list_optParam(12);
+                DH_temp(6,1)=DH_temp(6,1)+list_optParam(13);               DH_temp(6,3)=DH_temp(6,3)+list_optParam(14);
+                
+                DH_temp(1,2)=DH_temp(1,2)+list_optParam(15);               DH_temp(1,4)=DH_temp(1,4)+list_optParam(16);
+                                                                           DH_temp(2,4)=DH_temp(2,4)+list_optParam(17);
+                                                                           DH_temp(3,4)=DH_temp(3,4)+list_optParam(18);
+                                                                           DH_temp(5,4)=DH_temp(5,4)+list_optParam(19);
+                                                                           DH_temp(6,4)=DH_temp(6,4)+list_optParam(20);
+               
+            
+            
             DH_table(:,:,finger) = DH_temp;
 
             for joint=1:num_DHjoints
@@ -312,7 +339,7 @@ title('Index and Middle fingers')
 
 
 % save data
-save('training_test_data.mat', 'arr_jointAngles', 'pos_calibZig', 'pos_endEffector')
+% save('training_test_data.mat', 'arr_jointAngles', 'pos_calibZig', 'pos_endEffector')
 
 % thumb 21°³ position(x,y,z) 100 °³, 21*3*100
 % CAD_thumb : 21°³ x,y,z 21*3
