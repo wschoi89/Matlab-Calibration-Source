@@ -39,7 +39,7 @@ data_jointAngle_middle = data_jointAngle_indexMiddle(:,5:8);
 
 for p=1:page
     data_training(row*(p-1)+1:row*p,:) = training_index(:,:,p);
-    data_jointAngle_index(row*(p-1)+1:row*p,:) = jointAngle(:,5:8,p);
+    data_jointAngle_index(row*(p-1)+1:row*p,:) = arr_jointAngles(:,5:8,p);
     for r=1:row
         data_test(100*(p-1)+r,:) = test_index(p,1:3);
         
