@@ -267,22 +267,46 @@ std=reshape(arr_mean_dist{1,1}(2,4,:), [21 1]);
 errorbar(x,y,std,'s', 'Color', 'r')
 xlabel('position')
 ylabel('distance error(mm)')
+legend Thumb
 
 subplot(2,2,4);
 x=1:1:num_zigIndexPos;
 y=reshape(arr_mean_dist{1,2}(1,4,:), [num_zigIndexPos 1]);
 std=reshape(arr_mean_dist{1,2}(2,4,:), [num_zigIndexPos 1]);
 errorbar(x,y,std,'s', 'Color', [0 0.5 0])
-
 hold on
 
 x=1:1:num_zigMiddlePos;
 y=reshape(arr_mean_dist{1,3}(1,4,:), [num_zigMiddlePos 1]);
 std=reshape(arr_mean_dist{1,3}(2,4,:), [num_zigMiddlePos 1]);
 errorbar(x,y,std,'s', 'Color', 'b')
+legend Index Middle
 
 xlabel('position')
 ylabel('distance error(mm)')
+
+
+% add texts for positions
+subplot(2,2,1);
+txt = {'Postion 1'};
+t = text(pos_calibZig{1,1}(1,1),pos_calibZig{1,1}(1,2),pos_calibZig{1,1}(1,3)-10, txt);
+txt = {'Postion 3'};
+t = text(pos_calibZig{1,1}(3,1),pos_calibZig{1,1}(3,2),pos_calibZig{1,1}(3,3)-10, txt);
+txt = {'Postion 21'};
+t = text(pos_calibZig{1,1}(21,1),pos_calibZig{1,1}(21,2),pos_calibZig{1,1}(21,3)+10, txt);
+xlabel('mm')
+ylabel('mm')
+title('Thumb')
+
+subplot(2,2,2);
+txt = {'Postion 1'};
+t = text(pos_calibZig{1,2}(1,1),pos_calibZig{1,2}(1,2),pos_calibZig{1,2}(1,3)-10, txt);
+txt = {'Postion 4'};
+t = text(pos_calibZig{1,2}(4,1),pos_calibZig{1,2}(4,2),pos_calibZig{1,2}(4,3)-10, txt);
+xlabel('mm')
+ylabel('mm')
+title('Index and Middle fingers')
+
 
 
 
