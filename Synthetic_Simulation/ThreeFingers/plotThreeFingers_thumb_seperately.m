@@ -181,32 +181,32 @@ for n_pos=1:num_zigThumbPos
             DH_temp(6,2)=jointAngles_temp(row_sample,4*(finger-1)+4);
             DH_temp(2:end,3) = arr_links(:,finger);
             % add calibrated parameters
-            if finger==1
-                load optimized_parameter_thumb.mat
-            elseif finger==2
-                load optimized_parameter_index.mat
-            elseif finger==3
-                load optimized_parameter_middle.mat
-            end
-                DH_temp(2,2)=DH_temp(2,2)+list_optParam(1);
-                DH_temp(3,2)=DH_temp(3,2)+list_optParam(2);
-                DH_temp(5,2)=DH_temp(5,2)+list_optParam(3);
-                DH_temp(6,2)=DH_temp(6,2)+list_optParam(4);
-                
-                DH_temp(1,1)=DH_temp(1,1)+list_optParam(5);                DH_temp(1,3)=DH_temp(1,3)+list_optParam(6);
-                DH_temp(2,1)=DH_temp(2,1)+list_optParam(7);                DH_temp(2,3)=DH_temp(2,3)+list_optParam(8);
-                DH_temp(3,1)=DH_temp(3,1)+list_optParam(9);                DH_temp(3,3)=DH_temp(3,3)+list_optParam(10);
-                DH_temp(5,1)=DH_temp(5,1)+list_optParam(11);               DH_temp(5,3)=DH_temp(5,3)+list_optParam(12);
-                DH_temp(6,1)=DH_temp(6,1)+list_optParam(13);               DH_temp(6,3)=DH_temp(6,3)+list_optParam(14);
-                
-                DH_temp(1,2)=DH_temp(1,2)+list_optParam(15);               DH_temp(1,4)=DH_temp(1,4)+list_optParam(16);
-                                                                           DH_temp(2,4)=DH_temp(2,4)+list_optParam(17);
-                                                                           DH_temp(3,4)=DH_temp(3,4)+list_optParam(18);
-                                                                           DH_temp(5,4)=DH_temp(5,4)+list_optParam(19);
-                                                                           DH_temp(6,4)=DH_temp(6,4)+list_optParam(20);
-               
-            
-            
+%             if finger==1
+%                 load optimized_parameter_thumb.mat
+%             elseif finger==2
+%                 load optimized_parameter_index.mat
+%             elseif finger==3
+%                 load optimized_parameter_middle.mat
+%             end
+%                 % sensor offset
+%                 DH_temp(2,2)=DH_temp(2,2)+list_optParam(1);
+%                 DH_temp(3,2)=DH_temp(3,2)+list_optParam(2);
+%                 DH_temp(5,2)=DH_temp(5,2)+list_optParam(3);
+%                 DH_temp(6,2)=DH_temp(6,2)+list_optParam(4);
+%                 
+%                 % DH parameters
+%                 DH_temp(1,1)=DH_temp(1,1)+list_optParam(5);                DH_temp(1,3)=DH_temp(1,3)+list_optParam(6);
+%                 DH_temp(2,1)=DH_temp(2,1)+list_optParam(7);                DH_temp(2,3)=DH_temp(2,3)+list_optParam(8);
+%                 DH_temp(3,1)=DH_temp(3,1)+list_optParam(9);                DH_temp(3,3)=DH_temp(3,3)+list_optParam(10);
+%                 DH_temp(5,1)=DH_temp(5,1)+list_optParam(11);               DH_temp(5,3)=DH_temp(5,3)+list_optParam(12);
+%                 DH_temp(6,1)=DH_temp(6,1)+list_optParam(13);               DH_temp(6,3)=DH_temp(6,3)+list_optParam(14);
+%                 
+%                 DH_temp(1,2)=DH_temp(1,2)+list_optParam(15);               DH_temp(1,4)=DH_temp(1,4)+list_optParam(16);
+%                                                                            DH_temp(2,4)=DH_temp(2,4)+list_optParam(17);
+%                                                                            DH_temp(3,4)=DH_temp(3,4)+list_optParam(18);
+%                                                                            DH_temp(5,4)=DH_temp(5,4)+list_optParam(19);
+%                                                                            DH_temp(6,4)=DH_temp(6,4)+list_optParam(20);
+                        
             DH_table(:,:,finger) = DH_temp;
 
             for joint=1:num_DHjoints
@@ -287,6 +287,7 @@ for finger=1:num_fingers
     end
 end
 
+% plot distance error and variance (thumb)
 subplot(2,2,3);
 x=1:1:num_zigThumbPos;
 y=reshape(arr_mean_dist{1,1}(1,4,:), [21 1]);
@@ -296,6 +297,8 @@ xlabel('position')
 ylabel('distance error(mm)')
 legend Thumb
 
+
+% plot distance error and variance (index)
 subplot(2,2,4);
 x=1:1:num_zigIndexPos;
 y=reshape(arr_mean_dist{1,2}(1,4,:), [num_zigIndexPos 1]);
@@ -303,6 +306,7 @@ std=reshape(arr_mean_dist{1,2}(2,4,:), [num_zigIndexPos 1]);
 errorbar(x,y,std,'s', 'Color', [0 0.5 0])
 hold on
 
+% plot distance error and variance (middle)
 x=1:1:num_zigMiddlePos;
 y=reshape(arr_mean_dist{1,3}(1,4,:), [num_zigMiddlePos 1]);
 std=reshape(arr_mean_dist{1,3}(2,4,:), [num_zigMiddlePos 1]);
@@ -333,6 +337,7 @@ t = text(pos_calibZig{1,2}(4,1),pos_calibZig{1,2}(4,2),pos_calibZig{1,2}(4,3)-10
 xlabel('mm')
 ylabel('mm')
 title('Index and Middle fingers')
+hold on
 
 
 
