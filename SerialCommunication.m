@@ -2,16 +2,16 @@ clear
 clc
 close all
 
-
-
 %file open for offset data recording
 if mkdir('DAQ')==false
     mkdir('DAQ');
 end
 
-fileID = fopen('DAQ/200102_DAQ_T1_I1_M1.csv', 'w');
+fileID = fopen('DAQ/200114_DAQ_T21_I21_M21.csv', 'w');
 num_iteration = 100;
 disp('Start in 5 seconds!')
+
+COM_PORT='COM5';
 
 % set initial interation number as zero
 iter = 0;
@@ -31,7 +31,7 @@ hex_prefix = 64;
 hex_postfix = 255;
 
 %open serial port
-ser = serial('COM3');
+ser = serial(COM_PORT);
 ser.Baudrate = 115200;
 fopen(ser);
 
