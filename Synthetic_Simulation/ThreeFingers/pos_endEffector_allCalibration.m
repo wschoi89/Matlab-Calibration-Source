@@ -10,7 +10,7 @@ A3 = parameter_input(9);                           C3 = parameter_input(10); D3 
 A5 = parameter_input(11);                           C5 = parameter_input(12); D5 = parameter_input(19);
 A6 = parameter_input(13);                           C6 = parameter_input(14);D6 = parameter_input(20);
 
-% pos_reference = data(:, 12:14);
+
 pos_reference = data(:, 5:7);
         
     for i=1:size(data, 1)
