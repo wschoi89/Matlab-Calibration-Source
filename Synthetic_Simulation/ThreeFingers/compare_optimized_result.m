@@ -2,30 +2,31 @@ clear
 clc
 close all
 
+
+device_name='device3';
+
 %load link lengths for thumb, index, and middle devices
 arr_links = loadLinkLength();
 
-num_DHjoints = 7;
-num_param_per_joint = 4; % DH parameter
-num_fingers = 3;
-num_angles = 4;
-num_zigThumbPos = 21;
-num_zigIndexPos = 16;
-num_zigMiddlePos = 16;
-num_data = 100;
+num_DHjoints = 7; % the joint number in DH table
+num_param_per_joint = 4; % DH parameter per joint
+num_fingers = 3; % the number of device fingers
+num_angles = 4; % device angle
+
+num_zigPos = [21, 16, 16]; % thumb, index, middle 
+num_samples = 100; % samples per position
 
 % set each finger's origin position
-Origin_index = eye(4);
-% depending on the cad model?? yes
 Origin_thumb = eye(4);
+Origin_index = eye(4);
 Origin_middle = Origin_index*transl(0,0,19);
 
-Origin = zeros(4, 4, num_fingers);
-Origin(:,:,1) = Origin_thumb;
-Origin(:,:,2) = Origin_index;
-Origin(:,:,3) = Origin_middle;
+Origin = cell(1,3);
+Origin{1,1} = Origin_thumb;
+Origin{1,2} = Origin_index;
+Origin{1,3} = Origin_middle;
 
-DH_ref = [0 0     0   -pi/2;
+DH_ref = [0 0      0   -pi/2;
           0 0      0   pi/2;
           0 0      0   0;
           0 -pi/2  0   0;
@@ -37,17 +38,15 @@ DH_table = zeros(num_DHjoints, num_param_per_joint, num_fingers);
 mat_transform = cell(1, num_DHjoints, num_fingers);
 frame = cell(1, 7, 3);
 pos_frame = cell(1, num_DHjoints, num_fingers);
+
 pos_endEffector_noCalib = cell(1,3);
 pos_endEffector_Calib = cell(1,3);
-arr_jointAngles = zeros(num_data, num_angles*num_fingers, num_zigThumbPos);
+arr_jointAngles = zeros(num_samples, num_angles*num_fingers, num_zigPos(1));
 
-pos_endEffector_noCalib{1,1} = zeros(num_data,3,num_zigThumbPos);
-pos_endEffector_noCalib{1,2} = zeros(num_data,3,num_zigIndexPos);
-pos_endEffector_noCalib{1,3} = zeros(num_data,3,num_zigMiddlePos);
-
-pos_endEffector_Calib{1,1} = zeros(num_data,3,num_zigThumbPos);
-pos_endEffector_Calib{1,2} = zeros(num_data,3,num_zigIndexPos);
-pos_endEffector_Calib{1,3} = zeros(num_data,3,num_zigMiddlePos);
+for finger=1:num_fingers
+    pos_endEffector_noCalib{1,finger} = zeros(num_samples,3,num_zigPos(finger));    
+    pos_endEffector_Calib{1,finger}=zeros(num_samples,3,num_zigPos(finger)); 
+end
 
 % for finger=1:num_fingers
 % %     angle_TH1(i) = -30+60*rand(1);
@@ -81,93 +80,77 @@ pos_endEffector_Calib{1,3} = zeros(num_data,3,num_zigMiddlePos);
 % load positions for CAD zig
 load pos_calibration_thumb_seperately.mat
 
-% color for each finger (thumb, index,and middle finger)
-color_zigPosition = {[1 0 0], [0 0.5 0], [0 0 1]};
+%% plot finger's origin
+color_zigPosition = {[1 0 0], [0 0.5 0], [0 0 1]}; % color for each finger (thumb, index,and middle finger)
 figure;
-subplot(2,2,1);
-% plot thumb's origin
-plot3(Origin_thumb(1,4), Origin_thumb(2,4), Origin_thumb(3,4), '-o','MarkerSize',10,'MarkerFaceColor', color_zigPosition{1}, 'MarkerEdgeColor', color_zigPosition{1})
-hold on
-subplot(2,2,2);
-% plot index and middle finger's origin
-plot3(Origin_index(1,4), Origin_index(2,4), Origin_index(3,4), '-o','MarkerSize',10,'MarkerFaceColor', color_zigPosition{2}, 'MarkerEdgeColor', color_zigPosition{2})
-hold on
-plot3(Origin_middle(1,4), Origin_middle(2,4), Origin_middle(3,4), '-o','MarkerSize',10,'MarkerFaceColor',color_zigPosition{3}, 'MarkerEdgeColor',color_zigPosition{3})
-hold on
+for finger=1:num_fingers
+    if finger==1 % Thumb
+        subplot(2,2,1);
+    elseif finger==2 || finger==3 % index and middle fingers
+        subplot(2,2,2);
+    end
+    % plot each finger's origin
+    plot3(Origin{1,finger}(1,4), Origin{1,finger}(2,4), Origin{1,finger}(3,4), '-o','MarkerSize',10,'MarkerFaceColor', color_zigPosition{finger}, 'MarkerEdgeColor', color_zigPosition{finger})
+    hold on
+end
 
+%% plot real end-effector position
 for finger=1:num_fingers
     if finger==1
         subplot(2,2,1);
-        % plot thumb zig positions
-        for row=1:size(pos_calibZig{1,finger}, 1)
-            plot3(pos_calibZig{1,finger}(row,1), pos_calibZig{1,finger}(row,2), pos_calibZig{1,finger}(row,3), '-o','MarkerSize',4,'MarkerFaceColor', color_zigPosition{finger}, 'MarkerEdgeColor', color_zigPosition{finger})
-            hold on
-        end
-       
-        view(-180,0)
-        
-        
     else
         subplot(2,2,2);
+    end
         % plot index and middle finger's zig positions
         for row=1:size(pos_calibZig{1,finger}, 1)
-            plot3(pos_calibZig{1,finger}(row,1), pos_calibZig{1,finger}(row,2), pos_calibZig{1,finger}(row,3), '-o','MarkerSize',4,'MarkerFaceColor', color_zigPosition{finger}, 'MarkerEdgeColor', color_zigPosition{finger})
+            plot3(pos_calibZig{1,finger}(row,1), pos_calibZig{1,finger}(row,2), pos_calibZig{1,finger}(row,3), '-o','MarkerSize',8,'MarkerFaceColor', color_zigPosition{finger}, 'MarkerEdgeColor', color_zigPosition{finger});
             hold on
         end
         view(-180,0)
-    end
 end
 
 %% plot Origins which projected on the zig plane.
 Origin_projToPlane = Origin;
-Origin_projToPlane(2,4,1) = pos_calibZig{1, 1}(1,2);
-Origin_projToPlane(2,4,2) = pos_calibZig{1, 2}(1,2);
-Origin_projToPlane(2,4,3) = pos_calibZig{1, 3}(1,2);
-Origin_thumb_projToPlane = Origin_projToPlane(:,:,1);
-Origin_index_projToPlane = Origin_projToPlane(:,:,2);
-Origin_middle_projToPlane = Origin_projToPlane(:,:,3);
-subplot(2,2,1);
-% plot thumb's origin
-plot3(Origin_thumb_projToPlane(1,4), Origin_thumb_projToPlane(2,4), Origin_thumb_projToPlane(3,4), '-o','MarkerSize',10,'MarkerFaceColor', color_zigPosition{1}, 'MarkerEdgeColor', [0 0 0])
-hold on
-subplot(2,2,2);
-% plot index and middle finger's origin
-plot3(Origin_index_projToPlane(1,4), Origin_index_projToPlane(2,4), Origin_index_projToPlane(3,4), '-o','MarkerSize',10,'MarkerFaceColor', color_zigPosition{2}, 'MarkerEdgeColor', [0 0 0])
-hold on
-plot3(Origin_middle_projToPlane(1,4), Origin_middle_projToPlane(2,4), Origin_middle_projToPlane(3,4), '-o','MarkerSize',10,'MarkerFaceColor',color_zigPosition{3}, 'MarkerEdgeColor',[0 0 0])
-hold on
+
+for finger=1:num_fingers
+   if finger==1
+       subplot(2,2,1);
+   elseif finger==2 || finger==3
+       subplot(2,2,2);
+   end
+   Origin_projToPlane{1,finger}(2,4) = pos_calibZig{1,finger}(1,2); % y axis
+   plot3(Origin_projToPlane{1,finger}(1,4), Origin_projToPlane{1,finger}(2,4), Origin_projToPlane{1,finger}(3,4), '-o','MarkerSize',10,'MarkerFaceColor', color_zigPosition{finger}, 'MarkerEdgeColor', [0 0 0])
+   hold on
+end
 
 %% draw line to connect zig positions
-subplot(2,2,1);
-%thumb
-for row=1:size(pos_calibZig{1,1}, 1) 
-    plot3([Origin_thumb_projToPlane(1,4) pos_calibZig{1,1}(row,1)], [Origin_thumb_projToPlane(2,4) pos_calibZig{1,1}(row,2)], [Origin_thumb_projToPlane(3,4) pos_calibZig{1,1}(row,3)], 'Color', [1 0 0])
-    hold on
+for finger=1:num_fingers
+   if finger==1
+       subplot(2,2,1);
+   elseif finger==2 || finger==3
+      subplot(2,2,2); 
+   end
+   for row=1:size(pos_calibZig{1,finger}, 1) 
+      plot3([Origin_projToPlane{1,finger}(1,4) pos_calibZig{1,finger}(row,1)], [Origin_projToPlane{1,finger}(2,4) pos_calibZig{1,finger}(row,2)], [Origin_projToPlane{1,finger}(3,4) pos_calibZig{1,finger}(row,3)], 'Color', 'k')
+      hold on
+   end
+   
 end
 
-subplot(2,2,2);
-% index finger
-for row=1:size(pos_calibZig{1,2}, 1) 
-    plot3([Origin_index_projToPlane(1,4) pos_calibZig{1,2}(row,1)], [Origin_index_projToPlane(2,4) pos_calibZig{1,2}(row,2)], [Origin_index_projToPlane(3,4) pos_calibZig{1,2}(row,3)],'Color',[0 0.5 0])
-    hold on
+% preallocate magnetic data size 
+magnetic_data = cell(1, num_zigPos(1));
+for n_pos=1:num_zigPos(1)
+   magnetic_data{1,n_pos} = zeros(num_samples, num_angles*num_fingers); 
 end
 
-% middle finger
-for row=1:size(pos_calibZig{1,3}, 1) 
-    plot3([Origin_middle_projToPlane(1,4) pos_calibZig{1,3}(row,1)], [Origin_middle_projToPlane(2,4) pos_calibZig{1,3}(row,2)], [Origin_middle_projToPlane(3,4) pos_calibZig{1,3}(row,3)],'Color',[0 0 1])
-    hold on
-end
-
-
-%%  load magnet data from files
-
-for n_pos=1:num_zigThumbPos
+%%  load magnet data from files and calculate estimated end-effector without calibration
+for n_pos=1:num_zigPos(1) % the number of thumb zig positions
     
-    fileName_magneticData=strcat('../DAQ/200102_DAQ_T',num2str(n_pos),'_I',num2str(n_pos),'_M',num2str(n_pos),'.csv');
-    magnetic_data = load(fileName_magneticData);
+    fileName_magneticData=strcat('../DAQ/',device_name,'/',device_name,'_DAQ_T',num2str(n_pos),'_I',num2str(n_pos),'_M',num2str(n_pos),'.csv');
+    magnetic_data{1,n_pos} = load(fileName_magneticData);
 
     % convert magnetic data into joint angles
-    arr_jointAngles(:,:,n_pos) = getJointAngle(magnetic_data);
+    arr_jointAngles(:,:,n_pos) = getJointAngle(magnetic_data{1,n_pos});
 
     % preallocate the size of pos_frame 
     for finger=1:num_fingers
@@ -186,33 +169,7 @@ for n_pos=1:num_zigThumbPos
             DH_temp(5,2)=jointAngles_temp(row_sample,4*(finger-1)+3);
             DH_temp(6,2)=jointAngles_temp(row_sample,4*(finger-1)+4);
             DH_temp(2:end,3) = arr_links(:,finger);
-            % add calibrated parameters
-%             if finger==1
-%                 load optimized_parameter_thumb.mat
-%             elseif finger==2
-%                 load optimized_parameter_index.mat
-%             elseif finger==3
-%                 load optimized_parameter_middle.mat
-%             end
-%                 % sensor offset
-%                 DH_temp(2,2)=DH_temp(2,2)+list_optParam(1);
-%                 DH_temp(3,2)=DH_temp(3,2)+list_optParam(2);
-%                 DH_temp(5,2)=DH_temp(5,2)+list_optParam(3);
-%                 DH_temp(6,2)=DH_temp(6,2)+list_optParam(4);
-%                 
-%                 % DH parameters
-%                 DH_temp(1,1)=DH_temp(1,1)+list_optParam(5);                DH_temp(1,3)=DH_temp(1,3)+list_optParam(6);
-%                 DH_temp(2,1)=DH_temp(2,1)+list_optParam(7);                DH_temp(2,3)=DH_temp(2,3)+list_optParam(8);
-%                 DH_temp(3,1)=DH_temp(3,1)+list_optParam(9);                DH_temp(3,3)=DH_temp(3,3)+list_optParam(10);
-%                 DH_temp(5,1)=DH_temp(5,1)+list_optParam(11);               DH_temp(5,3)=DH_temp(5,3)+list_optParam(12);
-%                 DH_temp(6,1)=DH_temp(6,1)+list_optParam(13);               DH_temp(6,3)=DH_temp(6,3)+list_optParam(14);
-%                 
-%                 DH_temp(1,2)=DH_temp(1,2)+list_optParam(15);               DH_temp(1,4)=DH_temp(1,4)+list_optParam(16);
-%                                                                            DH_temp(2,4)=DH_temp(2,4)+list_optParam(17);
-%                                                                            DH_temp(3,4)=DH_temp(3,4)+list_optParam(18);
-%                                                                            DH_temp(5,4)=DH_temp(5,4)+list_optParam(19);
-%                                                                            DH_temp(6,4)=DH_temp(6,4)+list_optParam(20);
-                        
+
             DH_table(:,:,finger) = DH_temp;
 
             for joint=1:num_DHjoints
@@ -221,7 +178,8 @@ for n_pos=1:num_zigThumbPos
 
                 %frame's transform matrix 
                 if joint == 1
-                    frame{1,joint,finger} = Origin(:,:,finger)*cell2mat(mat_transform(1,1,finger));
+%                     frame{1,joint,finger} = Origin(:,:,finger)*cell2mat(mat_transform(1,1,finger));
+                    frame{1,joint,finger} = Origin{1,finger}*cell2mat(mat_transform(1,1,finger));
                 else
                     frame{1,joint, finger} = cell2mat(frame(1,joint-1,finger))*cell2mat(mat_transform(1,joint,finger));
                 end
@@ -232,8 +190,7 @@ for n_pos=1:num_zigThumbPos
         end
     end
 
-    % calculate end-effector positions
-    
+    % allocate end-effector positions
     color_init_endEffector = {[0.8 0 0], [0 0.5 0], [0 0 0.8]};
     for finger=1:num_fingers 
         if finger==1
@@ -242,12 +199,7 @@ for n_pos=1:num_zigThumbPos
                 pos_endEffector_noCalib{1,finger}(row_sample,:,n_pos) = pos_frame{1,7,finger}(row_sample,:);
             end
              
-        elseif finger == 2 && n_pos<17
-            subplot(2,2,2);
-            for row_sample=1:size(arr_jointAngles,1)
-                pos_endEffector_noCalib{1,finger}(row_sample,:,n_pos) = pos_frame{1,7,finger}(row_sample,:);
-            end
-        elseif finger==3 && n_pos<17
+        elseif (finger == 2 || finger ==3) && n_pos<17
             subplot(2,2,2);
             for row_sample=1:size(arr_jointAngles,1)
                 pos_endEffector_noCalib{1,finger}(row_sample,:,n_pos) = pos_frame{1,7,finger}(row_sample,:);
@@ -256,19 +208,16 @@ for n_pos=1:num_zigThumbPos
     end
 end
 
-% array for each axis distance and 3D distance without calibration
+%% pre-allocate array for distance error without calibration
 arr_distance_noCalib = cell(1,3);
-arr_distance_noCalib{1,1} = zeros(num_data, 4, num_zigThumbPos);
-arr_distance_noCalib{1,2} = zeros(num_data, 4, num_zigIndexPos);
-arr_distance_noCalib{1,3} = zeros(num_data, 4, num_zigMiddlePos);
 % array for distance average and standard deviation without calibration
 arr_mean_dist_noCalib = cell(1,3);
-arr_mean_dist_noCalib{1,1} = zeros(2, 4, num_zigThumbPos);
-arr_mean_dist_noCalib{1,2} = zeros(2, 4, num_zigIndexPos);
-arr_mean_dist_noCalib{1,3} = zeros(2, 4, num_zigMiddlePos);
+for finger=1:num_fingers
+    arr_distance_noCalib{1,finger} = zeros(num_samples, 4, num_zigPos(finger)); 
+    arr_mean_dist_noCalib{1,finger} = zeros(2, 4, num_zigPos(finger));
+end
 
-
-% calculated the distance between zig position and calculated end-effector
+%% calculated the distance between zig position and calculated end-effector
 % without calibration
 
 for finger=1:num_fingers
@@ -281,7 +230,7 @@ for finger=1:num_fingers
     end
 end
 
-% array for mean and std distance error
+%% allocate mean and std distance error
 for finger=1:num_fingers
     [row,col,page] = size(arr_distance_noCalib{1,finger});
     for p=1:page
@@ -292,95 +241,68 @@ for finger=1:num_fingers
     end
 end
 
-% plot calculated end-effector's mean without calibration
+%% plot calculated end-effector's mean without calibration
  for finger=1:num_fingers 
     if finger==1
         subplot(2,2,1);
-        [row,col,page] = size(arr_distance_noCalib{1,finger});
-        for p=1:page
-            plot3(mean(pos_endEffector_noCalib{1,finger}(:,1,p)),mean(pos_endEffector_noCalib{1,finger}(:,2,p)),mean(pos_endEffector_noCalib{1,finger}(:,3,p)),'-^', 'Color', color_init_endEffector{finger})
-            hold on
-           
-        end
-    elseif finger == 2 
+    elseif finger==2 || finger==3
         subplot(2,2,2);
-        [row,col,page] = size(arr_distance_noCalib{1,finger});
-        for p=1:page
-            plot3(mean(pos_endEffector_noCalib{1,finger}(:,1,p)),mean(pos_endEffector_noCalib{1,finger}(:,2,p)),mean(pos_endEffector_noCalib{1,finger}(:,3,p)),'-^', 'Color', color_init_endEffector{finger})
-            hold on
-           
-        end
-    elseif finger==3 
-        subplot(2,2,2);
-        [row,col,page] = size(arr_distance_noCalib{1,finger});
-        for p=1:page
-            plot3(mean(pos_endEffector_noCalib{1,finger}(:,1,p)),mean(pos_endEffector_noCalib{1,finger}(:,2,p)),mean(pos_endEffector_noCalib{1,finger}(:,3,p)),'-^', 'Color', color_init_endEffector{finger})
-            hold on
-        end
+    end
+    [row,col,page] = size(arr_distance_noCalib{1,finger});
+    for p=1:page
+        plot3(mean(pos_endEffector_noCalib{1,finger}(:,1,p)),mean(pos_endEffector_noCalib{1,finger}(:,2,p)),mean(pos_endEffector_noCalib{1,finger}(:,3,p)),'-^','MarkerSize',15,'MarkerEdgeColor', color_init_endEffector{finger});
+        hold on
     end
 end
 
-% plot distance error and variance (thumb)
-subplot(2,2,3);
-x=1:1:num_zigThumbPos;
-y=reshape(arr_mean_dist_noCalib{1,1}(1,4,:), [21 1]);
-std=reshape(arr_mean_dist_noCalib{1,1}(2,4,:), [21 1]);
-errorbar(x,y,std,'^', 'Color', color_init_endEffector{1}, 'DisplayName', 'thumb w/o calibration')
-xlabel('position')
-ylabel('distance error(mm)')
-hold on
+%% plot distance error and variance
+for finger=1:num_fingers
+   if finger==1
+       subplot(2,2,3);
+   elseif finger==2 || finger==3
+       subplot(2,2,4);
+   end
+   x=1:1:num_zigPos(finger);
+    y=reshape(arr_mean_dist_noCalib{1,finger}(1,4,:), [num_zigPos(finger) 1]);
+    std=reshape(arr_mean_dist_noCalib{1,finger}(2,4,:), [num_zigPos(finger) 1]);
+    errorbar(x,y,std,'^','MarkerSize', 15, 'Color', color_init_endEffector{finger})
+    xlabel('position')
+    ylabel('distance error(mm)')
+    hold on
+end
 
-
-% plot distance error and variance (index)
-subplot(2,2,4);
-x=1:1:num_zigIndexPos;
-y=reshape(arr_mean_dist_noCalib{1,2}(1,4,:), [num_zigIndexPos 1]);
-std=reshape(arr_mean_dist_noCalib{1,2}(2,4,:), [num_zigIndexPos 1]);
-errorbar(x,y,std,'^', 'Color', color_init_endEffector{2}, 'DisplayName', 'index w/o calibration')
-hold on
-
-% plot distance error and variance (middle)
-x=1:1:num_zigMiddlePos;
-y=reshape(arr_mean_dist_noCalib{1,3}(1,4,:), [num_zigMiddlePos 1]);
-std=reshape(arr_mean_dist_noCalib{1,3}(2,4,:), [num_zigMiddlePos 1]);
-errorbar(x,y,std,'^', 'Color', color_init_endEffector{3}, 'DisplayName', 'middle w/o calibration')
-
-xlabel('position')
-ylabel('distance error(mm)')
-
-
-% add texts for positions
+%% add texts for specific zig positions
 subplot(2,2,1);
-txt = {'Postion 1'};
-t = text(pos_calibZig{1,1}(1,1),pos_calibZig{1,1}(1,2),pos_calibZig{1,1}(1,3)-10, txt);
-txt = {'Postion 3'};
-t = text(pos_calibZig{1,1}(3,1),pos_calibZig{1,1}(3,2),pos_calibZig{1,1}(3,3)-10, txt);
-txt = {'Postion 21'};
-t = text(pos_calibZig{1,1}(21,1),pos_calibZig{1,1}(21,2),pos_calibZig{1,1}(21,3)+10, txt);
+txt_t1 = {'Postion 1'};
+text(pos_calibZig{1,1}(1,1),pos_calibZig{1,1}(1,2),pos_calibZig{1,1}(1,3)-10, txt_t1);
+txt_t3 = {'Postion 3'};
+text(pos_calibZig{1,1}(3,1),pos_calibZig{1,1}(3,2),pos_calibZig{1,1}(3,3)-10, txt_t3);
+txt_t21 = {'Postion 21'};
+text(pos_calibZig{1,1}(21,1),pos_calibZig{1,1}(21,2),pos_calibZig{1,1}(21,3)+10, txt_t21);
 xlabel('mm')
-ylabel('mm')
+zlabel('mm')
 title('Thumb')
 
 subplot(2,2,2);
-txt = {'Postion 1'};
-t = text(pos_calibZig{1,2}(1,1),pos_calibZig{1,2}(1,2),pos_calibZig{1,2}(1,3)-10, txt);
-txt = {'Postion 4'};
-t = text(pos_calibZig{1,2}(4,1),pos_calibZig{1,2}(4,2),pos_calibZig{1,2}(4,3)-10, txt);
+txt_i1 = {'Postion 1'};
+text(pos_calibZig{1,2}(1,1),pos_calibZig{1,2}(1,2),pos_calibZig{1,2}(1,3)-10, txt_i1);
+txt_i4 = {'Postion 4'};
+text(pos_calibZig{1,2}(4,1),pos_calibZig{1,2}(4,2),pos_calibZig{1,2}(4,3)-10, txt_i4);
 xlabel('mm')
-ylabel('mm')
+zlabel('mm')
 title('Index and Middle fingers')
 hold on
+% add legend
+subplot(2,2,3); legend('thumb w/o calibration');
+subplot(2,2,4); legend('index w/o calibration', 'middle w/o calibration');
 
 
 %% after calibration
 
-for n_pos=1:num_zigThumbPos
+for n_pos=1:num_zigPos(1)
     
-    fileName_magneticData=strcat('../DAQ/200102_DAQ_T',num2str(n_pos),'_I',num2str(n_pos),'_M',num2str(n_pos),'.csv');
-    magnetic_data = load(fileName_magneticData);
-
     % convert magnetic data into joint angles
-    arr_jointAngles(:,:,n_pos) = getJointAngle(magnetic_data);
+    arr_jointAngles(:,:,n_pos) = getJointAngle(magnetic_data{1,n_pos});
 
     % preallocate the size of pos_frame 
     for finger=1:num_fingers
@@ -401,11 +323,11 @@ for n_pos=1:num_zigThumbPos
             DH_temp(2:end,3) = arr_links(:,finger);
             % add calibrated parameters
             if finger==1
-                load optimized_parameter_thumb.mat
+                load(strcat('Optimized_parameter/',device_name,'/optimized_parameter_thumb.mat'));
             elseif finger==2
-                load optimized_parameter_index.mat
+                load(strcat('Optimized_parameter/',device_name,'/optimized_parameter_index.mat'));
             elseif finger==3
-                load optimized_parameter_middle.mat
+                load(strcat('Optimized_parameter/',device_name,'/optimized_parameter_middle.mat'));
             end
                 % sensor offset
                 DH_temp(2,2)=DH_temp(2,2)+list_optParam(1);
@@ -434,7 +356,7 @@ for n_pos=1:num_zigThumbPos
 
                 %frame's transform matrix 
                 if joint == 1
-                    frame{1,joint,finger} = Origin(:,:,finger)*cell2mat(mat_transform(1,1,finger));
+                    frame{1,joint,finger} = Origin{1,finger}*cell2mat(mat_transform(1,1,finger));
                 else
                     frame{1,joint, finger} = cell2mat(frame(1,joint-1,finger))*cell2mat(mat_transform(1,joint,finger));
                 end
@@ -446,7 +368,6 @@ for n_pos=1:num_zigThumbPos
     end
 
     % save end-effector positions with calibration
-    
     color_init_endEffector = {[0.8 0 0], [0 0.5 0], [0 0 0.8]};
     for finger=1:num_fingers 
         if finger==1
@@ -454,12 +375,7 @@ for n_pos=1:num_zigThumbPos
             for row_sample=1:size(arr_jointAngles,1)
                pos_endEffector_Calib{1,finger}(row_sample,:,n_pos) = pos_frame{1,7,finger}(row_sample,:);
             end
-        elseif finger == 2 && n_pos<17
-            subplot(2,2,2);
-            for row_sample=1:size(arr_jointAngles,1)
-               pos_endEffector_Calib{1,finger}(row_sample,:,n_pos) = pos_frame{1,7,finger}(row_sample,:);
-            end
-        elseif finger==3 && n_pos<17
+        elseif (finger == 2|| finger==3) && n_pos<17
             subplot(2,2,2);
             for row_sample=1:size(arr_jointAngles,1)
                pos_endEffector_Calib{1,finger}(row_sample,:,n_pos) = pos_frame{1,7,finger}(row_sample,:);
@@ -468,46 +384,31 @@ for n_pos=1:num_zigThumbPos
     end
 end
 
+% array for each axis distance and 3D distance with calibration
+arr_distance_Calib = cell(1,3);
+% array for distance average and standard deviation with calibration
+arr_mean_dist_Calib = cell(1,3);
+
+for finger=1:num_fingers
+    arr_distance_Calib{1,finger} = zeros(num_samples, 4, num_zigPos(finger));    
+    arr_mean_dist_Calib{1,finger} = zeros(2, 4, num_zigPos(finger));
+end
+
 
 % plot calculated end-effector's mean with calibration
  for finger=1:num_fingers 
     if finger==1
         subplot(2,2,1);
-        [row,col,page] = size(arr_distance_noCalib{1,finger});
-        for p=1:page
-            plot3(mean(pos_endEffector_Calib{1,finger}(:,1,p)),mean(pos_endEffector_Calib{1,finger}(:,2,p)),mean(pos_endEffector_Calib{1,finger}(:,3,p)),'-s', 'Color', color_init_endEffector{finger})
-            hold on
-           
-        end
-    elseif finger == 2 
+    elseif finger==2 || finger==3
         subplot(2,2,2);
-        [row,col,page] = size(arr_distance_noCalib{1,finger});
-        for p=1:page
-            plot3(mean(pos_endEffector_Calib{1,finger}(:,1,p)),mean(pos_endEffector_Calib{1,finger}(:,2,p)),mean(pos_endEffector_Calib{1,finger}(:,3,p)),'-s', 'Color', color_init_endEffector{finger})
-            hold on
-           
-        end
-    elseif finger==3 
-        subplot(2,2,2);
-        [row,col,page] = size(arr_distance_noCalib{1,finger});
-        for p=1:page
-            plot3(mean(pos_endEffector_Calib{1,finger}(:,1,p)),mean(pos_endEffector_Calib{1,finger}(:,2,p)),mean(pos_endEffector_Calib{1,finger}(:,3,p)),'-s', 'Color', color_init_endEffector{finger})
-            hold on
-        end
     end
- end
-
-% array for each axis distance and 3D distance with calibration
-arr_distance_Calib = cell(1,3);
-arr_distance_Calib{1,1} = zeros(num_data, 4, num_zigThumbPos);
-arr_distance_Calib{1,2} = zeros(num_data, 4, num_zigIndexPos);
-arr_distance_Calib{1,3} = zeros(num_data, 4, num_zigMiddlePos);
-% array for distance average and standard deviation with calibration
-arr_mean_dist_Calib = cell(1,3);
-arr_mean_dist_Calib{1,1} = zeros(2, 4, num_zigThumbPos);
-arr_mean_dist_Calib{1,2} = zeros(2, 4, num_zigIndexPos);
-arr_mean_dist_Calib{1,3} = zeros(2, 4, num_zigMiddlePos);
-
+    [row,col,page] = size(arr_distance_Calib{1,finger});
+    for p=1:page
+        plot3(mean(pos_endEffector_Calib{1,finger}(:,1,p)),mean(pos_endEffector_Calib{1,finger}(:,2,p)),mean(pos_endEffector_Calib{1,finger}(:,3,p)),'-s','MarkerSize',15,'MarkerFaceColor', color_init_endEffector{finger}, 'MarkerEdgeColor', color_init_endEffector{finger});
+        hold on
+    end
+end
+  
 
 % calculated the distance between zig position and calculated end-effector
 % with calibration
@@ -535,31 +436,33 @@ for finger=1:num_fingers
 end
 
 % plot distance error and variance (thumb) with calibration
+for finger=1:num_fingers
+   if finger==1
+       subplot(2,2,3);
+       grid on
+       
+   elseif finger==2 || finger==3
+       subplot(2,2,4);
+       grid on
+   end
+   x=1:1:num_zigPos(finger);
+   y=reshape(arr_mean_dist_Calib{1,finger}(1,4,:), [num_zigPos(finger) 1]);
+   std=reshape(arr_mean_dist_Calib{1,finger}(2,4,:), [num_zigPos(finger) 1]);
+   errorbar(x,y,std,'s','MarkerSize', 15, 'MarkerFaceColor', color_init_endEffector{finger})
+   hold on
+end
 subplot(2,2,3);
-x=1:1:num_zigThumbPos;
-y=reshape(arr_mean_dist_Calib{1,1}(1,4,:), [21 1]);
-std=reshape(arr_mean_dist_Calib{1,1}(2,4,:), [21 1]);
-errorbar(x,y,std,'s', 'Color', color_init_endEffector{1}, 'DisplayName', 'thumb w/ calibration')
 legend('thumb w/o calibration', 'thumb w/ calibration');
-% xlabel('position')
-% ylabel('distance error(mm)')
+xticks([0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22])
+grid on
+hold on
 
-
-% plot distance error and variance (index)
 subplot(2,2,4);
-x=1:1:num_zigIndexPos;
-y=reshape(arr_mean_dist_Calib{1,2}(1,4,:), [num_zigIndexPos 1]);
-std=reshape(arr_mean_dist_Calib{1,2}(2,4,:), [num_zigIndexPos 1]);
-errorbar(x,y,std,'s', 'Color', color_init_endEffector{2},  'DisplayName','index w/ calibration')
+legend('index w/o calibration', 'middle w/o calibration', 'index w/ calibration', 'middle w/ calibration');
+xticks([0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17])
+grid on
 hold on
 
-% plot distance error and variance (middle)
-x=1:1:num_zigMiddlePos;
-y=reshape(arr_mean_dist_Calib{1,3}(1,4,:), [num_zigMiddlePos 1]);
-std=reshape(arr_mean_dist_Calib{1,3}(2,4,:), [num_zigMiddlePos 1]);
-errorbar(x,y,std,'s', 'Color', color_init_endEffector{3}, 'DisplayName','middle w/ calibration')
-legend('index w/o calibration', 'middle w/o calibration', 'index w/ calibration', 'middle w/ calibration');
-hold on
 
 
 
