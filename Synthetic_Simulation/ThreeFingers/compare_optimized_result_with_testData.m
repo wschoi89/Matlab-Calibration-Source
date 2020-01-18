@@ -13,7 +13,7 @@ num_param_per_joint = 4; % DH parameter per joint
 num_fingers = 3; % the number of device fingers
 num_angles = 4; % device angle
 
-num_zigPos = [18, 16, 16]; % thumb, index, middle 
+num_zigPos = [18, 11, 11]; % thumb, index, middle 
 num_samples = 100; % samples per position
 
 % set each finger's origin position
@@ -80,8 +80,8 @@ end
 % plotThreeFingers(Origin, pos_frame)
 
 % load positions for CAD zig
-load pos_calibration_thumb_seperately.mat
-% load pos_calibration_TEST.mat
+% load pos_calibration_thumb_seperately.mat
+load pos_calibration_test_update.mat
 
 
 
@@ -107,8 +107,8 @@ for finger=1:num_fingers
         subplot(2,2,2);
     end
         % plot index and middle finger's zig positions
-        for row=1:size(pos_calibZig{1,finger}, 1)-3
-            plot3(pos_calibZig{1,finger}(row,1), pos_calibZig{1,finger}(row,2), pos_calibZig{1,finger}(row,3), '-o','MarkerSize',8,'MarkerFaceColor', color_zigPosition{finger}, 'MarkerEdgeColor', color_zigPosition{finger});
+        for row=1:size(pos_calibZig_test{1,finger}, 1)-3
+            plot3(pos_calibZig_test{1,finger}(row,1), pos_calibZig_test{1,finger}(row,2), pos_calibZig_test{1,finger}(row,3), '-o','MarkerSize',8,'MarkerFaceColor', color_zigPosition{finger}, 'MarkerEdgeColor', color_zigPosition{finger});
             hold on
         end
         view(-180,0)
@@ -123,7 +123,7 @@ for finger=1:num_fingers
    elseif finger==2 || finger==3
        subplot(2,2,2);
    end
-   Origin_projToPlane{1,finger}(2,4) = pos_calibZig{1,finger}(1,2); % y axis
+   Origin_projToPlane{1,finger}(2,4) = pos_calibZig_test{1,finger}(1,2); % y axis
    plot3(Origin_projToPlane{1,finger}(1,4), Origin_projToPlane{1,finger}(2,4), Origin_projToPlane{1,finger}(3,4), '-o','MarkerSize',10,'MarkerFaceColor', color_zigPosition{finger}, 'MarkerEdgeColor', [0 0 0])
    hold on
 end
@@ -135,8 +135,8 @@ for finger=1:num_fingers
    elseif finger==2 || finger==3
       subplot(2,2,2); 
    end
-   for row=1:size(pos_calibZig{1,finger}, 1) -3
-      plot3([Origin_projToPlane{1,finger}(1,4) pos_calibZig{1,finger}(row,1)], [Origin_projToPlane{1,finger}(2,4) pos_calibZig{1,finger}(row,2)], [Origin_projToPlane{1,finger}(3,4) pos_calibZig{1,finger}(row,3)], 'Color', 'k')
+   for row=1:size(pos_calibZig_test{1,finger}, 1)
+      plot3([Origin_projToPlane{1,finger}(1,4) pos_calibZig_test{1,finger}(row,1)], [Origin_projToPlane{1,finger}(2,4) pos_calibZig_test{1,finger}(row,2)], [Origin_projToPlane{1,finger}(3,4) pos_calibZig_test{1,finger}(row,3)], 'Color', 'k')
       hold on
    end
    
@@ -151,8 +151,8 @@ end
 %%  load magnet data from files and calculate estimated end-effector without calibration
 for n_pos=1:num_zigPos(1) % the number of thumb zig positions
 
-    fileName_magneticData=strcat('DAQ/',device_name,'/training/',device_name,'_DAQ_T',num2str(n_pos),'_I',num2str(n_pos),'_M',num2str(n_pos),'_training.csv');
-% fileName_magneticData=strcat('DAQ/',device_name,'/test/',device_name,'_DAQ_T',num2str(n_pos),'_I',num2str(n_pos),'_M',num2str(n_pos),'_test.csv');
+%     fileName_magneticData=strcat('DAQ/',device_name,'/training/',device_name,'_DAQ_T',num2str(n_pos),'_I',num2str(n_pos),'_M',num2str(n_pos),'_training.csv');
+fileName_magneticData=strcat('DAQ/',device_name,'/test/',device_name,'_DAQ_T',num2str(n_pos),'_I',num2str(n_pos),'_M',num2str(n_pos),'_test.csv');
     magnetic_data{1,n_pos} = load(fileName_magneticData);
 
     % convert magnetic data into joint angles
@@ -204,7 +204,7 @@ for n_pos=1:num_zigPos(1) % the number of thumb zig positions
                 pos_endEffector_noCalib{1,finger}(row_sample,:,n_pos) = pos_frame{1,7,finger}(row_sample,:);
             end
              
-        elseif (finger == 2 || finger ==3) && n_pos<17
+        elseif (finger == 2 || finger ==3) && n_pos<(num_zigPos(2)+1)
             subplot(2,2,2);
             for row_sample=1:size(arr_jointAngles,1)
                 pos_endEffector_noCalib{1,finger}(row_sample,:,n_pos) = pos_frame{1,7,finger}(row_sample,:);
@@ -229,9 +229,9 @@ for finger=1:num_fingers
     [row,col,page] = size(pos_endEffector_noCalib{1,finger});
     for p=1:page
         %1-3 columns: each axis' distance
-        arr_distance_noCalib{1,finger}(:,1:3,p)=pos_endEffector_noCalib{1,finger}(:,:,p)-pos_calibZig{1,finger}(p,1:3);
+        arr_distance_noCalib{1,finger}(:,1:3,p)=pos_endEffector_noCalib{1,finger}(:,:,p)-pos_calibZig_test{1,finger}(p,1:3);
         %4 column : 3D distance
-        arr_distance_noCalib{1,finger}(:,4,p)=sqrt(sum((pos_endEffector_noCalib{1,finger}(:,:,p)-pos_calibZig{1,finger}(p,1:3)).^2, 2));
+        arr_distance_noCalib{1,finger}(:,4,p)=sqrt(sum((pos_endEffector_noCalib{1,finger}(:,:,p)-pos_calibZig_test{1,finger}(p,1:3)).^2, 2));
     end
 end
 
@@ -279,20 +279,20 @@ end
 %% add texts for specific zig positions
 subplot(2,2,1);
 txt_t1 = {'Postion 1'};
-text(pos_calibZig{1,1}(1,1),pos_calibZig{1,1}(1,2),pos_calibZig{1,1}(1,3)-10, txt_t1);
+text(pos_calibZig_test{1,1}(1,1),pos_calibZig_test{1,1}(1,2),pos_calibZig_test{1,1}(1,3)-10, txt_t1);
 txt_t3 = {'Postion 3'};
-text(pos_calibZig{1,1}(3,1),pos_calibZig{1,1}(3,2),pos_calibZig{1,1}(3,3)-10, txt_t3);
+text(pos_calibZig_test{1,1}(3,1),pos_calibZig_test{1,1}(3,2),pos_calibZig_test{1,1}(3,3)-10, txt_t3);
 txt_t18 = {'Postion 18'};
-text(pos_calibZig{1,1}(18,1),pos_calibZig{1,1}(18,2),pos_calibZig{1,1}(18,3)+10, txt_t18);
+text(pos_calibZig_test{1,1}(18,1),pos_calibZig_test{1,1}(18,2),pos_calibZig_test{1,1}(18,3)+10, txt_t18);
 xlabel('mm')
 zlabel('mm')
 title('Thumb')
 
 subplot(2,2,2);
 txt_i1 = {'Postion 1'};
-text(pos_calibZig{1,2}(1,1),pos_calibZig{1,2}(1,2),pos_calibZig{1,2}(1,3)-10, txt_i1);
+text(pos_calibZig_test{1,2}(1,1),pos_calibZig_test{1,2}(1,2),pos_calibZig_test{1,2}(1,3)-10, txt_i1);
 txt_i4 = {'Postion 4'};
-text(pos_calibZig{1,2}(4,1),pos_calibZig{1,2}(4,2),pos_calibZig{1,2}(4,3)-10, txt_i4);
+text(pos_calibZig_test{1,2}(4,1),pos_calibZig_test{1,2}(4,2),pos_calibZig_test{1,2}(4,3)-10, txt_i4);
 xlabel('mm')
 zlabel('mm')
 title('Index and Middle fingers')
@@ -386,7 +386,7 @@ for n_pos=1:num_zigPos(1)
             for row_sample=1:size(arr_jointAngles,1)
                pos_endEffector_Calib{1,finger}(row_sample,:,n_pos) = pos_frame{1,7,finger}(row_sample,:);
             end
-        elseif (finger == 2|| finger==3) && n_pos<17
+        elseif (finger == 2|| finger==3) && n_pos<num_zigPos(2)+1
             subplot(2,2,2);
             for row_sample=1:size(arr_jointAngles,1)
                pos_endEffector_Calib{1,finger}(row_sample,:,n_pos) = pos_frame{1,7,finger}(row_sample,:);
@@ -428,9 +428,9 @@ for finger=1:num_fingers
     [row,col,page] = size(pos_endEffector_Calib{1,finger});
     for p=1:page
         %1-3 columns: each axis' distance
-        arr_distance_Calib{1,finger}(:,1:3,p)=pos_endEffector_Calib{1,finger}(:,:,p)-pos_calibZig{1,finger}(p,1:3);
+        arr_distance_Calib{1,finger}(:,1:3,p)=pos_endEffector_Calib{1,finger}(:,:,p)-pos_calibZig_test{1,finger}(p,1:3);
         %4 column : 3D distance
-        arr_distance_Calib{1,finger}(:,4,p)=sqrt(sum((pos_endEffector_Calib{1,finger}(:,:,p)-pos_calibZig{1,finger}(p,1:3)).^2, 2));
+        arr_distance_Calib{1,finger}(:,4,p)=sqrt(sum((pos_endEffector_Calib{1,finger}(:,:,p)-pos_calibZig_test{1,finger}(p,1:3)).^2, 2));
     end
 end
 
