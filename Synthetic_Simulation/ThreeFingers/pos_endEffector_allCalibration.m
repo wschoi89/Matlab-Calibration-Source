@@ -1,9 +1,10 @@
-function output = pos_endEffector_onlyDH_lengthCalibration(parameter_input, data)
+function output = pos_endEffector_allCalibration(parameter_input, data)
 % INPUT
 % first parameter  : sensor offsetÀÇ initial value
 % second parameter : simulation data °ª 
 
 off_TH1=parameter_input(1);off_TH2=parameter_input(2);off_TH3=parameter_input(3);off_TH4=parameter_input(4);
+
 A1 = parameter_input(5); B1 = parameter_input(15); C1 = parameter_input(6); D1 = parameter_input(16);
 A2 = parameter_input(7);                           C2 = parameter_input(8); D2 = parameter_input(17);
 A3 = parameter_input(9);                           C3 = parameter_input(10); D3 = parameter_input(18);
