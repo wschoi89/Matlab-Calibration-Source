@@ -2,8 +2,8 @@ clear
 clc
 close all
 
-% set device name
-device_name='device1';
+
+device_name='device3';
 
 %load link lengths for thumb, index, and middle devices
 arr_links = loadLinkLength();
@@ -13,7 +13,7 @@ num_param_per_joint = 4; % DH parameter per joint
 num_fingers = 3; % the number of device fingers
 num_angles = 4; % device angle
 
-num_zigPos = [18, 16, 16]; % thumb, index, middle 
+num_zigPos = [21, 16, 16]; % thumb, index, middle 
 num_samples = 100; % samples per position
 
 % set each finger's origin position
@@ -21,12 +21,10 @@ Origin_thumb = eye(4);
 Origin_index = eye(4);
 Origin_middle = Origin_index*transl(0,0,19);
 
-% allocate each finger's origin into Origin cell.
 Origin = cell(1,3);
 Origin{1,1} = Origin_thumb;
 Origin{1,2} = Origin_index;
 Origin{1,3} = Origin_middle;
-
 
 DH_ref = [0 0      0   -pi/2;
           0 0      0   pi/2;
@@ -81,9 +79,6 @@ end
 
 % load positions for CAD zig
 load pos_calibration_thumb_seperately.mat
-% load pos_calibration_TEST.mat
-
-
 
 %% plot finger's origin
 color_zigPosition = {[1 0 0], [0 0.5 0], [0 0 1]}; % color for each finger (thumb, index,and middle finger)
@@ -107,7 +102,7 @@ for finger=1:num_fingers
         subplot(2,2,2);
     end
         % plot index and middle finger's zig positions
-        for row=1:size(pos_calibZig{1,finger}, 1)-3
+        for row=1:size(pos_calibZig{1,finger}, 1)
             plot3(pos_calibZig{1,finger}(row,1), pos_calibZig{1,finger}(row,2), pos_calibZig{1,finger}(row,3), '-o','MarkerSize',8,'MarkerFaceColor', color_zigPosition{finger}, 'MarkerEdgeColor', color_zigPosition{finger});
             hold on
         end
@@ -135,7 +130,7 @@ for finger=1:num_fingers
    elseif finger==2 || finger==3
       subplot(2,2,2); 
    end
-   for row=1:size(pos_calibZig{1,finger}, 1) -3
+   for row=1:size(pos_calibZig{1,finger}, 1) 
       plot3([Origin_projToPlane{1,finger}(1,4) pos_calibZig{1,finger}(row,1)], [Origin_projToPlane{1,finger}(2,4) pos_calibZig{1,finger}(row,2)], [Origin_projToPlane{1,finger}(3,4) pos_calibZig{1,finger}(row,3)], 'Color', 'k')
       hold on
    end
@@ -150,9 +145,8 @@ end
 
 %%  load magnet data from files and calculate estimated end-effector without calibration
 for n_pos=1:num_zigPos(1) % the number of thumb zig positions
-
-    fileName_magneticData=strcat('DAQ/',device_name,'/training/',device_name,'_DAQ_T',num2str(n_pos),'_I',num2str(n_pos),'_M',num2str(n_pos),'_training.csv');
-% fileName_magneticData=strcat('DAQ/',device_name,'/test/',device_name,'_DAQ_T',num2str(n_pos),'_I',num2str(n_pos),'_M',num2str(n_pos),'_test.csv');
+    
+    fileName_magneticData=strcat('../DAQ/',device_name,'/',device_name,'_DAQ_T',num2str(n_pos),'_I',num2str(n_pos),'_M',num2str(n_pos),'.csv');
     magnetic_data{1,n_pos} = load(fileName_magneticData);
 
     % convert magnetic data into joint angles
@@ -184,6 +178,7 @@ for n_pos=1:num_zigPos(1) % the number of thumb zig positions
 
                 %frame's transform matrix 
                 if joint == 1
+%                     frame{1,joint,finger} = Origin(:,:,finger)*cell2mat(mat_transform(1,1,finger));
                     frame{1,joint,finger} = Origin{1,finger}*cell2mat(mat_transform(1,1,finger));
                 else
                     frame{1,joint, finger} = cell2mat(frame(1,joint-1,finger))*cell2mat(mat_transform(1,joint,finger));
@@ -282,8 +277,8 @@ txt_t1 = {'Postion 1'};
 text(pos_calibZig{1,1}(1,1),pos_calibZig{1,1}(1,2),pos_calibZig{1,1}(1,3)-10, txt_t1);
 txt_t3 = {'Postion 3'};
 text(pos_calibZig{1,1}(3,1),pos_calibZig{1,1}(3,2),pos_calibZig{1,1}(3,3)-10, txt_t3);
-txt_t18 = {'Postion 18'};
-text(pos_calibZig{1,1}(18,1),pos_calibZig{1,1}(18,2),pos_calibZig{1,1}(18,3)+10, txt_t18);
+txt_t21 = {'Postion 21'};
+text(pos_calibZig{1,1}(21,1),pos_calibZig{1,1}(21,2),pos_calibZig{1,1}(21,3)+10, txt_t21);
 xlabel('mm')
 zlabel('mm')
 title('Thumb')
@@ -307,7 +302,7 @@ subplot(2,2,4); legend('index w/o calibration', 'middle w/o calibration');
 for n_pos=1:num_zigPos(1)
     
     % convert magnetic data into joint angles
-%     arr_jointAngles(:,:,n_pos) = getJointAngle(magnetic_data{1,n_pos});
+    arr_jointAngles(:,:,n_pos) = getJointAngle(magnetic_data{1,n_pos});
 
     % preallocate the size of pos_frame 
     for finger=1:num_fingers
@@ -328,17 +323,11 @@ for n_pos=1:num_zigPos(1)
             DH_temp(2:end,3) = arr_links(:,finger);
             % add calibrated parameters
             if finger==1
-%                 load(strcat('Optimized_parameter/',device_name,'/optimized_parameter_thumb.mat'));
-%                 load('Optimized_parameter/device1_thumb_magneticPosition_adjustment/optimized_parameter_thumb.mat');
-                  load('optimized_parameter_thumb.mat');
+                load(strcat('Optimized_parameter/',device_name,'/optimized_parameter_thumb.mat'));
             elseif finger==2
-%                 load('Optimized_parameter/device1/optimized_parameter_index.mat');
-%                 load(strcat('Optimized_parameter/',device_name,'/optimized_parameter_index.mat'));
-                  load('optimized_parameter_index.mat');
+                load(strcat('Optimized_parameter/',device_name,'/optimized_parameter_index.mat'));
             elseif finger==3
-%                 load('Optimized_parameter/device1/optimized_parameter_middle.mat');
-%                 load(strcat('Optimized_parameter/',device_name,'/optimized_parameter_middle.mat'));
-                  load('optimized_parameter_middle.mat');
+                load(strcat('Optimized_parameter/',device_name,'/optimized_parameter_middle.mat'));
             end
                 % sensor offset
                 DH_temp(2,2)=DH_temp(2,2)+list_optParam(1);
@@ -462,7 +451,6 @@ for finger=1:num_fingers
    errorbar(x,y,std,'s','MarkerSize', 15, 'MarkerFaceColor', color_init_endEffector{finger})
    hold on
 end
-
 subplot(2,2,3);
 legend('thumb w/o calibration', 'thumb w/ calibration');
 xticks([0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22])
