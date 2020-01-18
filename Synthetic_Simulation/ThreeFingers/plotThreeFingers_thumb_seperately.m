@@ -4,7 +4,7 @@ clc
 close all
 
 % set device name
-device_name='device1_thumb_magneticPosition_adjustment';
+device_name='device1';
 
 %load link lengths for thumb, index, and middle devices
 arr_links = loadLinkLength();
@@ -27,7 +27,6 @@ Origin = cell(1,3);
 Origin{1,1} = Origin_thumb;
 Origin{1,2} = Origin_index;
 Origin{1,3} = Origin_middle;
-
 
 DH_ref = [0 0      0   -pi/2;
           0 0      0   pi/2;
@@ -83,6 +82,7 @@ end
 % load positions for CAD zig
 load pos_calibration_thumb_seperately.mat
 
+
 %% plot finger's origin
 color_zigPosition = {[1 0 0], [0 0.5 0], [0 0 1]}; % color for each finger (thumb, index,and middle finger)
 figure;
@@ -133,7 +133,7 @@ for finger=1:num_fingers
    elseif finger==2 || finger==3
       subplot(2,2,2); 
    end
-   for row=1:size(pos_calibZig{1,finger}, 1) 
+   for row=1:size(pos_calibZig{1,finger}, 1)
       plot3([Origin_projToPlane{1,finger}(1,4) pos_calibZig{1,finger}(row,1)], [Origin_projToPlane{1,finger}(2,4) pos_calibZig{1,finger}(row,2)], [Origin_projToPlane{1,finger}(3,4) pos_calibZig{1,finger}(row,3)], 'Color', 'k')
       hold on
    end
@@ -149,7 +149,7 @@ end
 %%  load magnet data from files and calculate estimated end-effector without calibration
 for n_pos=1:num_zigPos(1) % the number of thumb zig positions
 
-    fileName_magneticData=strcat('../DAQ/',device_name,'/',device_name,'_DAQ_T',num2str(n_pos),'_I',num2str(n_pos),'_M',num2str(n_pos),'.csv');
+    fileName_magneticData=strcat('DAQ/',device_name,'/training/',device_name,'_DAQ_T',num2str(n_pos),'_I',num2str(n_pos),'_M',num2str(n_pos),'_training.csv');
     magnetic_data{1,n_pos} = load(fileName_magneticData);
 
     % convert magnetic data into joint angles
@@ -279,8 +279,8 @@ txt_t1 = {'Postion 1'};
 text(pos_calibZig{1,1}(1,1),pos_calibZig{1,1}(1,2),pos_calibZig{1,1}(1,3)-10, txt_t1);
 txt_t3 = {'Postion 3'};
 text(pos_calibZig{1,1}(3,1),pos_calibZig{1,1}(3,2),pos_calibZig{1,1}(3,3)-10, txt_t3);
-txt_t21 = {'Postion 21'};
-text(pos_calibZig{1,1}(21,1),pos_calibZig{1,1}(21,2),pos_calibZig{1,1}(21,3)+10, txt_t21);
+txt_t18 = {'Postion 18'};
+text(pos_calibZig{1,1}(18,1),pos_calibZig{1,1}(18,2),pos_calibZig{1,1}(18,3)+10, txt_t18);
 xlabel('mm')
 zlabel('mm')
 title('Thumb')
