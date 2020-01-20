@@ -88,7 +88,7 @@ load pos_calibration_test_update.mat
 
 
 %% plot finger's origin
-color_zigPosition = {[1 0 0], [0 0.5 0], [0 0 1]}; % color for each finger (thumb, index,and middle finger)
+color_zigPosition = {[0 0 0], [0 0 0], [0 0 0]}; % color for each finger (thumb, index,and middle finger)
 figure;
 for finger=1:num_fingers
     if finger==1 % Thumb
