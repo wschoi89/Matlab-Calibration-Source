@@ -13,7 +13,7 @@ num_param_per_joint = 4; % DH parameter per joint
 num_fingers = 3; % the number of device fingers
 num_angles = 4; % device angle
 
-num_zigPos = [18, 16, 16]; % thumb, index, middle 
+num_zigPos_training = [18, 16, 16]; % thumb, index, middle 
 num_samples = 100; % samples per position
 
 % set each finger's origin position
@@ -43,11 +43,11 @@ pos_frame = cell(1, num_DHjoints, num_fingers);
 
 pos_endEffector_noCalib = cell(1,3);
 pos_endEffector_Calib = cell(1,3);
-arr_jointAngles = zeros(num_samples, num_angles*num_fingers, num_zigPos(1));
+arr_jointAngles = zeros(num_samples, num_angles*num_fingers, num_zigPos_training(1));
 
 for finger=1:num_fingers
-    pos_endEffector_noCalib{1,finger} = zeros(num_samples,3,num_zigPos(finger));    
-    pos_endEffector_Calib{1,finger}=zeros(num_samples,3,num_zigPos(finger)); 
+    pos_endEffector_noCalib{1,finger} = zeros(num_samples,3,num_zigPos_training(finger));    
+    pos_endEffector_Calib{1,finger}=zeros(num_samples,3,num_zigPos_training(finger)); 
 end
 
 % for finger=1:num_fingers
@@ -155,13 +155,13 @@ for finger=1:num_fingers
 end
 
 % preallocate magnetic data size 
-magnetic_data = cell(1, num_zigPos(1));
-for n_pos=1:num_zigPos(1)
+magnetic_data = cell(1, num_zigPos_training(1));
+for n_pos=1:num_zigPos_training(1)
    magnetic_data{1,n_pos} = zeros(num_samples, num_angles*num_fingers); 
 end
 
 %%  load magnet data from files and calculate estimated end-effector without calibration
-for n_pos=1:num_zigPos(1) % the number of thumb zig positions
+for n_pos=1:num_zigPos_training(1) % the number of thumb zig positions
 
     fileName_magneticData=strcat('DAQ/',device_name,'/training/',device_name,'_DAQ_T',num2str(n_pos),'_I',num2str(n_pos),'_M',num2str(n_pos),'_training.csv');
     magnetic_data{1,n_pos} = load(fileName_magneticData);
@@ -215,12 +215,12 @@ for n_pos=1:num_zigPos(1) % the number of thumb zig positions
                 pos_endEffector_noCalib{1,finger}(row_sample,:,n_pos) = pos_frame{1,7,finger}(row_sample,:);
             end
              
-        elseif finger==2 && n_pos<num_zigPos(2)+1
+        elseif finger==2 && n_pos<num_zigPos_training(2)+1
             subplot(2,3,2);
             for row_sample=1:size(arr_jointAngles,1)
                 pos_endEffector_noCalib{1,finger}(row_sample,:,n_pos) = pos_frame{1,7,finger}(row_sample,:);
             end
-        elseif finger==3 && n_pos<num_zigPos(3)+1
+        elseif finger==3 && n_pos<num_zigPos_training(3)+1
             for row_sample=1:size(arr_jointAngles,1)
                 pos_endEffector_noCalib{1,finger}(row_sample,:,n_pos) = pos_frame{1,7,finger}(row_sample,:);
             end
@@ -235,6 +235,8 @@ arr_mean_dist_noCalib = cell(1,3);
 for finger=1:num_fingers
     arr_distance_noCalib{1,finger} = zeros(num_samples, 4, num_zigPos(finger)); 
     arr_mean_dist_noCalib{1,finger} = zeros(2, 4, num_zigPos(finger));
+    arr_distance_noCalib_training{1,finger} = zeros(num_samples, 4, num_zigPos_training(finger)); 
+    arr_mean_dist_noCalib_training{1,finger} = zeros(2, 4, num_zigPos_training(finger));
 end
 
 %% calculated the distance between zig position and calculated end-effector
@@ -290,9 +292,9 @@ for finger=1:num_fingers
    elseif finger==3 
        subplot(2,3,6);
    end
-   x=1:1:num_zigPos(finger);
     y=reshape(arr_mean_dist_noCalib{1,finger}(1,4,:), [num_zigPos(finger) 1]);
     std=reshape(arr_mean_dist_noCalib{1,finger}(2,4,:), [num_zigPos(finger) 1]);
+   x=1:1:num_zigPos_training(finger);
     errorbar(x,y,std,'o','MarkerSize', 10, 'Color', color_init_endEffector{finger})
     xlabel('position')
     ylabel('distance error(mm)')
@@ -331,7 +333,7 @@ subplot(2,3,6); legend('middle w/o calibration');
 
 %% after calibration
 
-for n_pos=1:num_zigPos(1)
+for n_pos=1:num_zigPos_training(1)
     
     % convert magnetic data into joint angles
 %     arr_jointAngles(:,:,n_pos) = getJointAngle(magnetic_data{1,n_pos});
@@ -407,12 +409,12 @@ for n_pos=1:num_zigPos(1)
             for row_sample=1:size(arr_jointAngles,1)
                pos_endEffector_Calib{1,finger}(row_sample,:,n_pos) = pos_frame{1,7,finger}(row_sample,:);
             end
-        elseif finger == 2 && n_pos<num_zigPos(2)+1
+        elseif finger == 2 && n_pos<num_zigPos_training(2)+1
             subplot(2,3,2);
             for row_sample=1:size(arr_jointAngles,1)
                pos_endEffector_Calib{1,finger}(row_sample,:,n_pos) = pos_frame{1,7,finger}(row_sample,:);
             end
-        elseif finger == 3 && n_pos<num_zigPos(3)+1
+        elseif finger == 3 && n_pos<num_zigPos_training(3)+1
         subplot(2,3,3);
             for row_sample=1:size(arr_jointAngles,1)
                pos_endEffector_Calib{1,finger}(row_sample,:,n_pos) = pos_frame{1,7,finger}(row_sample,:);
@@ -491,9 +493,9 @@ for finger=1:num_fingers
        subplot(2,3,6);
        grid on
    end
-   x=1:1:num_zigPos(finger);
    y=reshape(arr_mean_dist_Calib{1,finger}(1,4,:), [num_zigPos(finger) 1]);
    std=reshape(arr_mean_dist_Calib{1,finger}(2,4,:), [num_zigPos(finger) 1]);
+   x=1:1:num_zigPos_training(finger);
    errorbar(x,y,std,'s','MarkerSize', 10, 'MarkerFaceColor', color_init_endEffector{finger})
    hold on
 end
@@ -503,21 +505,21 @@ title('Distance error compared to CAD position (thumb)');
 legend('thumb w/o calibration', 'thumb w/ calibration');
 % xticks([0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22])
 
-xticks(linspace(1,num_zigPos(1)+1,num_zigPos(1)+1))
+xticks(linspace(1,num_zigPos_training(1)+1,num_zigPos_training(1)+1))
 grid on
 hold on
 
 subplot(2,3,5);
 title('Distance error compared to CAD position (index)');
 legend('index w/o calibration', 'index w/ calibration');
-xticks(linspace(1,num_zigPos(2)+1,num_zigPos(2)+1))
+xticks(linspace(1,num_zigPos_training(2)+1,num_zigPos_training(2)+1))
 grid on
 hold on
 
 subplot(2,3,6);
 title('Distance error compared to CAD position (middle)');
 legend('middle w/o calibration', 'middle w/ calibration');
-xticks(linspace(1,num_zigPos(3)+1,num_zigPos(3)+1))
+xticks(linspace(1,num_zigPos_training(3)+1,num_zigPos_training(3)+1))
 grid on
 hold on
 
