@@ -328,13 +328,6 @@ subplot(2,3,6); legend('middle w/o calibration', 'location', 'northoutside');
 % save data
 save('training_test_data.mat', 'arr_jointAngles', 'pos_calibZig', 'pos_endEffector_noCalib')
 
-% thumb 21개 position(x,y,z) 100 개, 21*3*100
-% CAD_thumb : 21개 x,y,z 21*3
-% index 16개 position(x,y,z) 100 개, 16*3*100
-% CAD_index : 16개 x,y,z, 16*3
-% middle 16개 position(x,y,z) 100개, 16*3*100
-% CAD_middle : 16개 x,y,z, 16*3
-
 
 
 
