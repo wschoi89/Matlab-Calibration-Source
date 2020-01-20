@@ -229,12 +229,10 @@ for n_pos=1:num_zigPos_training(1) % the number of thumb zig positions
 end
 
 %% pre-allocate array for distance error without calibration
-arr_distance_noCalib = cell(1,3);
+arr_distance_noCalib_training = cell(1,3);
 % array for distance average and standard deviation without calibration
-arr_mean_dist_noCalib = cell(1,3);
+arr_mean_dist_noCalib_training = cell(1,3);
 for finger=1:num_fingers
-    arr_distance_noCalib{1,finger} = zeros(num_samples, 4, num_zigPos(finger)); 
-    arr_mean_dist_noCalib{1,finger} = zeros(2, 4, num_zigPos(finger));
     arr_distance_noCalib_training{1,finger} = zeros(num_samples, 4, num_zigPos_training(finger)); 
     arr_mean_dist_noCalib_training{1,finger} = zeros(2, 4, num_zigPos_training(finger));
 end
@@ -246,19 +244,19 @@ for finger=1:num_fingers
     [row,col,page] = size(pos_endEffector_noCalib{1,finger});
     for p=1:page
         %1-3 columns: each axis' distance
-        arr_distance_noCalib{1,finger}(:,1:3,p)=pos_endEffector_noCalib{1,finger}(:,:,p)-pos_calibZig{1,finger}(p,1:3);
+        arr_distance_noCalib_training{1,finger}(:,1:3,p)=pos_endEffector_noCalib{1,finger}(:,:,p)-pos_calibZig{1,finger}(p,1:3);
         %4 column : 3D distance
-        arr_distance_noCalib{1,finger}(:,4,p)=sqrt(sum((pos_endEffector_noCalib{1,finger}(:,:,p)-pos_calibZig{1,finger}(p,1:3)).^2, 2));
+        arr_distance_noCalib_training{1,finger}(:,4,p)=sqrt(sum((pos_endEffector_noCalib{1,finger}(:,:,p)-pos_calibZig{1,finger}(p,1:3)).^2, 2));
     end
 end
 
 %% allocate mean and std distance error
 for finger=1:num_fingers
-    [row,col,page] = size(arr_distance_noCalib{1,finger});
+    [row,col,page] = size(arr_distance_noCalib_training{1,finger});
     for p=1:page
         for c=1:col
-            arr_mean_dist_noCalib{1,finger}(1,c,p)=mean(arr_distance_noCalib{1,finger}(:,c,p)); 
-            arr_mean_dist_noCalib{1,finger}(2,c,p)=std(arr_distance_noCalib{1,finger}(:,c,p)); 
+            arr_mean_dist_noCalib_training{1,finger}(1,c,p)=mean(arr_distance_noCalib_training{1,finger}(:,c,p)); 
+            arr_mean_dist_noCalib_training{1,finger}(2,c,p)=std(arr_distance_noCalib_training{1,finger}(:,c,p)); 
         end
     end
 end
@@ -272,7 +270,7 @@ end
     elseif finger==3 % middle finger
         subplot(2,3,3);
     end
-    [row,col,page] = size(arr_distance_noCalib{1,finger});
+    [row,col,page] = size(arr_distance_noCalib_training{1,finger});
     for p=1:page
         if p==page
             plot_noCalib(finger) = plot3(mean(pos_endEffector_noCalib{1,finger}(:,1,p)),mean(pos_endEffector_noCalib{1,finger}(:,2,p)),mean(pos_endEffector_noCalib{1,finger}(:,3,p)),'-o','MarkerSize',10,'MarkerEdgeColor', color_init_endEffector{finger});
@@ -292,9 +290,9 @@ for finger=1:num_fingers
    elseif finger==3 
        subplot(2,3,6);
    end
-    y=reshape(arr_mean_dist_noCalib{1,finger}(1,4,:), [num_zigPos(finger) 1]);
-    std=reshape(arr_mean_dist_noCalib{1,finger}(2,4,:), [num_zigPos(finger) 1]);
    x=1:1:num_zigPos_training(finger);
+    y=reshape(arr_mean_dist_noCalib_training{1,finger}(1,4,:), [num_zigPos_training(finger) 1]);
+    std=reshape(arr_mean_dist_noCalib_training{1,finger}(2,4,:), [num_zigPos_training(finger) 1]);
     errorbar(x,y,std,'o','MarkerSize', 10, 'Color', color_init_endEffector{finger})
     xlabel('position')
     ylabel('distance error(mm)')
@@ -424,13 +422,13 @@ for n_pos=1:num_zigPos_training(1)
 end
 
 % array for each axis distance and 3D distance with calibration
-arr_distance_Calib = cell(1,3);
+arr_distance_Calib_training = cell(1,3);
 % array for distance average and standard deviation with calibration
-arr_mean_dist_Calib = cell(1,3);
+arr_mean_dist_Calib_training = cell(1,3);
 
 for finger=1:num_fingers
-    arr_distance_Calib{1,finger} = zeros(num_samples, 4, num_zigPos(finger));    
-    arr_mean_dist_Calib{1,finger} = zeros(2, 4, num_zigPos(finger));
+    arr_distance_Calib_training{1,finger} = zeros(num_samples, 4, num_zigPos_training(finger));    
+    arr_mean_dist_Calib_training{1,finger} = zeros(2, 4, num_zigPos_training(finger));
 end
 
 
@@ -443,7 +441,7 @@ end
     elseif finger==3
         subplot(2,3,3);
     end
-    [row,col,page] = size(arr_distance_Calib{1,finger});
+    [row,col,page] = size(arr_distance_Calib_training{1,finger});
     for p=1:page
         if p==page
             plot_calib(finger)=plot3(mean(pos_endEffector_Calib{1,finger}(:,1,p)),mean(pos_endEffector_Calib{1,finger}(:,2,p)),mean(pos_endEffector_Calib{1,finger}(:,3,p)),'-s','MarkerSize',10,'MarkerFaceColor', color_init_endEffector{finger}, 'MarkerEdgeColor', color_init_endEffector{finger});
@@ -462,20 +460,20 @@ for finger=1:num_fingers
     [row,col,page] = size(pos_endEffector_Calib{1,finger});
     for p=1:page
         %1-3 columns: each axis' distance
-        arr_distance_Calib{1,finger}(:,1:3,p)=pos_endEffector_Calib{1,finger}(:,:,p)-pos_calibZig{1,finger}(p,1:3);
+        arr_distance_Calib_training{1,finger}(:,1:3,p)=pos_endEffector_Calib{1,finger}(:,:,p)-pos_calibZig{1,finger}(p,1:3);
         %4 column : 3D distance
-        arr_distance_Calib{1,finger}(:,4,p)=sqrt(sum((pos_endEffector_Calib{1,finger}(:,:,p)-pos_calibZig{1,finger}(p,1:3)).^2, 2));
+        arr_distance_Calib_training{1,finger}(:,4,p)=sqrt(sum((pos_endEffector_Calib{1,finger}(:,:,p)-pos_calibZig{1,finger}(p,1:3)).^2, 2));
     end
 end
 
 clear std
 % array for mean and std distance error with calibration
 for finger=1:num_fingers
-    [row,col,page] = size(arr_distance_Calib{1,finger});
+    [row,col,page] = size(arr_distance_Calib_training{1,finger});
     for p=1:page
         for c=1:col
-            arr_mean_dist_Calib{1,finger}(1,c,p)=mean(arr_distance_Calib{1,finger}(:,c,p)); 
-            arr_mean_dist_Calib{1,finger}(2,c,p)=std(arr_distance_Calib{1,finger}(:,c,p)); 
+            arr_mean_dist_Calib_training{1,finger}(1,c,p)=mean(arr_distance_Calib_training{1,finger}(:,c,p)); 
+            arr_mean_dist_Calib_training{1,finger}(2,c,p)=std(arr_distance_Calib_training{1,finger}(:,c,p)); 
         end
     end
 end
@@ -493,9 +491,9 @@ for finger=1:num_fingers
        subplot(2,3,6);
        grid on
    end
-   y=reshape(arr_mean_dist_Calib{1,finger}(1,4,:), [num_zigPos(finger) 1]);
-   std=reshape(arr_mean_dist_Calib{1,finger}(2,4,:), [num_zigPos(finger) 1]);
    x=1:1:num_zigPos_training(finger);
+   y=reshape(arr_mean_dist_Calib_training{1,finger}(1,4,:), [num_zigPos_training(finger) 1]);
+   std=reshape(arr_mean_dist_Calib_training{1,finger}(2,4,:), [num_zigPos_training(finger) 1]);
    errorbar(x,y,std,'s','MarkerSize', 10, 'MarkerFaceColor', color_init_endEffector{finger})
    hold on
 end
@@ -526,6 +524,7 @@ hold on
 legend([plot_origin(1) plot_noCalib(1) plot_calib(1)], {'CAD', 'w/o calibration', 'w/ calibration'}, 'location', 'northeast');
 legend([plot_origin(2) plot_noCalib(2) plot_calib(2)], {'CAD', 'w/o calibration', 'w/ calibration'}, 'location', 'northeast');
 legend([plot_origin(3) plot_noCalib(3) plot_calib(3)], {'CAD', 'w/o calibration', 'w/ calibration'}, 'location', 'northeast');
+
 
 
 
