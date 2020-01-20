@@ -7,7 +7,11 @@ options = optimoptions(@lsqnonlin,'Algorithm', 'levenberg-marquardt','Display', 
 
 % load data
 load training_test_data.mat
-finger = 'middle';
+
+finger = 'thumb';
+% finger = 'index';
+% finger = 'middle';
+
 % thumb
 if strcmp(finger, 'thumb')
     training_thumb = pos_endEffector_noCalib{1,1};
@@ -84,7 +88,7 @@ for page=1:num_iteration
         
 %     data_batch = trainingData(:,:,page);
         
-    optimized_parameter=lsqnonlin (@pos_endEffector_allCalibration,zeros(1,num_optParam),[],[],options, data);
+    optimized_parameter=lsqnonlin (@pos_endEffector_allCalibration,zeros(1,num_optParam),[],[],options, data, finger);
     list_optParam(page, :) = optimized_parameter;
     
    
