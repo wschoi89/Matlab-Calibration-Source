@@ -15,7 +15,7 @@ num_param_per_joint = 4; % DH parameter per joint
 num_fingers = 3; % the number of device fingers
 num_angles = 4; % device angle
 
-num_zigPos = [18, 11, 11]; % thumb, index, middle 
+num_zigPos_test = [18, 11, 11]; % thumb, index, middle 
 num_samples = 100; % samples per position
 
 % set each finger's origin position
@@ -45,11 +45,11 @@ pos_frame = cell(1, num_DHjoints, num_fingers);
 
 pos_endEffector_noCalib = cell(1,3);
 pos_endEffector_Calib = cell(1,3);
-arr_jointAngles = zeros(num_samples, num_angles*num_fingers, num_zigPos(1));
+arr_jointAngles = zeros(num_samples, num_angles*num_fingers, num_zigPos_test(1));
 
 for finger=1:num_fingers
-    pos_endEffector_noCalib{1,finger} = zeros(num_samples,3,num_zigPos(finger));    
-    pos_endEffector_Calib{1,finger}=zeros(num_samples,3,num_zigPos(finger)); 
+    pos_endEffector_noCalib{1,finger} = zeros(num_samples,3,num_zigPos_test(finger));    
+    pos_endEffector_Calib{1,finger}=zeros(num_samples,3,num_zigPos_test(finger)); 
 end
 
 % for finger=1:num_fingers
