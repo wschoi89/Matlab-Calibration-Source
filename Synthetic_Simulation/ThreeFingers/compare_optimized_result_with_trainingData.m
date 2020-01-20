@@ -499,7 +499,7 @@ for finger=1:num_fingers
 end
 
 subplot(2,3,4);
-title('distance error compared to CAD position');
+title('Distance error compared to CAD position (thumb)');
 legend('thumb w/o calibration', 'thumb w/ calibration');
 % xticks([0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22])
 
@@ -508,14 +508,14 @@ grid on
 hold on
 
 subplot(2,3,5);
-title('distance error compared to CAD position');
+title('Distance error compared to CAD position (index)');
 legend('index w/o calibration', 'index w/ calibration');
 xticks(linspace(1,num_zigPos(2)+1,num_zigPos(2)+1))
 grid on
 hold on
 
 subplot(2,3,6);
-title('distance error compared to CAD position');
+title('Distance error compared to CAD position (middle)');
 legend('middle w/o calibration', 'middle w/ calibration');
 xticks(linspace(1,num_zigPos(3)+1,num_zigPos(3)+1))
 grid on
