@@ -8,9 +8,9 @@ options = optimoptions(@lsqnonlin,'Algorithm', 'levenberg-marquardt','Display', 
 % load data
 load training_test_data.mat
 
-finger = 'thumb';
+% finger = 'thumb';
 % finger = 'index';
-% finger = 'middle';
+finger = 'middle';
 
 % thumb
 if strcmp(finger, 'thumb')
@@ -72,6 +72,9 @@ elseif strcmp(finger, 'middle')
     end
 
     data = [data_jointAngle_middle data_test];
+    
+else
+    disp('please check the finger string value');
 end
 
 
@@ -86,11 +89,8 @@ list_optParam = zeros(num_iteration, num_optParam);
 
 for page=1:num_iteration
         
-%     data_batch = trainingData(:,:,page);
-        
     optimized_parameter=lsqnonlin (@pos_endEffector_allCalibration,zeros(1,num_optParam),[],[],options, data, finger);
     list_optParam(page, :) = optimized_parameter;
-    
    
 end
 
@@ -100,6 +100,8 @@ elseif strcmp(finger, 'index')
     save(strcat('optimized_parameter_index', '.mat'), 'list_optParam');
 elseif strcmp(finger, 'middle')
     save(strcat('optimized_parameter_middle', '.mat'), 'list_optParam');
+else
+    disp('please check the finger string value');
 end
 
 
