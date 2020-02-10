@@ -28,6 +28,6 @@ fprintf(fileID, '\t"off_TH4_Index": %f,\n\n', parameters(2,4));
 fprintf(fileID, '\t"off_TH1_Middle": %f,\n', parameters(3,1));
 fprintf(fileID, '\t"off_TH2_Middle": %f,\n', parameters(3,2));
 fprintf(fileID, '\t"off_TH3_Middle": %f,\n', parameters(3,3));
-fprintf(fileID, '\t"off_TH4_Middle": %f,\n\n', parameters(3,4));
+fprintf(fileID, '\t"off_TH4_Middle": %f\n', parameters(3,4));
 fprintf(fileID, ' }');
 fclose(fileID);
