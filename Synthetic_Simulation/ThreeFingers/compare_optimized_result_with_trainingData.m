@@ -1,6 +1,7 @@
 clear
 clc
-close all
+% close all
+
 
 % set device name
 device_name='device1';
