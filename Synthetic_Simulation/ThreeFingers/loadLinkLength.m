@@ -6,7 +6,7 @@ function linkLength = loadLinkLength()
     thumb = 1;
     index = 2;
     middle = 3;
-    %thumb links(8 links for end-effector position)
+    %thumb links(7 links for end-effector position)
     linkLength(1, thumb) = 24.21;
     linkLength(2, thumb) = 56.03;
     linkLength(3, thumb) = 12.94;
