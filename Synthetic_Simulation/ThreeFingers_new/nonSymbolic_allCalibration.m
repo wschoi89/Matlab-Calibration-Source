@@ -8,18 +8,33 @@ options = optimoptions(@lsqnonlin,'Algorithm', 'levenberg-marquardt','Display', 
 % load data
 load training_test_data.mat
 
-% finger = 'thumb';
-% finger = 'index';
-finger = 'middle';
+% check if there is a variable named 'num_fingers'.
+if ~exist('num_fingers','var')
+    num_fingers = 3;
+end
+
+for iter=1:num_fingers
+    if iter==1
+        finger = 'thumb';
+    elseif iter==2
+        finger ='index';
+    elseif iter==3
+        finger = 'middle';
+    end
+        
+
+
+sample = 100;
+
 
 % thumb
 if strcmp(finger, 'thumb')
     training_thumb = pos_endEffector_noCalib{1,1};
     test_thumb = pos_calibZig{1,1};
     [row,col,page] = size(training_thumb);
-    data_training=zeros(1800,3);
-    data_test = zeros(1800,3); % cad data
-    data_jointAngle = zeros(1800,4);
+    data_training=zeros(num_zigPos(1)*sample,3);
+    data_test = zeros(num_zigPos(1)*sample,3); % cad data
+    data_jointAngle = zeros(num_zigPos(1)*sample,4);
     data_jointAngle_thumb = data_jointAngle(:,1:4);    
     
     for p=1:page
@@ -37,9 +52,9 @@ elseif strcmp(finger, 'index')
     test_index = pos_calibZig{1,2};
     training_index = pos_endEffector_noCalib{1,2};
     [row,col,page] = size(training_index);
-    data_training=zeros(1500,3);
-    data_test = zeros(1500,3);
-    data_jointAngle_indexMiddle = zeros(1500, 8);
+    data_training=zeros(num_zigPos(2)*sample,3);
+    data_test = zeros(num_zigPos(2)*sample,3);
+    data_jointAngle_indexMiddle = zeros(num_zigPos(2)*sample, 8);
     data_jointAngle_index = data_jointAngle_indexMiddle(:,1:4);
 
     for p=1:page
@@ -57,9 +72,9 @@ elseif strcmp(finger, 'middle')
     test_middle = pos_calibZig{1,3};
     training_middle = pos_endEffector_noCalib{1,3};
     [row,col,page] = size(training_middle);
-    data_training=zeros(1500,3);
-    data_test = zeros(1500,3);
-    data_jointAngle_indexMiddle = zeros(1500, 8);
+    data_training=zeros(num_zigPos(3)*sample,3);
+    data_test = zeros(num_zigPos(3)*sample,3);
+    data_jointAngle_indexMiddle = zeros(num_zigPos(3)*sample, 8);
     data_jointAngle_middle = data_jointAngle_indexMiddle(:,5:8);
 
     for p=1:page
@@ -102,6 +117,8 @@ elseif strcmp(finger, 'middle')
     save(strcat('optimized_parameter_middle', '.mat'), 'list_optParam');
 else
     disp('please check the finger string value');
+end
+
 end
 
 
