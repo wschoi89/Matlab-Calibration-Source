@@ -4,7 +4,7 @@ clc
 
 
 % set device name
-device_name='Device4';
+device_name='device6';
 
 %load link lengths for thumb, index, and middle devices
 arr_links = loadLinkLength();
@@ -14,7 +14,8 @@ num_param_per_joint = 4; % DH parameter per joint
 num_fingers = 3; % the number of device fingers
 num_angles = 4; % device angle
 
-num_zigPos_training = [15, 15, 15]; % thumb, index, middle 
+num_zigPos_training = [13, 15, 15]; % thumb, index, middle 
+num_maxZigPos = max(num_zigPos_training);
 num_samples = 100; % samples per position
 
 % set each finger's origin position
@@ -45,7 +46,7 @@ pos_frame = cell(1, num_DHjoints, num_fingers);
 
 pos_endEffector_noCalib = cell(1,3);
 pos_endEffector_Calib = cell(1,3);
-arr_jointAngles = zeros(num_samples, num_angles*num_fingers, num_zigPos_training(1));
+arr_jointAngles = zeros(num_samples, num_angles*num_fingers, num_maxZigPos);
 
 for finger=1:num_fingers
     pos_endEffector_noCalib{1,finger} = zeros(num_samples,3,num_zigPos_training(finger));    
@@ -82,7 +83,7 @@ end
 % plotThreeFingers(Origin, pos_frame)
 
 % load positions for CAD zig
-load pos_calibration_seperately.mat
+load pos_calibration_seperately_2.mat
 
 
 %% plot finger's origin
@@ -157,13 +158,13 @@ end
 % end
 
 % preallocate magnetic data size 
-magnetic_data = cell(1, num_zigPos_training(1));
-for n_pos=1:num_zigPos_training(1)
+magnetic_data = cell(1, num_maxZigPos);
+for n_pos=1:num_maxZigPos
    magnetic_data{1,n_pos} = zeros(num_samples, num_angles*num_fingers); 
 end
 
 %%  load magnet data from files and calculate estimated end-effector without calibration
-for n_pos=1:num_zigPos_training(1) % the number of thumb zig positions
+for n_pos=1:num_maxZigPos % the number of thumb zig positions
 
     fileName_magneticData=strcat('DAQ/',device_name,'/training/',device_name,'_DAQ_T',num2str(n_pos),'_I',num2str(n_pos),'_M',num2str(n_pos),'_training.csv');
     magnetic_data{1,n_pos} = load(fileName_magneticData);
@@ -211,7 +212,7 @@ for n_pos=1:num_zigPos_training(1) % the number of thumb zig positions
     % allocate end-effector positions
     color_init_endEffector = {[0.8 0 0], [0 0.5 0], [0 0.5 1]};
     for finger=1:num_fingers 
-        if finger==1
+        if finger==1 && n_pos<num_zigPos_training(1)+1
             subplot(2,3,1);
             for row_sample=1:size(arr_jointAngles,1)
                 pos_endEffector_noCalib{1,finger}(row_sample,:,n_pos) = pos_frame{1,7,finger}(row_sample,:);
@@ -333,7 +334,7 @@ end
 
 %% after calibration
 
-for n_pos=1:num_zigPos_training(1)
+for n_pos=1:num_maxZigPos
     
     % convert magnetic data into joint angles
 %     arr_jointAngles(:,:,n_pos) = getJointAngle(magnetic_data{1,n_pos});
@@ -357,14 +358,14 @@ for n_pos=1:num_zigPos_training(1)
             DH_temp(2:end,3) = arr_links(:,finger);
             % add calibrated parameters
             if finger==1
-%                 load(strcat('Optimized_parameter/',device_name,'/',device_name, '_optimized_parameter_thumb.mat'));
-                load optimized_parameter_thumb.mat
+                load(strcat('Optimized_parameter/',device_name,'/',device_name, '_optimized_parameter_thumb.mat'));
+%                 load optimized_parameter_thumb.mat
             elseif finger==2
-%                 load(strcat('Optimized_parameter/',device_name,'/',device_name, '_optimized_parameter_index.mat'));
-                load optimized_parameter_index.mat
+                load(strcat('Optimized_parameter/',device_name,'/',device_name, '_optimized_parameter_index.mat'));
+%                 load optimized_parameter_index.mat
             elseif finger==3
-%                 load(strcat('Optimized_parameter/',device_name,'/',device_name, '_optimized_parameter_middle.mat'));
-                load optimized_parameter_middle.mat
+                load(strcat('Optimized_parameter/',device_name,'/',device_name, '_optimized_parameter_middle.mat'));
+%                 load optimized_parameter_middle.mat
             end
                 % sensor offset
                 DH_temp(2,2)=DH_temp(2,2)+list_optParam(1);
@@ -407,7 +408,7 @@ for n_pos=1:num_zigPos_training(1)
     % save end-effector positions with calibration
     
     for finger=1:num_fingers 
-        if finger==1
+        if finger==1 && n_pos<num_zigPos_training(1)+1
             subplot(2,3,1);
             for row_sample=1:size(arr_jointAngles,1)
                pos_endEffector_Calib{1,finger}(row_sample,:,n_pos) = pos_frame{1,7,finger}(row_sample,:);
