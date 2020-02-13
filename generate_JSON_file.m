@@ -1,8 +1,16 @@
-filename = 'mech-R3.json';
+filename = 'mech-R1.json';
 fileID = fopen(filename, 'w');
 fprintf(fileID, '{\n');
 fprintf(fileID, '\t"HandSide" : "right",\n\n');
 fprintf(fileID, '\t"DH_offset": [\n ');
+
+parameters = zeros(3,20);
+load('device1_optimized_parameter_thumb.mat');
+parameters(1,:) = list_optParam;
+load('device1_optimized_parameter_index.mat');
+parameters(2,:) = list_optParam;
+load('device1_optimized_parameter_middle.mat');
+parameters(3,:) = list_optParam;
 
 for row=1:3
     for col=5:20
