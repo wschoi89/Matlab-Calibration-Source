@@ -16,13 +16,13 @@ syms B2 B3 B5 B6 %% joint angle
 
 
 % DH table
-DHRef_thumb = [0+A1 B1       C1              -pi/2+D1;
+DHRef_thumb = [0+A1 B1         C1                 -pi/2+D1;
          0+A2 B2+off_TH1       arr_links(1,1)+C2  pi/2+D2;
          0+A3 B3+off_TH2       arr_links(2,1)+C3  0+D3;
-         0    -pi/2    arr_links(3,1)     0;
+         0    -pi/2            arr_links(3,1)     0;
          0+A5 B5+off_TH3       arr_links(4,1)+C5  0+D5;
          0+A6 B6+off_TH4       arr_links(5,1)+C6  0+D6;
-         0    -pi/2    arr_links(6,1)     0;];
+         0    -pi/2            arr_links(6,1)     0;];
      
 DHRef_index = [0+A1 B1       C1              -pi/2+D1;
                0+A2 B2+off_TH1       arr_links(1,2)+C2  pi/2+D2;
@@ -33,7 +33,7 @@ DHRef_index = [0+A1 B1       C1              -pi/2+D1;
                0    -pi/2            arr_links(6,2)     0;];
            
 DHRef_middle = [0+A1 B1       C1              -pi/2+D1;
-               0+A2 B2+off_TH1       arr_links(1,2)+C2  pi/2+D2;
+               0+A2 B2+off_TH1       arr_links(1,3)+C2  pi/2+D2;
                0+A3 B3+off_TH2       arr_links(2,3)+C3  0+D3;
                0    -pi/2            arr_links(3,3)     0;
                0+A5 B5+off_TH3       arr_links(4,3)+C5  0+D5;
