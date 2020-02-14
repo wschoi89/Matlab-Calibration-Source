@@ -7,11 +7,14 @@ if mkdir('DAQ')==false
     mkdir('DAQ');
 end
 
-fileID = fopen('DAQ/200114_DAQ_T21_I21_M21.csv', 'w');
-num_iteration = 100;
-disp('Start in 5 seconds!')
 
 COM_PORT='COM5';
+num_device='device6';
+position='15';
+fileID = fopen(strcat('DAQ/',num_device,'_DAQ_T',position,'_I',position,'_M',position,'_training.csv'), 'w');
+% fileID = fopen(strcat('DAQ/',num_device,'_DAQ_T',position,'_I',position,'_M',position,'_test.csv'), 'w');
+num_iteration = 100;
+disp('Start in 5 seconds!')
 
 % set initial interation number as zero
 iter = 0;
