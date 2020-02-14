@@ -16,7 +16,7 @@ num_angles = 4; % device angle
 
 % num_zigPos = [18, 16, 16]; % thumb, index, middle 
 num_zigPos = [13, 15, 15]; % thumb, index, middle 
-num_samples = 100; % samples per position
+num_samples = 10; % samples per position
 
 % set each finger's origin position
 transform_thumb_wrt_index =[ 0.4338 -0.6787 0.5926 -88.8053;
@@ -166,6 +166,7 @@ for n_pos=1:num_zigPos(2) % the number of thumb zig positions
 
     fileName_magneticData=strcat('DAQ/',device_name,'/training/',device_name,'_DAQ_T',num2str(n_pos),'_I',num2str(n_pos),'_M',num2str(n_pos),'_training.csv');
     magnetic_data{1,n_pos} = load(fileName_magneticData);
+    magnetic_data{1,n_pos} = magnetic_data{1,n_pos}(1:num_samples, :);
 
     % convert magnetic data into joint angles
     arr_jointAngles(:,:,n_pos) = getJointAngle(magnetic_data{1,n_pos});
