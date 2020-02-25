@@ -2,7 +2,7 @@ clc, clear, close ('all')
 
 %% Calibration - Index
 % Bx∞° 0¿Œ 3D magnetic sensor data (3x18)
-data=csvread('191108_threefinger.csv');
+data=csvread('Optimizing_Right02_200221.csv');
 
 data_thumb = data(1:10, 1:18);
 data_index = data(11:20, 1:18);

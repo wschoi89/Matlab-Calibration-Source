@@ -5,7 +5,7 @@ close all
 
 
 %file open for offset data recording
-fileID = fopen('Optimizing_Right06_191009.csv', 'w');
+fileID = fopen('Optimizing_Right02_200221.csv', 'w');
 disp('Start in 5 seconds!')
 flag_show = 0;
 
@@ -21,7 +21,7 @@ hex_prefix = 64;
 hex_postfix = 255;
 
 %open serial port
-ser = serial('COM5');
+ser = serial('COM4');
 ser.Baudrate = 115200;
 fopen(ser);
 
