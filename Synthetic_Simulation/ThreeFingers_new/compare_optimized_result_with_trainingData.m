@@ -439,7 +439,9 @@ legend([plot_origin(2) plot_noCalib(2) plot_calib(2)], {'CAD', 'w/o calibration'
 legend([plot_origin(3) plot_noCalib(3) plot_calib(3)], {'CAD', 'w/o calibration', 'w/ calibration'}, 'location', 'northeast');
 
 
-
+%% calculate mean error and std
+calculate_mean_std;
+error_table
 
 
 
