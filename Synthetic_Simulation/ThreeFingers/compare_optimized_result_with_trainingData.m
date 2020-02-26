@@ -1,12 +1,4 @@
-clear
-clc
-% close all
 
-
-% set device name
-if ~exist('device_name', 'var')
-    device_name='device6';
-end
 
 %load link lengths for thumb, index, and middle devices
 arr_links = loadLinkLength();
