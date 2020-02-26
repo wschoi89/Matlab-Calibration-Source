@@ -55,7 +55,7 @@ for finger=1:num_fingers
 end
 
 % load positions for CAD zig
-load pos_calibration.mat
+load('mat_files/pos_calibration.mat')
 
 
 %% plot finger's origin
