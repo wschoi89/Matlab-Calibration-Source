@@ -1,4 +1,4 @@
-filename = 'mech-R1.json';
+filename = 'mech-R4.json';
 fileID = fopen(filename, 'w');
 fprintf(fileID, '{\n');
 fprintf(fileID, '\t"HandSide" : "right",\n\n');
@@ -24,8 +24,6 @@ for row=1:3
     end
     fprintf(fileID, '\n');
 end
-
-
 fprintf(fileID, '\n');
 fprintf(fileID, '\t"off_TH1_Thumb": %f,\n', parameters(1,1));
 fprintf(fileID, '\t"off_TH2_Thumb": %f,\n', parameters(1,2));

@@ -4,7 +4,7 @@ clc
 close all
 
 % set device name
-device_name='Device1';
+device_name='Device6';
 
 %load link lengths for thumb, index, and middle devices
 arr_links = loadLinkLength();
@@ -16,13 +16,14 @@ num_angles = 4; % device angle
 
 % num_zigPos = [18, 16, 16]; % thumb, index, middle 
 num_zigPos = [13, 15, 15]; % thumb, index, middle 
-num_maxZigPos = max(num_zigPos);
-num_samples = 20; % samples per position
+num_samples = 10; % samples per position
 
 % set each finger's origin position
+transform_thumb_wrt_index =[ 0.4338 -0.6787 0.5926 -88.8053;
+                            -0.3136  0.5029 0.8055 -30.1988;
+							-0.8447 -0.5352 0.0053 -25.3626;
+		       				    0    0      0        1.0000;];
 
-% load thumb transfrom with respect to Index coordinate
-load mat_thumb_wrt_index.mat
 
 Origin_thumb = eye(4)*transform_thumb_wrt_index;
 Origin_index = eye(4);
@@ -155,13 +156,13 @@ end
 % end
 % 
 % preallocate magnetic data size 
-magnetic_data = cell(1, num_maxZigPos);
-for n_pos=1:num_maxZigPos
+magnetic_data = cell(1, num_zigPos(2));
+for n_pos=1:num_zigPos(2)
    magnetic_data{1,n_pos} = zeros(num_samples, num_angles*num_fingers); 
 end
 
 %%  load magnet data from files and calculate estimated end-effector without calibration
-for n_pos=1:num_maxZigPos % the number of thumb zig positions
+for n_pos=1:num_zigPos(2) % the number of thumb zig positions
 
     fileName_magneticData=strcat('DAQ/',device_name,'/training/',device_name,'_DAQ_T',num2str(n_pos),'_I',num2str(n_pos),'_M',num2str(n_pos),'_training.csv');
     magnetic_data{1,n_pos} = load(fileName_magneticData);

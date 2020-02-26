@@ -7,7 +7,7 @@ clc
 close all
 
 % set device name
-device_name='device2_';
+device_name='device1';
 
 %load link lengths for thumb, index, and middle devices
 arr_links = loadLinkLength();
@@ -17,7 +17,7 @@ num_param_per_joint = 4; % DH parameter per joint
 num_fingers = 3; % the number of device fingers
 num_angles = 4; % device angle
 
-num_zigPos_test = [3, 3, 3]; % thumb, index, middle 
+num_zigPos_test = [18, 11, 11]; % thumb, index, middle 
 num_samples = 100; % samples per position
 
 % set each finger's origin position
@@ -84,12 +84,7 @@ end
 % plotThreeFingers(Origin, pos_frame)
 
 % load positions for CAD test zig
-% load pos_calibration_test.mat
-load pos_calibration_thumb_seperately.mat
-pos_calibZig_test=pos_calibZig;
-pos_calibZig_test{1,2}(2,:) = pos_calibZig_test{1,2}(1,:);
-pos_calibZig_test{1,2}(3,:) = pos_calibZig_test{1,2}(1,:);
-
+load pos_calibration_test.mat
 
 %% plot finger's origin
 color_zigPosition = {[0 0 0], [0 0 0], [0 0 0]}; % color for each finger (thumb, index,and middle finger)
@@ -174,7 +169,7 @@ end
 %%  load test magnet data from files and calculate estimated end-effector without calibration
 for n_pos=1:num_zigPos_test(1) % the number of thumb zig positions
     
-    fileName_magneticData=strcat('DAQ/',device_name,'/training/',device_name,'_DAQ_T',num2str(n_pos),'_I',num2str(n_pos),'_M',num2str(n_pos),'_training.csv');
+    fileName_magneticData=strcat('DAQ/',device_name,'/test/',device_name,'_DAQ_T',num2str(n_pos),'_I',num2str(n_pos),'_M',num2str(n_pos),'_test.csv');
     magnetic_data{1,n_pos} = load(fileName_magneticData);
 
     % convert magnetic data into joint angles
@@ -197,37 +192,6 @@ for n_pos=1:num_zigPos_test(1) % the number of thumb zig positions
             DH_temp(5,2)=jointAngles_temp(row_sample,4*(finger-1)+3);
             DH_temp(6,2)=jointAngles_temp(row_sample,4*(finger-1)+4);
             DH_temp(2:end,3) = arr_links(:,finger);
-            
-            if finger==1
-                load(strcat('Optimized_parameter/',device_name,'/',device_name, '_optimized_parameter_thumb.mat'));
-%                 load optimized_parameter_thumb.mat
-            elseif finger==2
-                load(strcat('Optimized_parameter/',device_name,'/',device_name, '_optimized_parameter_index.mat'));
-%                 load optimized_parameter_index.mat
-            elseif finger==3
-                load(strcat('Optimized_parameter/',device_name,'/',device_name, '_optimized_parameter_middle.mat'));
-%                 load optimized_parameter_middle.mat
-            end
-
-            % sensor offset
-            DH_temp(2,2)=DH_temp(2,2)+list_optParam(1);
-            DH_temp(3,2)=DH_temp(3,2)+list_optParam(2);
-            DH_temp(5,2)=DH_temp(5,2)+list_optParam(3);
-            DH_temp(6,2)=DH_temp(6,2)+list_optParam(4);
-
-            % DH parameters
-            DH_temp(1,1)=DH_temp(1,1)+list_optParam(5);                DH_temp(1,3)=DH_temp(1,3)+list_optParam(6);
-            DH_temp(2,1)=DH_temp(2,1)+list_optParam(7);                DH_temp(2,3)=DH_temp(2,3)+list_optParam(8);
-            DH_temp(3,1)=DH_temp(3,1)+list_optParam(9);                DH_temp(3,3)=DH_temp(3,3)+list_optParam(10);
-            DH_temp(5,1)=DH_temp(5,1)+list_optParam(11);               DH_temp(5,3)=DH_temp(5,3)+list_optParam(12);
-            DH_temp(6,1)=DH_temp(6,1)+list_optParam(13);               DH_temp(6,3)=DH_temp(6,3)+list_optParam(14);
-
-            DH_temp(1,2)=DH_temp(1,2)+list_optParam(15);               DH_temp(1,4)=DH_temp(1,4)+list_optParam(16);
-                                                                       DH_temp(2,4)=DH_temp(2,4)+list_optParam(17);
-                                                                       DH_temp(3,4)=DH_temp(3,4)+list_optParam(18);
-                                                                       DH_temp(5,4)=DH_temp(5,4)+list_optParam(19);
-                                                                       DH_temp(6,4)=DH_temp(6,4)+list_optParam(20);
-            
 
             DH_table(:,:,finger) = DH_temp;
 
@@ -248,14 +212,6 @@ for n_pos=1:num_zigPos_test(1) % the number of thumb zig positions
         end
     end
 
-    mean_pos_frame = [mean(pos_frame{1,1,2});
-        mean(pos_frame{1,2,2});
-        mean(pos_frame{1,3,2});
-        mean(pos_frame{1,4,2});
-        mean(pos_frame{1,5,2});
-        mean(pos_frame{1,6,2});
-        mean(pos_frame{1,7,2});
-        ];
     % allocate end-effector positions
     color_init_endEffector = {[0.8 0 0], [0 0.5 0], [0 0.5 1]};
     for finger=1:num_fingers 
@@ -381,11 +337,8 @@ subplot(2,3,6); legend('middle w/o calibration');
 
 for n_pos=1:num_zigPos_test(1)
     
-    fileName_magneticData=strcat('DAQ/',device_name,'/test/',device_name,'_DAQ_T',num2str(n_pos),'_I',num2str(n_pos),'_M',num2str(n_pos),'_test.csv');
-    magnetic_data{1,n_pos} = load(fileName_magneticData);
-    
     % convert magnetic data into joint angles
-    arr_jointAngles(:,:,n_pos) = getJointAngle(magnetic_data{1,n_pos});
+%     arr_jointAngles(:,:,n_pos) = getJointAngle(magnetic_data{1,n_pos});
 
     % preallocate the size of pos_frame 
     for finger=1:num_fingers
@@ -449,15 +402,6 @@ for n_pos=1:num_zigPos_test(1)
             end
         end
     end
-    
-    mean_pos_frame = [mean(pos_frame{1,1,2});
-        mean(pos_frame{1,2,2});
-        mean(pos_frame{1,3,2});
-        mean(pos_frame{1,4,2});
-        mean(pos_frame{1,5,2});
-        mean(pos_frame{1,6,2});
-        mean(pos_frame{1,7,2});
-        ];
 
     % save end-effector positions with calibration
     for finger=1:num_fingers 

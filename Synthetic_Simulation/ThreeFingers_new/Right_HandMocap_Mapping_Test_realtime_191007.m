@@ -14,8 +14,7 @@ flag_init=0;
 
 COM_PORT='COM5';
 %load optimized DH parameters
-% DH_json = jsondecode(fileread('Optimized_parameter/device6/mech-R6.json'));
-DH_json = jsondecode(fileread('mech-R1.json'));
+DH_json = jsondecode(fileread('Optimized_parameter/device6/mech-R6.json'));
 DHoffset = reshape(DH_json.DH_offset, 16, 3)';
 %load device angle offset
 %index
@@ -45,7 +44,7 @@ end
 ser = serial(COM_PORT);
 ser.Baudrate = 115200;
 
-load pos_calibration_wrt_indexOrigin_T13.mat
+load pos_calibration_seperately.mat
 
 %thumb, index, middle finger number (right)
 T1=1;
@@ -57,6 +56,39 @@ M2=5;
 
 %load link lengths for thumb, index, and middle devices
 arr_links = loadLinkLength();
+
+% l1_TH=24.2;
+% l2_TH=56.03;
+% l3_TH=12.94;
+% l4_TH=57.5;
+% l5_TH=19.5;
+% % l6_TH=24.82;
+% l6_TH = 27.25;
+% l7_TH=10.42;
+% l8_TH=16.61;
+
+% %% Link Length_181114 Fingertip ¼öÁ¤
+% l1=24.2;
+% l2=56.03;
+% l3=12.94;
+% l4=47.5;
+% l5=19.5;
+% % l6=22.96;
+% l6 = 24.90;
+% l7=-10.42;
+% l8=16.61;
+% 
+% 
+% l1_MI=24.2;
+% l2_MI=56.03;
+% l3_MI=12.94;
+% l4_MI=47.5;
+% l5_MI=19.5;
+% % l6_MI=22.93;
+% l6_MI = 24.90;
+% l7_MI=-10.42;
+% l8_MI=16.61;
+
 
 %% connect serial port 
 
@@ -145,16 +177,13 @@ view([172, -44])
 hold on
 % axis('equal')
 
-transform_thumb_wrt_index =[  0.5300   -0.6789    0.5081  -88.7496;
-                             -0.1686    0.5029    0.8477  -29.0405;
-							 -0.8311   -0.5350    0.1521  -24.3522;
-                                   0    0         0        1.0000;];
-
-
 Origin=eye(4);%% initial values
-Origin_TH=Origin*transform_thumb_wrt_index;
-Origin_MI=Origin*transl(0,0,19);%% initial values
-% Origin_MI=Origin;%% initial values
+% Origin_TH=Origin*transl(-86.71,-28.55,22.75)*trotz(24*pi/180)*trotx(-75*pi/180)*troty(54*pi/180)*trotz(45*pi/180);%% initial values
+% Origin_TH=Origin*transl(-88.75,-29.04,-24.35)*trotz(24*pi/180)*trotx(-75*pi/180)*troty(54*pi/180)*trotz(45*pi/180);%% initial values
+Origin_TH=Origin;%% initial values
+% Origin_THParam=[-88.75 -29.04 -24.35 asin(-Origin_TH(2,3)/cos(asin(Origin_TH(1,3)))) asin(Origin_TH(1,3)) asin(-Origin_TH(1,2)/cos(asin(Origin_TH(1,3))))];
+% Origin_MI=Origin*transl(0,0,19);%% initial values
+Origin_MI=Origin;%% initial values
 
 DH_ref = [0 0      0   -pi/2;
           0 0      0   pi/2;
@@ -996,8 +1025,6 @@ Joint6_TH=[R6_TH(1,4); R6_TH(2,4); R6_TH(3,4)];
 tic;
 %% index
 
-magneticValue(iter, 7:12);
-
 mag=sqrt(magneticValue(iter,I1*3+1)^2+magneticValue(iter,I1*3+2)^2+magneticValue(iter,I1*3+3)^2);
 a=magneticValue(iter,I1*3+1)/mag;
 b=magneticValue(iter,I1*3+2)/mag;
@@ -1031,14 +1058,10 @@ end
 
 mag=sqrt(magneticValue(iter,I2*3+1)^2+magneticValue(iter,I2*3+2)^2+magneticValue(iter,I2*3+3)^2);
 a=magneticValue(iter,I2*3+1)/mag;
-
-
 b=magneticValue(iter,I2*3+2)/mag;
 
 X=atan2(alpha,gamma);
-
 if alpha*alpha+gamma*gamma-a*a>0
-    
     TH4(iter)=atan2(a,sqrt(alpha*alpha+gamma*gamma-a*a))-X;
 else
     TH4(iter)=atan2(a,0)-X;
@@ -1050,7 +1073,6 @@ elseif TH4(iter)<-pi/2
     TH4(iter)=-pi/2;
 end
 
-% TH4 : -0.51546704508844587
 
 Y(iter)=-sin(TH4(iter))*alpha+cos(TH4(iter))*gamma;
 if Y(iter) == 0
@@ -1070,14 +1092,10 @@ end
 
 TH4(iter)=TH4(iter)+pi/4;
 
-angle = [TH1(iter) TH2(iter) TH3(iter) TH4(iter)];
-
 TH1(iter)=TH1(iter)+off_TH1;
 TH2(iter)=TH2(iter)+off_TH2;
 TH3(iter)=TH3(iter)+off_TH3;
 TH4(iter)=TH4(iter)+off_TH4;
-
-
 
 % DH=[0 0 0 -pi/2; 0 TH1(iter) l1 pi/2; 0 TH2(iter) l2 0; 0 -pi/2 l3 0; 0 TH3(iter) l4 0; 0 TH4(iter) l5 0; 0 -pi/2 l6 0; 0 pi/2 20.38 0];
 DH = DH_ref;
@@ -1121,8 +1139,6 @@ R5=R4*R56;
 Joint5=[R5(1,4); R5(2,4); R5(3,4)];
 R6=R5*R67;
 Joint6=[R6(1,4); R6(2,4); R6(3,4)];
-
-% pos_joint = [Joint1';Joint2';Joint3';Joint4';Joint5';Joint6';];
 % R7=R6*R78;
 % Joint7=[R7(1,4); R7(2,4); R7(3,4)];
 

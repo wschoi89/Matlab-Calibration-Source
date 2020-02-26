@@ -7,7 +7,7 @@ clc
 close all
 
 % set device name
-device_name='Device4_';
+device_name='Device4';
 
 %load link lengths for thumb, index, and middle devices
 arr_links = loadLinkLength();
@@ -17,7 +17,7 @@ num_param_per_joint = 4; % DH parameter per joint
 num_fingers = 3; % the number of device fingers
 num_angles = 4; % device angle
 
-num_zigPos_test = [3, 3, 3]; % thumb, index, middle 
+num_zigPos_test = [15, 15, 15]; % thumb, index, middle 
 num_samples = 100; % samples per position
 
 % set each finger's origin position
@@ -48,7 +48,7 @@ pos_frame = cell(1, num_DHjoints, num_fingers);
 
 pos_endEffector_noCalib = cell(1,3);
 pos_endEffector_Calib = cell(1,3);
-arr_jointAngles_training = zeros(num_samples, num_angles*num_fingers, num_zigPos_test(1));
+arr_jointAngles = zeros(num_samples, num_angles*num_fingers, num_zigPos_test(1));
 
 for finger=1:num_fingers
     pos_endEffector_noCalib{1,finger} = zeros(num_samples,3,num_zigPos_test(finger));    
@@ -88,9 +88,6 @@ end
 % load pos_calibration_test.mat
 load pos_calibration_seperately.mat
 pos_calibZig_test=pos_calibZig;
-
-pos_calibZig_test{1,2}(1,:) = pos_calibZig_test{1,2}(3,:);
-pos_calibZig_test{1,2}(2,:) = pos_calibZig_test{1,2}(3,:);
 
 %% plot finger's origin
 color_zigPosition = {[0 0 0], [0 0 0], [0 0 0]}; % color for each finger (thumb, index,and middle finger)
@@ -176,23 +173,23 @@ end
 for n_pos=1:num_zigPos_test(1) % the number of thumb zig positions
     
     fileName_magneticData=strcat('DAQ/',device_name,'/training/',device_name,'_DAQ_T',num2str(n_pos),'_I',num2str(n_pos),'_M',num2str(n_pos),'_training.csv');
-    magnetic_data_training{1,n_pos} = load(fileName_magneticData);
+    magnetic_data{1,n_pos} = load(fileName_magneticData);
 
     % convert magnetic data into joint angles
-    arr_jointAngles_training(:,:,n_pos) = getJointAngle(magnetic_data_training{1,n_pos});
+    arr_jointAngles(:,:,n_pos) = getJointAngle(magnetic_data{1,n_pos});
 
     % preallocate the size of pos_frame 
     for finger=1:num_fingers
         for joint=1:num_DHjoints
-            pos_frame{1,joint,finger} = zeros(size(arr_jointAngles_training(:,:,n_pos), 1),3);
+            pos_frame{1,joint,finger} = zeros(size(arr_jointAngles(:,:,n_pos), 1),3);
         end
     end
 
     % calculate each joint's transformation matrix and position
     for finger=1:num_fingers
-        for row_sample=1:size(arr_jointAngles_training(:,:,n_pos),1)
+        for row_sample=1:size(arr_jointAngles(:,:,n_pos),1)
             DH_temp = DH_ref;
-            jointAngles_temp = arr_jointAngles_training(:,:,n_pos);
+            jointAngles_temp = arr_jointAngles(:,:,n_pos);
             DH_temp(2,2)=jointAngles_temp(row_sample,4*(finger-1)+1);
             DH_temp(3,2)=jointAngles_temp(row_sample,4*(finger-1)+2);
             DH_temp(5,2)=jointAngles_temp(row_sample,4*(finger-1)+3);
@@ -248,32 +245,23 @@ for n_pos=1:num_zigPos_test(1) % the number of thumb zig positions
             end
         end
     end
-    
-    mean_pos_frame = [mean(pos_frame{1,1,2});
-        mean(pos_frame{1,2,2});
-        mean(pos_frame{1,3,2});
-        mean(pos_frame{1,4,2});
-        mean(pos_frame{1,5,2});
-        mean(pos_frame{1,6,2});
-        mean(pos_frame{1,7,2});
-        ];
 
     % allocate end-effector positions
     color_init_endEffector = {[0.8 0 0], [0 0.5 0], [0 0.5 1]};
     for finger=1:num_fingers 
         if finger==1
             subplot(2,3,1);
-            for row_sample=1:size(arr_jointAngles_training,1)
+            for row_sample=1:size(arr_jointAngles,1)
                 pos_endEffector_noCalib{1,finger}(row_sample,:,n_pos) = pos_frame{1,7,finger}(row_sample,:);
             end
              
         elseif finger==2 && n_pos<num_zigPos_test(2)+1
             subplot(2,3,2);
-            for row_sample=1:size(arr_jointAngles_training,1)
+            for row_sample=1:size(arr_jointAngles,1)
                 pos_endEffector_noCalib{1,finger}(row_sample,:,n_pos) = pos_frame{1,7,finger}(row_sample,:);
             end
         elseif finger==3 && n_pos<num_zigPos_test(3)+1
-            for row_sample=1:size(arr_jointAngles_training,1)
+            for row_sample=1:size(arr_jointAngles,1)
                 pos_endEffector_noCalib{1,finger}(row_sample,:,n_pos) = pos_frame{1,7,finger}(row_sample,:);
             end
         end
@@ -387,24 +375,24 @@ for n_pos=1:num_zigPos_test(1)
 %     arr_jointAngles(:,:,n_pos) = getJointAngle(magnetic_data{1,n_pos});
 
     fileName_magneticData=strcat('DAQ/',device_name,'/test/',device_name,'_DAQ_T',num2str(n_pos),'_I',num2str(n_pos),'_M',num2str(n_pos),'_test.csv');
-    magnetic_data_test{1,n_pos} = load(fileName_magneticData);
+    magnetic_data{1,n_pos} = load(fileName_magneticData);
     
     % convert magnetic data into joint angles
-    arr_jointAngles_test(:,:,n_pos) = getJointAngle(magnetic_data_test{1,n_pos});
+    arr_jointAngles(:,:,n_pos) = getJointAngle(magnetic_data{1,n_pos});
 
 
     % preallocate the size of pos_frame 
     for finger=1:num_fingers
         for joint=1:num_DHjoints
-            pos_frame{1,joint,finger} = zeros(size(arr_jointAngles_test(:,:,n_pos), 1),3);
+            pos_frame{1,joint,finger} = zeros(size(arr_jointAngles(:,:,n_pos), 1),3);
         end
     end
     
     % calculate each joint's transformation matrix and position
     for finger=1:num_fingers
-        for row_sample=1:size(arr_jointAngles_test(:,:,n_pos),1)
+        for row_sample=1:size(arr_jointAngles(:,:,n_pos),1)
             DH_temp = DH_ref;
-            jointAngles_temp = arr_jointAngles_test(:,:,n_pos);
+            jointAngles_temp = arr_jointAngles(:,:,n_pos);
             DH_temp(2,2)=jointAngles_temp(row_sample,4*(finger-1)+1);
             DH_temp(3,2)=jointAngles_temp(row_sample,4*(finger-1)+2);
             DH_temp(5,2)=jointAngles_temp(row_sample,4*(finger-1)+3);
@@ -458,31 +446,22 @@ for n_pos=1:num_zigPos_test(1)
             end
         end
     end
-    
-    mean_pos_frame = [mean(pos_frame{1,1,2});
-        mean(pos_frame{1,2,2});
-        mean(pos_frame{1,3,2});
-        mean(pos_frame{1,4,2});
-        mean(pos_frame{1,5,2});
-        mean(pos_frame{1,6,2});
-        mean(pos_frame{1,7,2});
-        ];
 
     % save end-effector positions with calibration
     for finger=1:num_fingers 
         if finger==1
             subplot(2,3,1);
-            for row_sample=1:size(arr_jointAngles_test,1)
+            for row_sample=1:size(arr_jointAngles,1)
                pos_endEffector_Calib{1,finger}(row_sample,:,n_pos) = pos_frame{1,7,finger}(row_sample,:);
             end
         elseif finger == 2 && n_pos<num_zigPos_test(2)+1
             subplot(2,3,2);
-            for row_sample=1:size(arr_jointAngles_test,1)
+            for row_sample=1:size(arr_jointAngles,1)
                pos_endEffector_Calib{1,finger}(row_sample,:,n_pos) = pos_frame{1,7,finger}(row_sample,:);
             end
         elseif finger == 3 && n_pos<num_zigPos_test(2)+1
             subplot(2,3,3);
-            for row_sample=1:size(arr_jointAngles_test,1)
+            for row_sample=1:size(arr_jointAngles,1)
                pos_endEffector_Calib{1,finger}(row_sample,:,n_pos) = pos_frame{1,7,finger}(row_sample,:);
             end
         end

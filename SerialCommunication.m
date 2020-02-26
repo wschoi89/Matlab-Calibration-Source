@@ -9,18 +9,18 @@ end
 
 
 COM_PORT='COM5';
-num_device='Device1';
+num_device='device6';
 position='15';
 fileID = fopen(strcat('DAQ/',num_device,'_DAQ_T',position,'_I',position,'_M',position,'_training.csv'), 'w');
 % fileID = fopen(strcat('DAQ/',num_device,'_DAQ_T',position,'_I',position,'_M',position,'_test.csv'), 'w');
-num_iteration = 20;
+num_iteration = 100;
 disp('Start in 5 seconds!')
 
 % set initial interation number as zero
 iter = 0;
 
 % data preallocation 
-data_for_plot = zeros(num_iteration, 18);
+data_for_plot = zeros(100, 18);
 
 %close existing memory of port object
 if ~isempty(instrfind)

@@ -4,7 +4,7 @@ clc
 
 
 % set device name
-device_name='Device1';
+device_name='device6';
 
 %load link lengths for thumb, index, and middle devices
 arr_links = loadLinkLength();
@@ -16,19 +16,13 @@ num_angles = 4; % device angle
 
 num_zigPos_training = [13, 15, 15]; % thumb, index, middle 
 num_maxZigPos = max(num_zigPos_training);
-num_samples = 20;
-if ~exist('num_samples','var')
-    num_samples = 100;
-end
-
-% load thumb transfrom with respect to Index coordinate
-load mat_thumb_wrt_index.mat
+num_samples = 100; % samples per position
 
 % set each finger's origin position
-Origin_thumb = eye(4)*transform_thumb_wrt_index;
+Origin_thumb = eye(4);
 Origin_index = eye(4);
-Origin_middle = Origin_index*transl(0,0,19);
-% Origin_middle = eye(4);
+% Origin_middle = Origin_index*transl(0,0,19);
+Origin_middle = eye(4);
 
 % allocate each finger's origin into Origin cell.
 Origin = cell(1,3);
@@ -89,7 +83,7 @@ end
 % plotThreeFingers(Origin, pos_frame)
 
 % load positions for CAD zig
-load pos_calibration_wrt_indexOrigin_T13.mat
+load pos_calibration_seperately_2.mat
 
 
 %% plot finger's origin
@@ -174,7 +168,7 @@ for n_pos=1:num_maxZigPos % the number of thumb zig positions
 
     fileName_magneticData=strcat('DAQ/',device_name,'/training/',device_name,'_DAQ_T',num2str(n_pos),'_I',num2str(n_pos),'_M',num2str(n_pos),'_training.csv');
     magnetic_data{1,n_pos} = load(fileName_magneticData);
-    magnetic_data{1,n_pos} = magnetic_data{1,n_pos}(1:num_samples, :);
+
     % convert magnetic data into joint angles
     arr_jointAngles(:,:,n_pos) = getJointAngle(magnetic_data{1,n_pos});
 
@@ -364,14 +358,14 @@ for n_pos=1:num_maxZigPos
             DH_temp(2:end,3) = arr_links(:,finger);
             % add calibrated parameters
             if finger==1
-%                  load(strcat('Optimized_parameter/',device_name,'/',device_name, '_optimized_parameter_thumb.mat'));
-                load optimized_parameter_thumb.mat
+                load(strcat('Optimized_parameter/',device_name,'/',device_name, '_optimized_parameter_thumb.mat'));
+%                 load optimized_parameter_thumb.mat
             elseif finger==2
-%                  load(strcat('Optimized_parameter/',device_name,'/',device_name, '_optimized_parameter_index.mat'));
-                load optimized_parameter_index.mat
+                load(strcat('Optimized_parameter/',device_name,'/',device_name, '_optimized_parameter_index.mat'));
+%                 load optimized_parameter_index.mat
             elseif finger==3
-%                 load(strcat('Optimized_parameter/',device_name,'/',device_name, '_optimized_parameter_middle.mat'));
-                load optimized_parameter_middle.mat
+                load(strcat('Optimized_parameter/',device_name,'/',device_name, '_optimized_parameter_middle.mat'));
+%                 load optimized_parameter_middle.mat
             end
                 % sensor offset
                 DH_temp(2,2)=DH_temp(2,2)+list_optParam(1);

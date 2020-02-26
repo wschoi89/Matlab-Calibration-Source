@@ -1,4 +1,4 @@
-% 
+
 clear
 clc
 close all
@@ -15,7 +15,6 @@ num_fingers = 3; % the number of device fingers
 num_angles = 4; % device angle
 
 num_zigPos = [18, 16, 16]; % thumb, index, middle 
-% num_zigPos = [1, 1, 1]; % thumb, index, middle 
 num_samples = 100; % samples per position
 
 % set each finger's origin position

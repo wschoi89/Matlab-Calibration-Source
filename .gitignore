@@ -2,10 +2,4 @@
 *.jpg
 *.mat
 !Synthetic_Simulation/ThreeFingers/pos_calibration.mat
-/Synthetic_Simulation/**/*.csv
-**/*.csv
-
-
-
-
-
+*.csv
