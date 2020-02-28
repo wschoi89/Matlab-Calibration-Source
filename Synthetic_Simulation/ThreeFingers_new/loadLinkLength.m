@@ -11,8 +11,8 @@ function linkLength = loadLinkLength()
     linkLength(2, thumb) = 56.03;
     linkLength(3, thumb) = 12.94;
     linkLength(4, thumb) = 57.50;
-    linkLength(5, thumb) = 19.50;
-    linkLength(6, thumb) = 24.90;
+    linkLength(5, thumb) = 17.50;
+    linkLength(6, thumb) = 34.30;
     
      
 %     %index links
