@@ -1,26 +1,27 @@
-clear
-clc
-close all
+clear;clc;close all;
 
 %file open for offset data recording
 if mkdir('DAQ')==false
     mkdir('DAQ');
 end
 
-
+%% set COM PORT, device number, position for DAQ, and the number of samples
 COM_PORT='COM5';
-num_device='device6';
-position='15';
+num_device='Device1';
+position='1';
+num_samples = 20; 
+
+num_sensors = 6;
 fileID = fopen(strcat('DAQ/',num_device,'_DAQ_T',position,'_I',position,'_M',position,'_training.csv'), 'w');
 % fileID = fopen(strcat('DAQ/',num_device,'_DAQ_T',position,'_I',position,'_M',position,'_test.csv'), 'w');
-num_samples = 100;
+
 disp('Start in 5 seconds!')
 
 % set initial interation number as zero
 iter = 0;
 
 % data preallocation 
-data_for_plot = zeros(num_samples, 18);
+data_for_plot = zeros(num_samples, num_sensors*3); % 3 means the number of vector components (Bx, By, Bz)
 
 %close existing memory of port object
 if ~isempty(instrfind)
@@ -111,7 +112,7 @@ while(true)
            fprintf(fileID, '%04.3f,%04.3f,%04.3f', bx{6}, by{6}, bz{6});
            fprintf(fileID, '\n');
            
-            if iter == num_iteration
+            if iter == num_samples
               break; 
            end
             
@@ -128,5 +129,4 @@ delete(ser);
 
 disp('finished')
 
-%close serial COM Port
 
