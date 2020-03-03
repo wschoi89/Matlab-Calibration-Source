@@ -14,7 +14,7 @@ flag_init=0;
 
 COM_PORT='COM5';
 %load optimized DH parameters
-DH_json = jsondecode(fileread('mech-R1.json'));
+DH_json = jsondecode(fileread('mech-R2.json'));
 DHoffset = reshape(DH_json.DH_offset, 16, 3)';
 %load device angle offset
 %index
@@ -188,7 +188,7 @@ iter=1;
 
 %% Mechanism & Finger Drawing
 while(true)
-    tic;
+    
     %read first byte and check whether it is same with the prefix byte
     first_byte = fread(ser, 1);    
     %check first byte
@@ -248,467 +248,267 @@ while(true)
         magneticValue(1, 3*(i-1)+3) = bz{i};
     end
 
-    % M=size(magneticValue);
+    % jointAngles array includes thumb, index, and middle device angles
+   jointAngles = getJointAngle(magneticValue);
     
-    iter = 1;
+   
+   %% thumb 
+   TH1_TH=jointAngles(1)+off_TH1_TH;
+   TH2_TH=jointAngles(2)+off_TH2_TH;
+   TH3_TH=jointAngles(3)+off_TH3_TH;
+   TH4_TH=jointAngles(4)+off_TH4_TH;
+
+   if flag_init == 0 
+       DH_TH = DH_ref;
+       DH_TH(2:end, 3) = arr_links(:, 1);
+
+       % DH parameters
+       DH_TH(1,1)=DH_TH(1,1)+DHoffset(1,1);                DH_TH(1,3)=DH_TH(1,3)+DHoffset(1,2);
+       DH_TH(2,1)=DH_TH(2,1)+DHoffset(1,3);                DH_TH(2,3)=DH_TH(2,3)+DHoffset(1,4);
+       DH_TH(3,1)=DH_TH(3,1)+DHoffset(1,5);                DH_TH(3,3)=DH_TH(3,3)+DHoffset(1,6);
+       DH_TH(5,1)=DH_TH(5,1)+DHoffset(1,7);                DH_TH(5,3)=DH_TH(5,3)+DHoffset(1,8);
+       DH_TH(6,1)=DH_TH(6,1)+DHoffset(1,9);                DH_TH(6,3)=DH_TH(6,3)+DHoffset(1,10);
+
+       DH_TH(1,2)=DH_TH(1,2)+DHoffset(1,11);               DH_TH(1,4)=DH_TH(1,4)+DHoffset(1,12);
+                                                           DH_TH(2,4)=DH_TH(2,4)+DHoffset(1,13);
+                                                           DH_TH(3,4)=DH_TH(3,4)+DHoffset(1,14);
+                                                           DH_TH(5,4)=DH_TH(5,4)+DHoffset(1,15);
+                                                           DH_TH(6,4)=DH_TH(6,4)+DHoffset(1,16);
+   end
+                                                       
+    DH_TH(2,2) = TH1_TH;
+    DH_TH(3,2) = TH2_TH;
+    DH_TH(5,2) = TH3_TH;
+    DH_TH(6,2) = TH4_TH;                                                   
+
+    R01_TH=transl(0,0,DH_TH(1,1))*trotz(DH_TH(1,2))*transl(DH_TH(1,3),0,0)*trotx(DH_TH(1,4));
+    R12_TH=transl(0,0,DH_TH(2,1))*trotz(DH_TH(2,2))*transl(DH_TH(2,3),0,0)*trotx(DH_TH(2,4));
+    R23_TH=transl(0,0,DH_TH(3,1))*trotz(DH_TH(3,2))*transl(DH_TH(3,3),0,0)*trotx(DH_TH(3,4));
+    R34_TH=transl(0,0,DH_TH(4,1))*trotz(DH_TH(4,2))*transl(DH_TH(4,3),0,0)*trotx(DH_TH(4,4));
+    R45_TH=transl(0,0,DH_TH(5,1))*trotz(DH_TH(5,2))*transl(DH_TH(5,3),0,0)*trotx(DH_TH(5,4));
+    R56_TH=transl(0,0,DH_TH(6,1))*trotz(DH_TH(6,2))*transl(DH_TH(6,3),0,0)*trotx(DH_TH(6,4));
+    R67_TH=transl(0,0,DH_TH(7,1))*trotz(DH_TH(7,2))*transl(DH_TH(7,3),0,0)*trotx(DH_TH(7,4));
+
+    R78_TH=transl(0,0,6)*trotz(pi/2)*transl(4,0,0);
+
+
+    R1_TH=Origin_TH*R01_TH*R12_TH;
+    Joint1_TH=[R1_TH(1,4); R1_TH(2,4); R1_TH(3,4)];
+    R2_TH=R1_TH*R23_TH;
+    Joint2_TH=[R2_TH(1,4); R2_TH(2,4); R2_TH(3,4)];
+    R3_TH=R2_TH*R34_TH;
+    Joint3_TH=[R3_TH(1,4); R3_TH(2,4); R3_TH(3,4)];
+    R4_TH=R3_TH*R45_TH;
+    Joint4_TH=[R4_TH(1,4); R4_TH(2,4); R4_TH(3,4)];
+    R5_TH=R4_TH*R56_TH;
+    Joint5_TH=[R5_TH(1,4); R5_TH(2,4); R5_TH(3,4)];
+    R6_TH=R5_TH*R67_TH;
+    Joint6_TH=[R6_TH(1,4); R6_TH(2,4); R6_TH(3,4)];
+    R7_TH=R6_TH*R78_TH;
+    Joint7_TH=[R7_TH(1,4); R7_TH(2,4); R7_TH(3,4)];
+
+    if flag_init == 0 
+
+        pp8=plot3([Origin_TH(1,4) Joint1_TH(1)],[Origin_TH(2,4) Joint1_TH(2)],[Origin_TH(3,4) Joint1_TH(3)],'r.-');
+        pp8.XDataSource = '[Origin_TH(1,4) Joint1_TH(1)]';
+        pp8.YDataSource = '[Origin_TH(2,4) Joint1_TH(2)]';
+        pp8.ZDataSource = '[Origin_TH(3,4) Joint1_TH(3)]';
+
+        pp9=plot3([Joint1_TH(1) Joint2_TH(1)],[Joint1_TH(2) Joint2_TH(2)],[Joint1_TH(3) Joint2_TH(3)],'r.-');
+        pp10=plot3([Joint2_TH(1) Joint3_TH(1)],[Joint2_TH(2) Joint3_TH(2)],[Joint2_TH(3) Joint3_TH(3)],'r.-');
+        pp11=plot3([Joint3_TH(1) Joint4_TH(1)],[Joint3_TH(2) Joint4_TH(2)],[Joint3_TH(3) Joint4_TH(3)],'r.-');
+        pp12=plot3([Joint4_TH(1) Joint5_TH(1)],[Joint4_TH(2) Joint5_TH(2)],[Joint4_TH(3) Joint5_TH(3)],'r.-');
+        pp13=plot3([Joint5_TH(1) Joint6_TH(1)],[Joint5_TH(2) Joint6_TH(2)],[Joint5_TH(3) Joint6_TH(3)],'r.-');
+        pp14=plot3([Joint6_TH(1) Joint7_TH(1)],[Joint6_TH(2) Joint7_TH(2)],[Joint6_TH(3) Joint7_TH(3)],'r.-');
+
+    end
     
-    t_end= toc;
-    tic;
-    
-%% Thumb
-mag=sqrt(magneticValue(iter,T1*3+1)^2+magneticValue(iter,T1*3+2)^2+magneticValue(iter,T1*3+3)^2);
-a=magneticValue(iter,T1*3+1)/mag;
-b=magneticValue(iter,T1*3+2)/mag;
-
-X=atan2(gamma,alpha);
-if alpha*alpha+gamma*gamma-a*a>0
-    TH1_TH(iter)=atan2(sqrt(alpha*alpha+gamma*gamma-a*a),a)-X;
-else
-    TH1_TH(iter)=atan2(0,a)-X;
-end
-
-if TH1_TH(iter)>pi/2
-    TH1_TH(iter)=pi/2;
-elseif TH1_TH(iter)<-pi/2
-    TH1_TH(iter)=-pi/2;
-end
-    
-Y(iter)=sin(TH1_TH(iter))*alpha+cos(TH1_TH(iter))*gamma;
-if Y(iter)*Y(iter)+beta*beta-b*b<0
-    TH2_TH(iter)=atan2(b,0)-atan2(beta,Y(iter));
-else
-    TH2_TH(iter)=atan2(b,sqrt(Y(iter)*Y(iter)+beta*beta-b*b))-atan2(beta,Y(iter));
-end
-
-if TH2_TH(iter)>pi/2
-    TH2_TH(iter)=pi/2;
-elseif TH2_TH(iter)<-pi/2
-    TH2_TH(iter)=-pi/2;
-end
-    
-mag=sqrt(magneticValue(iter,T2*3+1)^2+magneticValue(iter,T2*3+2)^2+magneticValue(iter,T2*3+3)^2);
-a=magneticValue(iter,T2*3+1)/mag;
-b=magneticValue(iter,T2*3+2)/mag;
-
-X=atan2(alpha,gamma);
-if alpha*alpha+gamma*gamma-a*a>0
-    TH4_TH(iter)=atan2(a,sqrt(alpha*alpha+gamma*gamma-a*a))-X;
-else
-    TH4_TH(iter)=atan2(a,0)-X;
-end
-
-if TH4_TH(iter)>pi/2
-    TH4_TH(iter)=pi/2;
-elseif TH4_TH(iter)<-pi/2
-    TH4_TH(iter)=-pi/2;
-end
+    set(pp8, 'XData', [Origin_TH(1,4) Joint1_TH(1)]);set(pp8, 'YData', [Origin_TH(2,4) Joint1_TH(2)]);set(pp8, 'ZData', [Origin_TH(3,4) Joint1_TH(3)]);
+    set(pp9, 'XData', [Joint1_TH(1) Joint2_TH(1)]);set(pp9, 'YData', [Joint1_TH(2) Joint2_TH(2)]);set(pp9, 'ZData', [Joint1_TH(3) Joint2_TH(3)]);
+    set(pp10, 'XData', [Joint2_TH(1) Joint3_TH(1)]);set(pp10, 'YData', [Joint2_TH(2) Joint3_TH(2)]);set(pp10, 'ZData', [Joint2_TH(3) Joint3_TH(3)]);
+    set(pp11, 'XData', [Joint3_TH(1) Joint4_TH(1)]);set(pp11, 'YData', [Joint3_TH(2) Joint4_TH(2)]);set(pp11, 'ZData', [Joint3_TH(3) Joint4_TH(3)]);
+    set(pp12, 'XData', [Joint4_TH(1) Joint5_TH(1)]);set(pp12, 'YData', [Joint4_TH(2) Joint5_TH(2)]);set(pp12, 'ZData', [Joint4_TH(3) Joint5_TH(3)]);
+    set(pp13, 'XData', [Joint5_TH(1) Joint6_TH(1)]);set(pp13, 'YData', [Joint5_TH(2) Joint6_TH(2)]);set(pp13, 'ZData', [Joint5_TH(3) Joint6_TH(3)]);
+    set(pp14, 'XData', [Joint6_TH(1) Joint7_TH(1)]);set(pp14, 'YData', [Joint6_TH(2) Joint7_TH(2)]);set(pp14, 'ZData', [Joint6_TH(3) Joint7_TH(3)]);
 
 
-Y(iter)=-sin(TH4_TH(iter))*alpha+cos(TH4_TH(iter))*gamma;
-if Y(iter) == 0
-    Y(iter)=0.00001;
-end
-if Y(iter)*Y(iter)+beta*beta-b*b<0
-    TH3_TH(iter)=atan2(0,b)-atan2(Y(iter),beta);
-else
-    TH3_TH(iter)=atan2(sqrt(Y(iter)*Y(iter)+beta*beta-b*b),b)-atan2(Y(iter),beta);
-end
-
-if TH3_TH(iter)>pi/2
-    TH3_TH(iter)=pi/2;
-elseif TH3_TH(iter)<-pi/2
-    TH3_TH(iter)=-pi/2;
-end
-
-TH4_TH(iter)=TH4_TH(iter)+pi/4;
-
-TH1_TH(iter)=TH1_TH(iter)+off_TH1_TH;
-TH2_TH(iter)=TH2_TH(iter)+off_TH2_TH;
-TH3_TH(iter)=TH3_TH(iter)+off_TH3_TH;
-TH4_TH(iter)=TH4_TH(iter)+off_TH4_TH;
-
-% DH_TH=[0 0 0 -pi/2; 0 TH1_TH(iter) l1_TH pi/2; 0 TH2_TH(iter) l2_TH 0; 0 -pi/2 l3_TH 0; 0 TH3_TH(iter) l4_TH 0; 0 TH4_TH(iter) l5_TH 0; 0 -pi/2 l6_TH 0; 0 pi/2 20.46 0];
-DH_TH = DH_ref;
-
-DH_TH(2,2) = TH1_TH;
-DH_TH(3,2) = TH2_TH;
-DH_TH(5,2) = TH3_TH;
-DH_TH(6,2) = TH4_TH;
-DH_TH(2:end, 3) = arr_links(:, 1);
-
-% DH parameters
-DH_TH(1,1)=DH_TH(1,1)+DHoffset(1,1);                DH_TH(1,3)=DH_TH(1,3)+DHoffset(1,2);
-DH_TH(2,1)=DH_TH(2,1)+DHoffset(1,3);                DH_TH(2,3)=DH_TH(2,3)+DHoffset(1,4);
-DH_TH(3,1)=DH_TH(3,1)+DHoffset(1,5);                DH_TH(3,3)=DH_TH(3,3)+DHoffset(1,6);
-DH_TH(5,1)=DH_TH(5,1)+DHoffset(1,7);                DH_TH(5,3)=DH_TH(5,3)+DHoffset(1,8);
-DH_TH(6,1)=DH_TH(6,1)+DHoffset(1,9);                DH_TH(6,3)=DH_TH(6,3)+DHoffset(1,10);
-
-DH_TH(1,2)=DH_TH(1,2)+DHoffset(1,11);               DH_TH(1,4)=DH_TH(1,4)+DHoffset(1,12);
-                                                    DH_TH(2,4)=DH_TH(2,4)+DHoffset(1,13);
-                                                    DH_TH(3,4)=DH_TH(3,4)+DHoffset(1,14);
-                                                    DH_TH(5,4)=DH_TH(5,4)+DHoffset(1,15);
-                                                    DH_TH(6,4)=DH_TH(6,4)+DHoffset(1,16);
-
-R01_TH=transl(0,0,DH_TH(1,1))*trotz(DH_TH(1,2))*transl(DH_TH(1,3),0,0)*trotx(DH_TH(1,4));
-R12_TH=transl(0,0,DH_TH(2,1))*trotz(DH_TH(2,2))*transl(DH_TH(2,3),0,0)*trotx(DH_TH(2,4));
-R23_TH=transl(0,0,DH_TH(3,1))*trotz(DH_TH(3,2))*transl(DH_TH(3,3),0,0)*trotx(DH_TH(3,4));
-R34_TH=transl(0,0,DH_TH(4,1))*trotz(DH_TH(4,2))*transl(DH_TH(4,3),0,0)*trotx(DH_TH(4,4));
-R45_TH=transl(0,0,DH_TH(5,1))*trotz(DH_TH(5,2))*transl(DH_TH(5,3),0,0)*trotx(DH_TH(5,4));
-R56_TH=transl(0,0,DH_TH(6,1))*trotz(DH_TH(6,2))*transl(DH_TH(6,3),0,0)*trotx(DH_TH(6,4));
-R67_TH=transl(0,0,DH_TH(7,1))*trotz(DH_TH(7,2))*transl(DH_TH(7,3),0,0)*trotx(DH_TH(7,4));
-
-R78_TH=transl(0,0,6)*trotz(pi/2)*transl(4,0,0);
-
-
-R1_TH=Origin_TH*R01_TH*R12_TH;
-Joint1_TH=[R1_TH(1,4); R1_TH(2,4); R1_TH(3,4)];
-R2_TH=R1_TH*R23_TH;
-Joint2_TH=[R2_TH(1,4); R2_TH(2,4); R2_TH(3,4)];
-R3_TH=R2_TH*R34_TH;
-Joint3_TH=[R3_TH(1,4); R3_TH(2,4); R3_TH(3,4)];
-R4_TH=R3_TH*R45_TH;
-Joint4_TH=[R4_TH(1,4); R4_TH(2,4); R4_TH(3,4)];
-R5_TH=R4_TH*R56_TH;
-Joint5_TH=[R5_TH(1,4); R5_TH(2,4); R5_TH(3,4)];
-R6_TH=R5_TH*R67_TH;
-Joint6_TH=[R6_TH(1,4); R6_TH(2,4); R6_TH(3,4)];
-R7_TH=R6_TH*R78_TH;
-Joint7_TH=[R7_TH(1,4); R7_TH(2,4); R7_TH(3,4)];
-
-if flag_init ==0 
-    
-    pp8=plot3([Origin_TH(1,4) Joint1_TH(1)],[Origin_TH(2,4) Joint1_TH(2)],[Origin_TH(3,4) Joint1_TH(3)],'r.-');
-    pp8.XDataSource = '[Origin_TH(1,4) Joint1_TH(1)]';
-    pp8.YDataSource = '[Origin_TH(2,4) Joint1_TH(2)]';
-    pp8.ZDataSource = '[Origin_TH(3,4) Joint1_TH(3)]';
-
-    pp9=plot3([Joint1_TH(1) Joint2_TH(1)],[Joint1_TH(2) Joint2_TH(2)],[Joint1_TH(3) Joint2_TH(3)],'r.-');
-    pp10=plot3([Joint2_TH(1) Joint3_TH(1)],[Joint2_TH(2) Joint3_TH(2)],[Joint2_TH(3) Joint3_TH(3)],'r.-');
-    pp11=plot3([Joint3_TH(1) Joint4_TH(1)],[Joint3_TH(2) Joint4_TH(2)],[Joint3_TH(3) Joint4_TH(3)],'r.-');
-    pp12=plot3([Joint4_TH(1) Joint5_TH(1)],[Joint4_TH(2) Joint5_TH(2)],[Joint4_TH(3) Joint5_TH(3)],'r.-');
-    pp13=plot3([Joint5_TH(1) Joint6_TH(1)],[Joint5_TH(2) Joint6_TH(2)],[Joint5_TH(3) Joint6_TH(3)],'r.-');
-    pp14=plot3([Joint6_TH(1) Joint7_TH(1)],[Joint6_TH(2) Joint7_TH(2)],[Joint6_TH(3) Joint7_TH(3)],'r.-');
-
-end
-% 
-set(pp8, 'XData', [Origin_TH(1,4) Joint1_TH(1)]);set(pp8, 'YData', [Origin_TH(2,4) Joint1_TH(2)]);set(pp8, 'ZData', [Origin_TH(3,4) Joint1_TH(3)]);
-set(pp9, 'XData', [Joint1_TH(1) Joint2_TH(1)]);set(pp9, 'YData', [Joint1_TH(2) Joint2_TH(2)]);set(pp9, 'ZData', [Joint1_TH(3) Joint2_TH(3)]);
-set(pp10, 'XData', [Joint2_TH(1) Joint3_TH(1)]);set(pp10, 'YData', [Joint2_TH(2) Joint3_TH(2)]);set(pp10, 'ZData', [Joint2_TH(3) Joint3_TH(3)]);
-set(pp11, 'XData', [Joint3_TH(1) Joint4_TH(1)]);set(pp11, 'YData', [Joint3_TH(2) Joint4_TH(2)]);set(pp11, 'ZData', [Joint3_TH(3) Joint4_TH(3)]);
-set(pp12, 'XData', [Joint4_TH(1) Joint5_TH(1)]);set(pp12, 'YData', [Joint4_TH(2) Joint5_TH(2)]);set(pp12, 'ZData', [Joint4_TH(3) Joint5_TH(3)]);
-set(pp13, 'XData', [Joint5_TH(1) Joint6_TH(1)]);set(pp13, 'YData', [Joint5_TH(2) Joint6_TH(2)]);set(pp13, 'ZData', [Joint5_TH(3) Joint6_TH(3)]);
-set(pp14, 'XData', [Joint6_TH(1) Joint7_TH(1)]);set(pp14, 'YData', [Joint6_TH(2) Joint7_TH(2)]);set(pp14, 'ZData', [Joint6_TH(3) Joint7_TH(3)]);
-
-
-tic;
 %% index
+    TH1 = jointAngles(5)+off_TH1;
+    TH2 = jointAngles(6)+off_TH2;
+    TH3 = jointAngles(7)+off_TH3;
+    TH4 = jointAngles(8)+off_TH4;
 
-mag=sqrt(magneticValue(iter,I1*3+1)^2+magneticValue(iter,I1*3+2)^2+magneticValue(iter,I1*3+3)^2);
-a=magneticValue(iter,I1*3+1)/mag;
-b=magneticValue(iter,I1*3+2)/mag;
+    if flag_init ==0 
+        DH = DH_ref;
+        DH(2:end, 3) = arr_links(:, 2);
 
-X=atan2(gamma,alpha);
-if alpha*alpha+gamma*gamma-a*a>0
-    TH1(iter)=atan2(sqrt(alpha*alpha+gamma*gamma-a*a),a)-X;
-else
-    TH1(iter)=atan2(0,a)-X;
-end
+        % DH parameters
+        DH(1,1)=DH(1,1)+DHoffset(2,1);                DH(1,3)=DH(1,3)+DHoffset(2,2);
+        DH(2,1)=DH(2,1)+DHoffset(2,3);                DH(2,3)=DH(2,3)+DHoffset(2,4);
+        DH(3,1)=DH(3,1)+DHoffset(2,5);                DH(3,3)=DH(3,3)+DHoffset(2,6);
+        DH(5,1)=DH(5,1)+DHoffset(2,7);                DH(5,3)=DH(5,3)+DHoffset(2,8);
+        DH(6,1)=DH(6,1)+DHoffset(2,9);                DH(6,3)=DH(6,3)+DHoffset(2,10);
 
-if TH1(iter)>pi/2
-    TH1(iter)=pi/2;
-elseif TH1(iter)<-pi/2
-    TH1(iter)=-pi/2;
-end
+        DH(1,2)=DH(1,2)+DHoffset(2,11);               DH(1,4)=DH(1,4)+DHoffset(2,12);
+                                                      DH(2,4)=DH(2,4)+DHoffset(2,13);
+                                                      DH(3,4)=DH(3,4)+DHoffset(2,14);
+                                                      DH(5,4)=DH(5,4)+DHoffset(2,15);
+                                                      DH(6,4)=DH(6,4)+DHoffset(2,16);
+        
+    end
 
-
-Y(iter)=-sin(TH1(iter))*alpha+cos(TH1(iter))*gamma;
-if Y(iter)*Y(iter)+beta*beta-b*b<0
-    TH2(iter)=atan2(b,0)-atan2(beta,Y(iter));
-else
-    TH2(iter)=atan2(b,sqrt(Y(iter)*Y(iter)+beta*beta-b*b))-atan2(beta,Y(iter));
-end
-
-if TH2(iter)>pi/2
-    TH2(iter)=pi/2;
-elseif TH2(iter)<-pi/2
-    TH2(iter)=-pi/2;
-end
-
-mag=sqrt(magneticValue(iter,I2*3+1)^2+magneticValue(iter,I2*3+2)^2+magneticValue(iter,I2*3+3)^2);
-a=magneticValue(iter,I2*3+1)/mag;
-b=magneticValue(iter,I2*3+2)/mag;
-
-X=atan2(alpha,gamma);
-if alpha*alpha+gamma*gamma-a*a>0
-    TH4(iter)=atan2(a,sqrt(alpha*alpha+gamma*gamma-a*a))-X;
-else
-    TH4(iter)=atan2(a,0)-X;
-end
-
-if TH4(iter)>pi/2
-    TH4(iter)=pi/2;
-elseif TH4(iter)<-pi/2
-    TH4(iter)=-pi/2;
-end
+    DH(2,2) = TH1;
+    DH(3,2) = TH2;
+    DH(5,2) = TH3;
+    DH(6,2) = TH4;
 
 
-Y(iter)=-sin(TH4(iter))*alpha+cos(TH4(iter))*gamma;
-if Y(iter) == 0
-    Y(iter)=0.00001;
-end
-if Y(iter)*Y(iter)+beta*beta-b*b<0
-    TH3(iter)=atan2(0,b)-atan2(Y(iter),beta);
-else
-    TH3(iter)=atan2(sqrt(Y(iter)*Y(iter)+beta*beta-b*b),b)-atan2(Y(iter),beta);
-end
+    R01=transl(0,0,DH(1,1))*trotz(DH(1,2))*transl(DH(1,3),0,0)*trotx(DH(1,4));
+    R12=transl(0,0,DH(2,1))*trotz(DH(2,2))*transl(DH(2,3),0,0)*trotx(DH(2,4));
+    R23=transl(0,0,DH(3,1))*trotz(DH(3,2))*transl(DH(3,3),0,0)*trotx(DH(3,4));
+    R34=transl(0,0,DH(4,1))*trotz(DH(4,2))*transl(DH(4,3),0,0)*trotx(DH(4,4));
+    R45=transl(0,0,DH(5,1))*trotz(DH(5,2))*transl(DH(5,3),0,0)*trotx(DH(5,4));
+    R56=transl(0,0,DH(6,1))*trotz(DH(6,2))*transl(DH(6,3),0,0)*trotx(DH(6,4));
+    R67=transl(0,0,DH(7,1))*trotz(DH(7,2))*transl(DH(7,3),0,0)*trotx(DH(7,4));
+    R78=transl(0,0,-6)*trotz(pi/2)*transl(4,0,0);
 
-if TH3(iter)>pi/2
-    TH3(iter)=pi/2;
-elseif TH3(iter)<-pi/2
-    TH3(iter)=-pi/2;
-end
+    R1=Origin*R01*R12;
+    Joint1=[R1(1,4); R1(2,4); R1(3,4)];
+    R2=R1*R23;
+    Joint2=[R2(1,4); R2(2,4); R2(3,4)];
+    R3=R2*R34;
+    Joint3=[R3(1,4); R3(2,4); R3(3,4)];
+    R4=R3*R45;
+    Joint4=[R4(1,4); R4(2,4); R4(3,4)];
+    R5=R4*R56;
+    Joint5=[R5(1,4); R5(2,4); R5(3,4)];
+    R6=R5*R67;
+    Joint6=[R6(1,4); R6(2,4); R6(3,4)];
+    R7=R6*R78;
+    Joint7=[R7(1,4); R7(2,4); R7(3,4)];
 
-TH4(iter)=TH4(iter)+pi/4;
+    if flag_init == 0
+        pp1=plot3([Origin(1,4) Joint1(1)],[Origin(2,4) Joint1(2)],[Origin(3,4) Joint1(3)],'g.-');
+        pp1.XDataSource = '[Origin(1, 4) Joint1(1)]';
+        pp1.YDataSource = '[Origin(2, 4) Joint1(2)]';
+        pp1.ZDataSource = '[Origin(3, 4) Joint1(3)]';
 
-TH1(iter)=TH1(iter)+off_TH1;
-TH2(iter)=TH2(iter)+off_TH2;
-TH3(iter)=TH3(iter)+off_TH3;
-TH4(iter)=TH4(iter)+off_TH4;
+        pp2=plot3([Joint1(1) Joint2(1)],[Joint1(2) Joint2(2)],[Joint1(3) Joint2(3)],'g.-');
+        pp3=plot3([Joint2(1) Joint3(1)],[Joint2(2) Joint3(2)],[Joint2(3) Joint3(3)],'g.-');
+        pp4=plot3([Joint3(1) Joint4(1)],[Joint3(2) Joint4(2)],[Joint3(3) Joint4(3)],'g.-');
+        pp5=plot3([Joint4(1) Joint5(1)],[Joint4(2) Joint5(2)],[Joint4(3) Joint5(3)],'g.-');
+        pp6=plot3([Joint5(1) Joint6(1)],[Joint5(2) Joint6(2)],[Joint5(3) Joint6(3)],'g.-');
+        pp7=plot3([Joint6(1) Joint7(1)],[Joint6(2) Joint7(2)],[Joint6(3) Joint7(3)],'g.-');
 
-% DH=[0 0 0 -pi/2; 0 TH1(iter) l1 pi/2; 0 TH2(iter) l2 0; 0 -pi/2 l3 0; 0 TH3(iter) l4 0; 0 TH4(iter) l5 0; 0 -pi/2 l6 0; 0 pi/2 20.38 0];
-DH = DH_ref;
-DH(2,2) = TH1;
-DH(3,2) = TH2;
-DH(5,2) = TH3;
-DH(6,2) = TH4;
-DH(2:end, 3) = arr_links(:, 2);
+    end
 
-% DH parameters
-DH(1,1)=DH(1,1)+DHoffset(2,1);                DH(1,3)=DH(1,3)+DHoffset(2,2);
-DH(2,1)=DH(2,1)+DHoffset(2,3);                DH(2,3)=DH(2,3)+DHoffset(2,4);
-DH(3,1)=DH(3,1)+DHoffset(2,5);                DH(3,3)=DH(3,3)+DHoffset(2,6);
-DH(5,1)=DH(5,1)+DHoffset(2,7);                DH(5,3)=DH(5,3)+DHoffset(2,8);
-DH(6,1)=DH(6,1)+DHoffset(2,9);                DH(6,3)=DH(6,3)+DHoffset(2,10);
-
-DH(1,2)=DH(1,2)+DHoffset(2,11);               DH(1,4)=DH(1,4)+DHoffset(2,12);
-                                              DH(2,4)=DH(2,4)+DHoffset(2,13);
-                                              DH(3,4)=DH(3,4)+DHoffset(2,14);
-                                              DH(5,4)=DH(5,4)+DHoffset(2,15);
-                                              DH(6,4)=DH(6,4)+DHoffset(2,16);
-
-R01=transl(0,0,DH(1,1))*trotz(DH(1,2))*transl(DH(1,3),0,0)*trotx(DH(1,4));
-R12=transl(0,0,DH(2,1))*trotz(DH(2,2))*transl(DH(2,3),0,0)*trotx(DH(2,4));
-R23=transl(0,0,DH(3,1))*trotz(DH(3,2))*transl(DH(3,3),0,0)*trotx(DH(3,4));
-R34=transl(0,0,DH(4,1))*trotz(DH(4,2))*transl(DH(4,3),0,0)*trotx(DH(4,4));
-R45=transl(0,0,DH(5,1))*trotz(DH(5,2))*transl(DH(5,3),0,0)*trotx(DH(5,4));
-R56=transl(0,0,DH(6,1))*trotz(DH(6,2))*transl(DH(6,3),0,0)*trotx(DH(6,4));
-R67=transl(0,0,DH(7,1))*trotz(DH(7,2))*transl(DH(7,3),0,0)*trotx(DH(7,4));
-
-R78=transl(0,0,-6)*trotz(pi/2)*transl(4,0,0);
-
-R1=Origin*R01*R12;
-Joint1=[R1(1,4); R1(2,4); R1(3,4)];
-R2=R1*R23;
-Joint2=[R2(1,4); R2(2,4); R2(3,4)];
-R3=R2*R34;
-Joint3=[R3(1,4); R3(2,4); R3(3,4)];
-R4=R3*R45;
-Joint4=[R4(1,4); R4(2,4); R4(3,4)];
-R5=R4*R56;
-Joint5=[R5(1,4); R5(2,4); R5(3,4)];
-R6=R5*R67;
-Joint6=[R6(1,4); R6(2,4); R6(3,4)];
-R7=R6*R78;
-Joint7=[R7(1,4); R7(2,4); R7(3,4)];
-
-if flag_init == 0
-    pp1=plot3([Origin(1,4) Joint1(1)],[Origin(2,4) Joint1(2)],[Origin(3,4) Joint1(3)],'g.-');
-    pp1.XDataSource = '[Origin(1, 4) Joint1(1)]';
-    pp1.YDataSource = '[Origin(2, 4) Joint1(2)]';
-    pp1.ZDataSource = '[Origin(3, 4) Joint1(3)]';
-    
-    pp2=plot3([Joint1(1) Joint2(1)],[Joint1(2) Joint2(2)],[Joint1(3) Joint2(3)],'g.-');
-    pp3=plot3([Joint2(1) Joint3(1)],[Joint2(2) Joint3(2)],[Joint2(3) Joint3(3)],'g.-');
-    pp4=plot3([Joint3(1) Joint4(1)],[Joint3(2) Joint4(2)],[Joint3(3) Joint4(3)],'g.-');
-    pp5=plot3([Joint4(1) Joint5(1)],[Joint4(2) Joint5(2)],[Joint4(3) Joint5(3)],'g.-');
-    pp6=plot3([Joint5(1) Joint6(1)],[Joint5(2) Joint6(2)],[Joint5(3) Joint6(3)],'g.-');
-    pp7=plot3([Joint6(1) Joint7(1)],[Joint6(2) Joint7(2)],[Joint6(3) Joint7(3)],'g.-');
-
-end
-
-set(pp1, 'XData', [Origin(1, 4) Joint1(1)]);set(pp1, 'YData', [Origin(2, 4) Joint1(2)]);set(pp1, 'ZData', [Origin(3, 4) Joint1(3)]);
-set(pp2, 'XData', [Joint1(1) Joint2(1)]);   set(pp2, 'YData', [Joint1(2) Joint2(2)]);   set(pp2, 'ZData', [Joint1(3) Joint2(3)]);
-set(pp3, 'XData', [Joint2(1) Joint3(1)]);   set(pp3, 'YData', [Joint2(2) Joint3(2)]);   set(pp3, 'ZData', [Joint2(3) Joint3(3)]);
-set(pp4, 'XData', [Joint3(1) Joint4(1)]);   set(pp4, 'YData', [Joint3(2) Joint4(2)]);   set(pp4, 'ZData', [Joint3(3) Joint4(3)]);
-set(pp5, 'XData', [Joint4(1) Joint5(1)]);   set(pp5, 'YData', [Joint4(2) Joint5(2)]);   set(pp5, 'ZData', [Joint4(3) Joint5(3)]);
-set(pp6, 'XData', [Joint5(1) Joint6(1)]);   set(pp6, 'YData', [Joint5(2) Joint6(2)]);   set(pp6, 'ZData', [Joint5(3) Joint6(3)]);
-set(pp7, 'XData', [Joint6(1) Joint7(1)]);   set(pp7, 'YData', [Joint6(2) Joint7(2)]);   set(pp7, 'ZData', [Joint6(3) Joint7(3)]);
+    set(pp1, 'XData', [Origin(1, 4) Joint1(1)]);set(pp1, 'YData', [Origin(2, 4) Joint1(2)]);set(pp1, 'ZData', [Origin(3, 4) Joint1(3)]);
+    set(pp2, 'XData', [Joint1(1) Joint2(1)]);   set(pp2, 'YData', [Joint1(2) Joint2(2)]);   set(pp2, 'ZData', [Joint1(3) Joint2(3)]);
+    set(pp3, 'XData', [Joint2(1) Joint3(1)]);   set(pp3, 'YData', [Joint2(2) Joint3(2)]);   set(pp3, 'ZData', [Joint2(3) Joint3(3)]);
+    set(pp4, 'XData', [Joint3(1) Joint4(1)]);   set(pp4, 'YData', [Joint3(2) Joint4(2)]);   set(pp4, 'ZData', [Joint3(3) Joint4(3)]);
+    set(pp5, 'XData', [Joint4(1) Joint5(1)]);   set(pp5, 'YData', [Joint4(2) Joint5(2)]);   set(pp5, 'ZData', [Joint4(3) Joint5(3)]);
+    set(pp6, 'XData', [Joint5(1) Joint6(1)]);   set(pp6, 'YData', [Joint5(2) Joint6(2)]);   set(pp6, 'ZData', [Joint5(3) Joint6(3)]);
+    set(pp7, 'XData', [Joint6(1) Joint7(1)]);   set(pp7, 'YData', [Joint6(2) Joint7(2)]);   set(pp7, 'ZData', [Joint6(3) Joint7(3)]);
 
 
 
 %% Middle
-
-mag=sqrt(magneticValue(iter,M1*3+1)^2+magneticValue(iter,M1*3+2)^2+magneticValue(iter,M1*3+3)^2);
-a=magneticValue(iter,M1*3+1)/mag;
-b=magneticValue(iter,M1*3+2)/mag;
-
-X=atan2(gamma,alpha);
-if alpha*alpha+gamma*gamma-a*a>0
-    TH1_MI(iter)=atan2(sqrt(alpha*alpha+gamma*gamma-a*a),a)-X;
-else
-    TH1_MI(iter)=atan2(0,a)-X;
-end
-
-if TH1_MI(iter)>pi/2
-    TH1_MI(iter)=pi/2;
-elseif TH1_MI(iter)<-pi/2
-    TH1_MI(iter)=-pi/2;
-end
     
-Y(iter)=sin(TH1_MI(iter))*alpha+cos(TH1_MI(iter))*gamma;
-if Y(iter)*Y(iter)+beta*beta-b*b<0
-    TH2_MI(iter)=atan2(b,0)-atan2(beta,Y(iter));
-else
-    TH2_MI(iter)=atan2(b,sqrt(Y(iter)*Y(iter)+beta*beta-b*b))-atan2(beta,Y(iter));
-end
-
-if TH2_MI(iter)>pi/2
-    TH2_MI(iter)=pi/2;
-elseif TH2_MI(iter)<-pi/2
-    TH2_MI(iter)=-pi/2;
-end
+    TH1_MI=jointAngles(9)+off_TH1_MI;
+    TH2_MI=jointAngles(10)+off_TH2_MI;
+    TH3_MI=jointAngles(11)+off_TH3_MI;
+    TH4_MI=jointAngles(12)+off_TH4_MI;
     
-mag=sqrt(magneticValue(iter,M2*3+1)^2+magneticValue(iter,M2*3+2)^2+magneticValue(iter,M2*3+3)^2);
-a=magneticValue(iter,M2*3+1)/mag;
-b=magneticValue(iter,M2*3+2)/mag;
-
-X=atan2(alpha,gamma);
-if alpha*alpha+gamma*gamma-a*a>0
-    TH4_MI(iter)=atan2(a,sqrt(alpha*alpha+gamma*gamma-a*a))-X;
-else
-    TH4_MI(iter)=atan2(a,0)-X;
-end
-
-if TH4_MI(iter)>pi/2
-    TH4_MI(iter)=pi/2;
-elseif TH4_MI(iter)<-pi/2
-    TH4_MI(iter)=-pi/2;
-end
+    % initialize time-invariant paramters
+    if flag_init == 0
+       DH_MI = DH_ref;
+        DH_MI(2:end, 3) = arr_links(:, 3);
 
 
-Y(iter)=-sin(TH4_MI(iter))*alpha+cos(TH4_MI(iter))*gamma;
-if Y(iter) == 0
-    Y(iter)=0.00001;
-end
-if Y(iter)*Y(iter)+beta*beta-b*b<0
-    TH3_MI(iter)=atan2(0,b)-atan2(Y(iter),beta);
-else
-    TH3_MI(iter)=atan2(sqrt(Y(iter)*Y(iter)+beta*beta-b*b),b)-atan2(Y(iter),beta);
-    compare=atan2(abs(cos(TH3_MI(iter))*cos(TH4_MI(iter))),b)-atan2(Y(iter),beta);
-end
+        % DH parameters
+        DH_MI(1,1)=DH_MI(1,1)+DHoffset(3,1);                DH_MI(1,3)=DH_MI(1,3)+DHoffset(3,2);
+        DH_MI(2,1)=DH_MI(2,1)+DHoffset(3,3);                DH_MI(2,3)=DH_MI(2,3)+DHoffset(3,4);
+        DH_MI(3,1)=DH_MI(3,1)+DHoffset(3,5);                DH_MI(3,3)=DH_MI(3,3)+DHoffset(3,6);
+        DH_MI(5,1)=DH_MI(5,1)+DHoffset(3,7);                DH_MI(5,3)=DH_MI(5,3)+DHoffset(3,8);
+        DH_MI(6,1)=DH_MI(6,1)+DHoffset(3,9);               DH_MI(6,3)=DH_MI(6,3)+DHoffset(3,10);
 
-if TH3_MI(iter)>pi/2
-    TH3_MI(iter)=pi/2;
-elseif TH3_MI(iter)<-pi/2
-    TH3_MI(iter)=-pi/2;
-end
-
-TH4_MI(iter)=TH4_MI(iter)+pi/4;
-
-TH1_MI(iter)=TH1_MI(iter)+off_TH1_MI;
-TH2_MI(iter)=TH2_MI(iter)+off_TH2_MI;
-TH3_MI(iter)=TH3_MI(iter)+off_TH3_MI;
-TH4_MI(iter)=TH4_MI(iter)+off_TH4_MI;
-
-
-DH_MI = DH_ref;
-DH_MI(2,2) = TH1_MI(iter);
-DH_MI(3,2) = TH2_MI(iter);
-DH_MI(5,2) = TH3_MI(iter);
-DH_MI(6,2) = TH4_MI(iter);
-DH_MI(2:end, 3) = arr_links(:, 3);
-
-
-% DH parameters
-DH_MI(1,1)=DH_MI(1,1)+DHoffset(3,1);                DH_MI(1,3)=DH_MI(1,3)+DHoffset(3,2);
-DH_MI(2,1)=DH_MI(2,1)+DHoffset(3,3);                DH_MI(2,3)=DH_MI(2,3)+DHoffset(3,4);
-DH_MI(3,1)=DH_MI(3,1)+DHoffset(3,5);                DH_MI(3,3)=DH_MI(3,3)+DHoffset(3,6);
-DH_MI(5,1)=DH_MI(5,1)+DHoffset(3,7);                DH_MI(5,3)=DH_MI(5,3)+DHoffset(3,8);
-DH_MI(6,1)=DH_MI(6,1)+DHoffset(3,9);               DH_MI(6,3)=DH_MI(6,3)+DHoffset(3,10);
-
-DH_MI(1,2)=DH_MI(1,2)+DHoffset(3,11);             DH_MI(1,4)=DH_MI(1,4)+DHoffset(3,12);
-                                                  DH_MI(2,4)=DH_MI(2,4)+DHoffset(3,13);
-                                                  DH_MI(3,4)=DH_MI(3,4)+DHoffset(3,14);
-                                                  DH_MI(5,4)=DH_MI(5,4)+DHoffset(3,15);
-                                                  DH_MI(6,4)=DH_MI(6,4)+DHoffset(3,16);
-
-R01_MI=transl(0,0,DH_MI(1,1))*trotz(DH_MI(1,2))*transl(DH_MI(1,3),0,0)*trotx(DH_MI(1,4));
-R12_MI=transl(0,0,DH_MI(2,1))*trotz(DH_MI(2,2))*transl(DH_MI(2,3),0,0)*trotx(DH_MI(2,4));
-R23_MI=transl(0,0,DH_MI(3,1))*trotz(DH_MI(3,2))*transl(DH_MI(3,3),0,0)*trotx(DH_MI(3,4));
-R34_MI=transl(0,0,DH_MI(4,1))*trotz(DH_MI(4,2))*transl(DH_MI(4,3),0,0)*trotx(DH_MI(4,4));
-R45_MI=transl(0,0,DH_MI(5,1))*trotz(DH_MI(5,2))*transl(DH_MI(5,3),0,0)*trotx(DH_MI(5,4));
-R56_MI=transl(0,0,DH_MI(6,1))*trotz(DH_MI(6,2))*transl(DH_MI(6,3),0,0)*trotx(DH_MI(6,4));
-R67_MI=transl(0,0,DH_MI(7,1))*trotz(DH_MI(7,2))*transl(DH_MI(7,3),0,0)*trotx(DH_MI(7,4));
-R78_MI=transl(0,0,-6)*trotz(pi/2)*transl(4,0,0);
-
-R1_MI=Origin_MI*R01_MI*R12_MI;
-Joint1_MI=[R1_MI(1,4); R1_MI(2,4); R1_MI(3,4)];
-R2_MI=R1_MI*R23_MI;
-Joint2_MI=[R2_MI(1,4); R2_MI(2,4); R2_MI(3,4)];
-R3_MI=R2_MI*R34_MI;
-Joint3_MI=[R3_MI(1,4); R3_MI(2,4); R3_MI(3,4)];
-R4_MI=R3_MI*R45_MI;
-Joint4_MI=[R4_MI(1,4); R4_MI(2,4); R4_MI(3,4)];
-R5_MI=R4_MI*R56_MI;
-Joint5_MI=[R5_MI(1,4); R5_MI(2,4); R5_MI(3,4)];
-R6_MI=R5_MI*R67_MI;
-Joint6_MI=[R6_MI(1,4); R6_MI(2,4); R6_MI(3,4)];
-R7_MI = R6_MI*R78_MI;
-Joint7_MI=[R7_MI(1,4); R7_MI(2,4); R7_MI(3,4)];
-
-if flag_init == 0
-    pp15=plot3([Origin_MI(1,4) Joint1_MI(1)],[Origin_MI(2,4) Joint1_MI(2)],[Origin_MI(3,4) Joint1_MI(3)],'b.-');
-    pp15.XDataSource = '[Origin_MI(1, 4) Joint1_MI(1)]';
-    pp15.YDataSource = '[Origin_MI(2, 4) Joint1_MI(2)]';
-    pp15.ZDataSource = '[Origin_MI(3, 4) Joint1_MI(3)]';
+        DH_MI(1,2)=DH_MI(1,2)+DHoffset(3,11);             DH_MI(1,4)=DH_MI(1,4)+DHoffset(3,12);
+                                                          DH_MI(2,4)=DH_MI(2,4)+DHoffset(3,13);
+                                                          DH_MI(3,4)=DH_MI(3,4)+DHoffset(3,14);
+                                                          DH_MI(5,4)=DH_MI(5,4)+DHoffset(3,15);
+                                                          DH_MI(6,4)=DH_MI(6,4)+DHoffset(3,16); 
+    end
     
-    pp16=plot3([Joint1_MI(1) Joint2_MI(1)],[Joint1_MI(2) Joint2_MI(2)],[Joint1_MI(3) Joint2_MI(3)],'b.-');
-    pp17=plot3([Joint2_MI(1) Joint3_MI(1)],[Joint2_MI(2) Joint3_MI(2)],[Joint2_MI(3) Joint3_MI(3)],'b.-');
-    pp18=plot3([Joint3_MI(1) Joint4_MI(1)],[Joint3_MI(2) Joint4_MI(2)],[Joint3_MI(3) Joint4_MI(3)],'b.-');
-    pp19=plot3([Joint4_MI(1) Joint5_MI(1)],[Joint4_MI(2) Joint5_MI(2)],[Joint4_MI(3) Joint5_MI(3)],'b.-');
-    pp20=plot3([Joint5_MI(1) Joint6_MI(1)],[Joint5_MI(2) Joint6_MI(2)],[Joint5_MI(3) Joint6_MI(3)],'b.-');
-    pp21=plot3([Joint6_MI(1) Joint7_MI(1)],[Joint6_MI(2) Joint7_MI(2)],[Joint6_MI(3) Joint7_MI(3)],'b.-');
+    DH_MI(2,2) = TH1_MI;
+    DH_MI(3,2) = TH2_MI;
+    DH_MI(5,2) = TH3_MI;
+    DH_MI(6,2) = TH4_MI;
 
+    R01_MI=transl(0,0,DH_MI(1,1))*trotz(DH_MI(1,2))*transl(DH_MI(1,3),0,0)*trotx(DH_MI(1,4));
+    R12_MI=transl(0,0,DH_MI(2,1))*trotz(DH_MI(2,2))*transl(DH_MI(2,3),0,0)*trotx(DH_MI(2,4));
+    R23_MI=transl(0,0,DH_MI(3,1))*trotz(DH_MI(3,2))*transl(DH_MI(3,3),0,0)*trotx(DH_MI(3,4));
+    R34_MI=transl(0,0,DH_MI(4,1))*trotz(DH_MI(4,2))*transl(DH_MI(4,3),0,0)*trotx(DH_MI(4,4));
+    R45_MI=transl(0,0,DH_MI(5,1))*trotz(DH_MI(5,2))*transl(DH_MI(5,3),0,0)*trotx(DH_MI(5,4));
+    R56_MI=transl(0,0,DH_MI(6,1))*trotz(DH_MI(6,2))*transl(DH_MI(6,3),0,0)*trotx(DH_MI(6,4));
+    R67_MI=transl(0,0,DH_MI(7,1))*trotz(DH_MI(7,2))*transl(DH_MI(7,3),0,0)*trotx(DH_MI(7,4));
+    R78_MI=transl(0,0,-6)*trotz(pi/2)*transl(4,0,0);
+
+    R1_MI=Origin_MI*R01_MI*R12_MI;
+    Joint1_MI=[R1_MI(1,4); R1_MI(2,4); R1_MI(3,4)];
+    R2_MI=R1_MI*R23_MI;
+    Joint2_MI=[R2_MI(1,4); R2_MI(2,4); R2_MI(3,4)];
+    R3_MI=R2_MI*R34_MI;
+    Joint3_MI=[R3_MI(1,4); R3_MI(2,4); R3_MI(3,4)];
+    R4_MI=R3_MI*R45_MI;
+    Joint4_MI=[R4_MI(1,4); R4_MI(2,4); R4_MI(3,4)];
+    R5_MI=R4_MI*R56_MI;
+    Joint5_MI=[R5_MI(1,4); R5_MI(2,4); R5_MI(3,4)];
+    R6_MI=R5_MI*R67_MI;
+    Joint6_MI=[R6_MI(1,4); R6_MI(2,4); R6_MI(3,4)];
+    R7_MI = R6_MI*R78_MI;
+    Joint7_MI=[R7_MI(1,4); R7_MI(2,4); R7_MI(3,4)];
+
+    if flag_init == 0
+        pp15=plot3([Origin_MI(1,4) Joint1_MI(1)],[Origin_MI(2,4) Joint1_MI(2)],[Origin_MI(3,4) Joint1_MI(3)],'b.-');
+        pp15.XDataSource = '[Origin_MI(1, 4) Joint1_MI(1)]';
+        pp15.YDataSource = '[Origin_MI(2, 4) Joint1_MI(2)]';
+        pp15.ZDataSource = '[Origin_MI(3, 4) Joint1_MI(3)]';
+
+        pp16=plot3([Joint1_MI(1) Joint2_MI(1)],[Joint1_MI(2) Joint2_MI(2)],[Joint1_MI(3) Joint2_MI(3)],'b.-');
+        pp17=plot3([Joint2_MI(1) Joint3_MI(1)],[Joint2_MI(2) Joint3_MI(2)],[Joint2_MI(3) Joint3_MI(3)],'b.-');
+        pp18=plot3([Joint3_MI(1) Joint4_MI(1)],[Joint3_MI(2) Joint4_MI(2)],[Joint3_MI(3) Joint4_MI(3)],'b.-');
+        pp19=plot3([Joint4_MI(1) Joint5_MI(1)],[Joint4_MI(2) Joint5_MI(2)],[Joint4_MI(3) Joint5_MI(3)],'b.-');
+        pp20=plot3([Joint5_MI(1) Joint6_MI(1)],[Joint5_MI(2) Joint6_MI(2)],[Joint5_MI(3) Joint6_MI(3)],'b.-');
+        pp21=plot3([Joint6_MI(1) Joint7_MI(1)],[Joint6_MI(2) Joint7_MI(2)],[Joint6_MI(3) Joint7_MI(3)],'b.-');
+
+    end
+
+    set(pp15, 'XData', [Origin_MI(1, 4) Joint1_MI(1)]);set(pp15, 'YData', [Origin_MI(2, 4) Joint1_MI(2)]);set(pp15, 'ZData', [Origin_MI(3, 4) Joint1_MI(3)]);
+    set(pp16, 'XData', [Joint1_MI(1) Joint2_MI(1)]);   set(pp16, 'YData', [Joint1_MI(2) Joint2_MI(2)]);   set(pp16, 'ZData', [Joint1_MI(3) Joint2_MI(3)]);
+    set(pp17, 'XData', [Joint2_MI(1) Joint3_MI(1)]);   set(pp17, 'YData', [Joint2_MI(2) Joint3_MI(2)]);   set(pp17, 'ZData', [Joint2_MI(3) Joint3_MI(3)]);
+    set(pp18, 'XData', [Joint3_MI(1) Joint4_MI(1)]);   set(pp18, 'YData', [Joint3_MI(2) Joint4_MI(2)]);   set(pp18, 'ZData', [Joint3_MI(3) Joint4_MI(3)]);
+    set(pp19, 'XData', [Joint4_MI(1) Joint5_MI(1)]);   set(pp19, 'YData', [Joint4_MI(2) Joint5_MI(2)]);   set(pp19, 'ZData', [Joint4_MI(3) Joint5_MI(3)]);
+    set(pp20, 'XData', [Joint5_MI(1) Joint6_MI(1)]);   set(pp20, 'YData', [Joint5_MI(2) Joint6_MI(2)]);   set(pp20, 'ZData', [Joint5_MI(3) Joint6_MI(3)]);
+    set(pp21, 'XData', [Joint6_MI(1) Joint7_MI(1)]);   set(pp21, 'YData', [Joint6_MI(2) Joint7_MI(2)]);   set(pp21, 'ZData', [Joint6_MI(3) Joint7_MI(3)]);
+
+
+    drawnow;
+    % % distance between end effectors
+    dist_thumb_index = sqrt((Joint7(1)-Joint7_TH(1))^2+(Joint7(2)-Joint7_TH(2))^2+(Joint7(3)-Joint7_TH(3))^2);
+    dist_thumb_middle = sqrt((Joint7_MI(1)-Joint7_TH(1))^2+(Joint7_MI(2)-Joint7_TH(2))^2+(Joint7_MI(3)-Joint7_TH(3))^2);
+    % fprintf('<DISTANCE> TH_INDEX : %3.3f, TH_MIDDLE : %3.3f\n', dist_thumb_index, dist_thumb_middle);
+    % fprintf('<DISTANCE> TH_INDEX : %3.3f, TH_MIDDLE : %3.3f\n', dist_thumb_index, dist_thumb_middle);
+
+    % position
+    fprintf('Thumb: %3.3f, %3.3f, %3.3f\n', Joint6_TH(1), Joint6_TH(2), Joint6_TH(3));
+    % fprintf('Index R6: %3.3f, %3.3f, %3.3f\n', Joint6(1), Joint6(2), Joint6(3));
+    % fprintf('Index R7: %3.3f, %3.3f, %3.3f\n', Joint7(1), Joint7(2), Joint7(3));
+    % fprintf('middle: %3.3f, %3.3f, %3.3f \n', Joint6_MI(1), Joint6_MI(2), Joint6_MI(3));
+
+    % angle
+    % fprintf('Index angle: %3.3f, %3.3f, %3.3f, %3.3f\n', TH1*180/pi, TH2*180/pi, TH3*180/pi, TH4*180/pi);
+
+    view(180, -90)
+    flag_init = 1;
 end
 
-set(pp15, 'XData', [Origin_MI(1, 4) Joint1_MI(1)]);set(pp15, 'YData', [Origin_MI(2, 4) Joint1_MI(2)]);set(pp15, 'ZData', [Origin_MI(3, 4) Joint1_MI(3)]);
-set(pp16, 'XData', [Joint1_MI(1) Joint2_MI(1)]);   set(pp16, 'YData', [Joint1_MI(2) Joint2_MI(2)]);   set(pp16, 'ZData', [Joint1_MI(3) Joint2_MI(3)]);
-set(pp17, 'XData', [Joint2_MI(1) Joint3_MI(1)]);   set(pp17, 'YData', [Joint2_MI(2) Joint3_MI(2)]);   set(pp17, 'ZData', [Joint2_MI(3) Joint3_MI(3)]);
-set(pp18, 'XData', [Joint3_MI(1) Joint4_MI(1)]);   set(pp18, 'YData', [Joint3_MI(2) Joint4_MI(2)]);   set(pp18, 'ZData', [Joint3_MI(3) Joint4_MI(3)]);
-set(pp19, 'XData', [Joint4_MI(1) Joint5_MI(1)]);   set(pp19, 'YData', [Joint4_MI(2) Joint5_MI(2)]);   set(pp19, 'ZData', [Joint4_MI(3) Joint5_MI(3)]);
-set(pp20, 'XData', [Joint5_MI(1) Joint6_MI(1)]);   set(pp20, 'YData', [Joint5_MI(2) Joint6_MI(2)]);   set(pp20, 'ZData', [Joint5_MI(3) Joint6_MI(3)]);
-set(pp21, 'XData', [Joint6_MI(1) Joint7_MI(1)]);   set(pp21, 'YData', [Joint6_MI(2) Joint7_MI(2)]);   set(pp21, 'ZData', [Joint6_MI(3) Joint7_MI(3)]);
-
-
-drawnow;
-% % distance between end effectors
-dist_thumb_index = sqrt((Joint7(1)-Joint7_TH(1))^2+(Joint7(2)-Joint7_TH(2))^2+(Joint7(3)-Joint7_TH(3))^2);
-dist_thumb_middle = sqrt((Joint7_MI(1)-Joint7_TH(1))^2+(Joint7_MI(2)-Joint7_TH(2))^2+(Joint7_MI(3)-Joint7_TH(3))^2);
-% fprintf('<DISTANCE> TH_INDEX : %3.3f, TH_MIDDLE : %3.3f\n', dist_thumb_index, dist_thumb_middle);
-% fprintf('<DISTANCE> TH_INDEX : %3.3f, TH_MIDDLE : %3.3f\n', dist_thumb_index, dist_thumb_middle);
-
-% position
-fprintf('Thumb: %3.3f, %3.3f, %3.3f\n', Joint6_TH(1), Joint6_TH(2), Joint6_TH(3));
-% fprintf('Index R6: %3.3f, %3.3f, %3.3f\n', Joint6(1), Joint6(2), Joint6(3));
-% fprintf('Index R7: %3.3f, %3.3f, %3.3f\n', Joint7(1), Joint7(2), Joint7(3));
-% fprintf('middle: %3.3f, %3.3f, %3.3f \n', Joint6_MI(1), Joint6_MI(2), Joint6_MI(3));
-
-% angle
-% fprintf('Index angle: %3.3f, %3.3f, %3.3f, %3.3f\n', TH1*180/pi, TH2*180/pi, TH3*180/pi, TH4*180/pi);
-
-
-flag_init = 1;
-end
-
-
-csvwrite('Fingerinfo.csv',Matout)
