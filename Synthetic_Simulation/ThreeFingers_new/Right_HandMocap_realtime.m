@@ -59,39 +59,6 @@ M2=5;
 %load link lengths for thumb, index, and middle devices
 arr_links = loadLinkLength();
 
-% l1_TH=24.2;
-% l2_TH=56.03;
-% l3_TH=12.94;
-% l4_TH=57.5;
-% l5_TH=19.5;
-% % l6_TH=24.82;
-% l6_TH = 27.25;
-% l7_TH=10.42;
-% l8_TH=16.61;
-
-% %% Link Length_181114 Fingertip ¼öÁ¤
-% l1=24.2;
-% l2=56.03;
-% l3=12.94;
-% l4=47.5;
-% l5=19.5;
-% % l6=22.96;
-% l6 = 24.90;
-% l7=-10.42;
-% l8=16.61;
-% 
-% 
-% l1_MI=24.2;
-% l2_MI=56.03;
-% l3_MI=12.94;
-% l4_MI=47.5;
-% l5_MI=19.5;
-% % l6_MI=22.93;
-% l6_MI = 24.90;
-% l7_MI=-10.42;
-% l8_MI=16.61;
-
-
 %% connect serial port 
 
 %data length, prefix, postfix
