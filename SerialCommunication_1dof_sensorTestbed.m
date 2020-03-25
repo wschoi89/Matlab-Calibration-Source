@@ -1,22 +1,30 @@
 clear;clc;close all;
 
-%file open for offset data recording
-if mkdir('DAQ')==false
-    mkdir('DAQ');
-end
-
-%% set COM PORT, device number, position for DAQ, and the number of samples
+%% set COM PORT, sensor, repetition position for DAQ, and the number of samples
 COM_PORT='COM10';
 
-num_device='sensor3_testbed_magnet180_case3';
-position='-90';
-slide='0'; 
+name_sensor='sensor2';
+position_reference = [-180, -150, -135, -120, -90, -60, -45, -30, 0, 30, 45, 60, 90, 120, 135, 150, 180];
+position=position_reference(1);
+num_case='case3';  % 1 or 2 or 3 
 num_samples = 10; 
 
 num_sensors = 6;    
-% fileID = fopen(strcat('DAQ/',num_device,'_DAQ_T',position,'_I',position,'_M',position,'_slide',slide,'_training.csv'), 'w');
-% fileID = fopen(strcat('DAQ/',num_device,'_DAQ_T',position,'_I',position,'_M',position,'_test.csv'), 'w');
-fileID = fopen(strcat('DAQ/',num_device,'_', position, 'degree.csv'), 'w');
+base_dir = strcat(pwd,'/','sensor_validation_using_jig/magnetic_180/');
+sensor_dir = strcat(base_dir, name_sensor);
+counting_dir = strcat(sensor_dir,'/',num_case);
+
+if mkdir(sensor_dir) ==false % create sensor folder
+    mkdir(sensor_dir);
+end
+
+if mkdir(counting_dir)==false % create counting folder
+   mkdir(counting_dir) 
+end
+
+
+
+fileID = fopen(strcat(counting_dir,'/',name_sensor,'_', num2str(position),'degree_', num_case,'.csv'), 'w');
 
 disp('Start in 5 seconds!')
 
