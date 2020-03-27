@@ -3,11 +3,12 @@ clear;clc;close all;
 %% set COM PORT, sensor, repetition position for DAQ, and the number of samples
 COM_PORT='COM10';
 
-name_sensor='sensor2';
+name_sensor='sensor10';
 position_reference = [-180, -150, -135, -120, -90, -60, -45, -30, 0, 30, 45, 60, 90, 120, 135, 150, 180];
-position=position_reference(1);
-num_case='case3';  % 1 or 2 or 3 
-num_samples = 10; 
+position=position_reference(17);
+
+num_case='case3';  %3번 재조립 
+num_samples = 10;   
 
 num_sensors = 6;    
 base_dir = strcat(pwd,'/','sensor_validation_using_jig/magnetic_180/');
@@ -140,5 +141,7 @@ fclose(fileID);
 delete(ser);
 
 disp('finished')
+pause(2)
+close all;
 
 
