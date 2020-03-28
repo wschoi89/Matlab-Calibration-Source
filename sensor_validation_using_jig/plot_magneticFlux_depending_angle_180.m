@@ -1,4 +1,6 @@
-clear;clc;close all;
+clear;
+% clc;
+% close all;
 
 name_sensor = 'sensor1';
 num_case = 'case1';
@@ -8,7 +10,7 @@ arr_angles_reference = [-180, -150, -135, -120, -90, -60, -45, -30, 0, 30, 45, 6
 flag_calibration = false; % flag about whether the plot shows calibrated data or not 
 
 arr_mean = zeros(size(arr_angles_reference, 1), 3); % array for flux components(Bx, By, Bz)
-arr_mean_normalized = zeros(size(arr_angles_reference, 1), 3);
+
 arr_minMax = zeros(2, 3); % first row : min, second row : max for flux components(Bx, By, Bz)
 
 %% load magnetic flux data
@@ -23,8 +25,8 @@ for i=1:size(arr_angles_reference, 2)
 end
 
 %%  calculate offset using min-max method
-arr_minMax(1,:) = min(arr_mean); 
-arr_minMax(2,:) = max(arr_mean);
+arr_minMax(1,:) = min(arr_mean); %min
+arr_minMax(2,:) = max(arr_mean); %max
 offset = zeros(1,3);
 amplitude = zeros(1,3);
 
@@ -50,7 +52,7 @@ end
 arr_error_orthogonality = zeros(5,1);
 arr_enhanced_error_orthogonality = zeros(5,1);
 arr_delta_r_square = zeros(5,1);
-for i=1:1
+for i=1:size(arr_angles_reference, 2)-4
     arr_error_orthogonality(i) = 2*atan2(arr_orthogonal_magnitude(i+4)-arr_orthogonal_magnitude(i), arr_orthogonal_magnitude(i+4)+arr_orthogonal_magnitude(i));
     arr_delta_r_square(i) = (atan2(arr_mean_normalized(i,3),arr_mean_normalized(i,2))-arr_angles_reference(i)*pi/180)^2+...
         (atan2(arr_mean_normalized(i+4,3),arr_mean_normalized(i+4,2))-arr_angles_reference(i+4)*pi/180)^2;
@@ -62,8 +64,7 @@ end
 %% orthogonality ¹Ý¿µ
 if flag_calibration == true
     for i=1:size(arr_angles_reference, 2)
-    %     arr_mean_normalized(i,3) = (arr_mean_normalized(i,3)-arr_mean_normalized(i,2)*sin(-arr_enhanced_error_orthogonality(1)))/cos(-arr_enhanced_error_orthogonality(1));
-        arr_mean_normalized(i,2) = (arr_mean_normalized(i,2)-arr_mean_normalized(i,3)*sin(-arr_enhanced_error_orthogonality(1)))/cos(-arr_enhanced_error_orthogonality(1));
+        arr_mean_normalized(i,2) = (arr_mean_normalized(i,2)-arr_mean_normalized(i,3)*sin(-mean(arr_enhanced_error_orthogonality)))/cos(-mean(arr_enhanced_error_orthogonality));
     end
 end
 
@@ -83,12 +84,11 @@ xlim([-180 180]);
 
 
 % calculate angle
-
-arr_angles_calculated = size(arr_angles_reference);
+arr_angles_calculated = size(arr_angles_reference);% preallocate calculated angle array depending on the size of the number of reference angles 
 
 for i=1:size(arr_angles_reference, 2)
     arr_angles_calculated(i) = -atan2(arr_mean_normalized(i,2),arr_mean_normalized(i,3))*180/pi;
-    if i==1 &&arr_angles_calculated(i)>0
+    if i==1 &&arr_angles_calculated(i) > 0
        arr_angles_calculated(i) =  -arr_angles_calculated(i);
     end
 end
@@ -98,6 +98,9 @@ diff = comp_angle(:,2)-comp_angle(:,1);
 
 subplot(1,3,2);
 plot(comp_angle(:,1), comp_angle(:,2))
+hold on
+plot(comp_angle(:,1), comp_angle(:,1))
+legend('calculated angle', 'ideal');
 xlabel('reference angle (degree)')
 ylabel('Sensor calculated angle (degree)')
 
@@ -108,5 +111,6 @@ ylabel('angle error(degree)')
 title(strcat('Angle error : ', num2str(mean(diff)), '\pm',num2str(std(diff)),' \circ'));
 sgtitle('Before calibration')
 set(gcf, 'position', [2000,0,1500,800])
+
 
 % saveas(gcf, 'test.jpeg')
