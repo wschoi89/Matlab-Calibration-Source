@@ -12,16 +12,17 @@ function output = optimize_sensor(parameter_input, data)
     for i=1:size(data,1)
        %By, Bz
        up = ((data(i,3)-offset_z)./amp_z - (data(i,2)-offset_y)./amp_y*sin(-shift))/cos(-shift);
+%        up = ((data(i,3)-offset_z)./amp_z - (data(i,2)-offset_y)./amp_y);
        down = (data(i,2)-offset_y)./amp_y;
         diff_angle = atan2(up, down)*180/pi -atan2(1,0)*180/pi;
     
-    while(diff_angle < 0)
-        diff_angle=diff_angle + 360;
-    end
-       
-    if i==1
-        diff_angle = diff_angle - 360;
-    end
+%     while(diff_angle < 0)
+%         diff_angle=diff_angle + 360;
+%     end
+%        
+%     if i==1
+%         diff_angle = diff_angle - 360;
+%     end
         
    ref_angle = data(i,4);
    
