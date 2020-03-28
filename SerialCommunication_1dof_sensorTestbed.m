@@ -3,11 +3,12 @@ clear;clc;close all;
 %% set COM PORT, sensor, repetition position for DAQ, and the number of samples
 COM_PORT='COM10';
 
-name_sensor='sensor10';
-position_reference = [-180, -150, -135, -120, -90, -60, -45, -30, 0, 30, 45, 60, 90, 120, 135, 150, 180];
-position=position_reference(17);
+% name_sensor='sensor10';
+name_sensor='sensor_test';
+arr_angles_reference = [-180, -150, -135, -120, -90, -60, -45, -30, 0, 30, 45, 60, 90, 120, 135, 150, 180];
+angle=arr_angles_reference(17);
 
-num_case='case3';  %3번 재조립 
+num_case='case1';  %3번 재조립 
 num_samples = 10;   
 
 num_sensors = 6;    
@@ -25,7 +26,7 @@ end
 
 
 
-fileID = fopen(strcat(counting_dir,'/',name_sensor,'_', num2str(position),'degree_', num_case,'.csv'), 'w');
+fileID = fopen(strcat(counting_dir,'/',name_sensor,'_', num2str(angle),'degree_', num_case,'.csv'), 'w');
 
 disp('Start in 5 seconds!')
 
