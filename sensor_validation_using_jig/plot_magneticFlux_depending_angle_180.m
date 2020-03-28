@@ -1,11 +1,11 @@
 clear;clc;close all;
 
 name_sensor = 'sensor1';
-num_case = 'case2';
+num_case = 'case1';
 
 arr_angles_reference = [-180, -150, -135, -120, -90, -60, -45, -30, 0, 30, 45, 60, 90, 120, 135, 150, 180];
 
-flag_calibration = true; % flag about whether the plot shows calibrated data or not 
+flag_calibration = false; % flag about whether the plot shows calibrated data or not 
 
 arr_mean = zeros(size(arr_angles_reference, 1), 3); % array for flux components(Bx, By, Bz)
 arr_mean_normalized = zeros(size(arr_angles_reference, 1), 3);
@@ -60,9 +60,11 @@ end
 
 
 %% orthogonality ¹Ý¿µ
-for i=1:size(arr_angles_reference, 2)
-%     arr_mean_normalized(i,3) = (arr_mean_normalized(i,3)-arr_mean_normalized(i,2)*sin(-arr_enhanced_error_orthogonality(1)))/cos(-arr_enhanced_error_orthogonality(1));
-    arr_mean_normalized(i,2) = (arr_mean_normalized(i,2)-arr_mean_normalized(i,3)*sin(-arr_enhanced_error_orthogonality(1)))/cos(-arr_enhanced_error_orthogonality(1));
+if flag_calibration == true
+    for i=1:size(arr_angles_reference, 2)
+    %     arr_mean_normalized(i,3) = (arr_mean_normalized(i,3)-arr_mean_normalized(i,2)*sin(-arr_enhanced_error_orthogonality(1)))/cos(-arr_enhanced_error_orthogonality(1));
+        arr_mean_normalized(i,2) = (arr_mean_normalized(i,2)-arr_mean_normalized(i,3)*sin(-arr_enhanced_error_orthogonality(1)))/cos(-arr_enhanced_error_orthogonality(1));
+    end
 end
 
 %% plot data
