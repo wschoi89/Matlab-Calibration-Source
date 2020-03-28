@@ -19,10 +19,14 @@ arr_mean_optimzed = [arr_mean_normalized(:,1) (arr_mean_normalized(:,2)-offset_y
 for i=1:size(data,1)
     
     %By, Bz
-    up = ((data(i,3)-offset_z)./amp_z - (data(i,2)-offset_y)./amp_y*sin(-shift))/cos(-shift);
-%     up = ((data(i,3)-offset_z)./amp_z - (data(i,2)-offset_y)./amp_y);
-    down = (data(i,2)-offset_y)./amp_y;
-    diff_angle = atan2(up, down)*180/pi -atan2(1,0)*180/pi;
+    up = ((data(i,2)-offset_y)./amp_y - (data(i,3)-offset_z)./amp_z*sin(-shift))/cos(-shift);
+    down = (data(i,3)-offset_z)./amp_z;
+    
+    diff_angle = -atan2(up, down)*180/pi;
+    
+    if i==1 && diff_angle >0 
+        diff_angle = -diff_angle;
+    end
         
     arr_angles_optimized(i,1) = diff_angle;
     ref_angle = data(i,4);
