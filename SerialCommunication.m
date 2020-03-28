@@ -6,14 +6,17 @@ if mkdir('DAQ')==false
 end
 
 %% set COM PORT, device number, position for DAQ, and the number of samples
-COM_PORT='COM5';
-num_device='Device1';
-position='1';
-num_samples = 20; 
+COM_PORT='COM10';
 
-num_sensors = 6;
-fileID = fopen(strcat('DAQ/',num_device,'_DAQ_T',position,'_I',position,'_M',position,'_training.csv'), 'w');
+num_device='sensor3_testbed_magnet180_case3';
+position='-90';
+slide='0'; 
+num_samples = 10; 
+
+num_sensors = 6;    
+% fileID = fopen(strcat('DAQ/',num_device,'_DAQ_T',position,'_I',position,'_M',position,'_slide',slide,'_training.csv'), 'w');
 % fileID = fopen(strcat('DAQ/',num_device,'_DAQ_T',position,'_I',position,'_M',position,'_test.csv'), 'w');
+fileID = fopen(strcat('DAQ/',num_device,'_', position, 'degree.csv'), 'w');
 
 disp('Start in 5 seconds!')
 
@@ -86,6 +89,7 @@ while(true)
             by = cell(1, 6);
             bz = cell(1, 6);
             
+            
             [bx{1}, by{1}, bz{1}] = getMagneticValue(sensor1);
             [bx{2}, by{2}, bz{2}] = getMagneticValue(sensor2);
             [bx{3}, by{3}, bz{3}] = getMagneticValue(sensor3);
@@ -95,7 +99,7 @@ while(true)
                       
             
             fprintf('iter %d: ', iter);
-            fprintf(' sensor 1 X value: %04.3f, %04.3f, %04.3f, sensor2 X value: %04.3f, %04.3f, %04.3f', bx{1}, by{1}, bz{1}, bx{2}, by{2}, bz{2})
+            fprintf(' sensor 1: %04.3f, %04.3f, %04.3f, sensor2 : %04.3f, %04.3f, %04.3f', bx{1}, by{1}, bz{1}, bx{2}, by{2}, bz{2})
             fprintf(' sensor 3: %04.3f, %04.3f, %04.3f, sensor4 : %04.3f, %04.3f, %04.3f', bx{3}, by{3}, bz{3}, bx{4}, by{4}, bz{4})
             fprintf(' sensor 5: %04.3f, %04.3f, %04.3f, sensor6 : %04.3f, %04.3f, %04.3f\n', bx{5}, by{5}, bz{5}, bx{6}, by{6}, bz{6})
                      
