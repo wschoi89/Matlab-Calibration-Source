@@ -1,9 +1,9 @@
 clear;
-% clc;
-% close all;
+clc;
+close all;
 
-name_sensor = 'sensor1';
-num_case = 'case1';
+name_sensor = 'sensor10';
+num_case = 'case3';
 
 arr_angles_reference = [-180, -150, -135, -120, -90, -60, -45, -30, 0, 30, 45, 60, 90, 120, 135, 150, 180];
 
@@ -109,8 +109,22 @@ plot(comp_angle(:,1), diff)
 xlabel('reference angle (degree)')
 ylabel('angle error(degree)')
 title(strcat('Angle error : ', num2str(mean(diff)), '\pm',num2str(std(diff)),' \circ'));
-sgtitle('Before calibration')
+if flag_calibration==true
+    sgtitle('After calibration')
+else
+     sgtitle('Before calibration')
+end
+   
 set(gcf, 'position', [2000,0,1500,800])
+calibrate_sensor_parameters
+% disp(offset(2:3), amplitude(2:3))
+% fprintf(strcat(name_sensor,'\t', num_case, '\n'));
+% fprintf('offset : %2.5f, %2.5f\n', offset(2), offset(3))
+% fprintf('amplitude : %2.5f, %2.5f\n', amplitude(2), amplitude(3))
+% fprintf('mean orthogonality error : %2.5f\n', mean(arr_enhanced_error_orthogonality)*180/pi);
+% arr_minMax(:,2:3)
+% close all
 
 
-% saveas(gcf, 'test.jpeg')
+
+
