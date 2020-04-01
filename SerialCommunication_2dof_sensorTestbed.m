@@ -4,21 +4,20 @@ clear;clc;close all;
 COM_PORT='COM10';
 
 name_sensor='sensor11';
-% [-30, 30]도 범위에서 7.5도 간격 9개의 angle (minus 4개, 0도, plus 4개) 
+% 9 angles between [-30, 30] (7.5degree space)
 arr_angles_reference_abd =[-30,-22.5,-15,-7.5, 0, 7.5, 15, 22.5, 30];
 
-% [-90, 90]도 범위에서 15도 간격 13개의 angle (minus 6개, 0도, plus 6개) 
+% 13 angles between [-90, 90] (15degree space)
 arr_angles_reference_flex = [-90,-75,-60,-45,-30,-15,0,15,30,45,60,75,90];
 
-angle=[arr_angles_reference_abd(1) arr_angles_reference_flex(1)];
+angle=[arr_angles_reference_abd(9) arr_angles_reference_flex(13)];
 
-% num_case='case1';  %3번 재조립 
 num_samples = 10;   
 
 num_sensors = 6;    
-base_dir = strcat(pwd,'/','sensor_validation_using_jig/magnetic_180/2dofs/');
-sensor_dir = strcat(base_dir, name_sensor);
-abd_dir = strcat(sensor_dir,'/','abd_',num2str(angle(1)));
+base_dir = strcat(pwd,'/','sensor_validation_using_jig/magnetic_180/2dofs/'); %2dof testbed data 저장하는 base directory
+sensor_dir = strcat(base_dir, name_sensor); % sensor directory
+abd_dir = strcat(sensor_dir,'/','abd_',num2str(angle(1))); % fixed abduction directory 
 
 if mkdir(sensor_dir) ==false % create sensor folder
     mkdir(sensor_dir);
