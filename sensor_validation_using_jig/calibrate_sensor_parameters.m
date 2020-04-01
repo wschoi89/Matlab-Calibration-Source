@@ -1,4 +1,4 @@
-close all
+% close all
 options = optimoptions(@lsqnonlin,'Algorithm', 'levenberg-marquardt','Display', 'iter', 'MaxFunctionEvaluations', 100000, 'MaxIterations', 100000, 'initDamping', 10,'StepTolerance', 1e-10);
 
 data = [arr_mean_normalized arr_angles_reference'];
@@ -34,24 +34,47 @@ for i=1:size(data,1)
     diff(i,1) = diff_angle - ref_angle; % differences
 end
 
-
-subplot(1,3,1);
+if num_case == 'case1'
+    subplot(3,3,1);
+elseif num_case == 'case2'
+    subplot(3,3,4);
+else
+    subplot(3,3,7);
+end
 xlabel('refefence angle(degree)');
 ylabel('optimized angle(degree)');
 plot(arr_angles_reference, arr_mean_optimzed)
 xlabel('refefence angle(degree)');
 ylabel('magnetic flux (mT)')
 legend('Bx', 'By', 'Bz')
-subplot(1,3,2);
+if num_case == 'case1'
+    subplot(3,3,2);
+elseif num_case == 'case2'
+    subplot(3,3,5);
+else
+    subplot(3,3,8);
+end
 plot(arr_angles_reference, arr_angles_optimized)
 xlabel('refefence angle(degree)');
 ylabel('optimized angle(degree)');
-subplot(1,3,3);
+if num_case == 'case1'
+    subplot(3,3,3);
+elseif num_case == 'case2'
+    subplot(3,3,6);
+else
+    subplot(3,3,9);
+end
 plot(arr_angles_reference, diff);
 xlabel('refefence angle(degree)');
 ylabel('angle error(degree)');
 title(strcat('Angle error : ', num2str(mean(diff)), ' \pm',num2str(std(diff)),' \circ'));
-sgtitle('After optimization')
+sgtitle(strcat(name_sensor,'{ }','optimization'))
 set(gcf, 'position', [100,100,1000,500])
 set(gcf, 'position', [100,100,1000,400])
-saveas(gcf, 'test.jpeg')
+if num_case=='case3'
+    set(gcf, 'units', 'normalized','outerposition', [0 0 1 1])
+    saveas(gcf, strcat(name_sensor,'_','optimization.jpeg'))
+end
+fprintf(' %2.5f %2.5f %2.5f %2.5f %2.5f\n', optimized_sensor_param(1),optimized_sensor_param(2),optimized_sensor_param(3),optimized_sensor_param(4),optimized_sensor_param(5));
+
+close all
