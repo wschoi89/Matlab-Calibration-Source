@@ -2,28 +2,29 @@ clear;
 clc;
 close all;
 
-name_sensor = 'sensor_test';
-num_case = 'case1';
+name_sensor = 'sensor11';
 
-arr_angles_reference_abd = linspace(-30, 30, 9);
-arr_angles_reference_flex = linspace(-90, 90, 13);
+% 9 angles between [-30, 30] (7.5degree space)
+arr_angles_reference_abd =[-30,-22.5,-15,-7.5, 0, 7.5, 15, 22.5, 30];
 
-flag_calibration = false; % flag about wheather the plot shows calibrated data or not 
+% 13 angles between [-90, 90] (15degree space)
+arr_angles_reference_flex = [-90,-75,-60,-45,-30,-15,0,15,30,45,60,75,90];
 
-arr_mean = zeros(size(arr_angles_reference_abd, 1), 3); % array for flux components(Bx, By, Bz)
+angle=arr_angles_reference_abd(9);
+
+flag_calibration = false; % flag about wheather the plot shows calibrated data(true) or raw data(false)
+
+arr_mean = zeros(size(arr_angles_reference_flex, 1), 3); % array for flux components(Bx, By, Bz)
 
 arr_minMax = zeros(2, 3); % first row : min, second row : max for flux components(Bx, By, Bz)
 
 %% load magnetic flux data
 
-% for i=1:size(arr_angles_reference_abd, 2)
 for i=1:size(arr_angles_reference_flex, 2)
-    str_folderPath = strcat('magnetic_180/',name_sensor,'/',num_case);
-%     str_fileName = strcat(str_folderPath,'/',name_sensor,'_',num2str(arr_angles_reference_abd(i)),'degree_',num_case,'.csv');
-    % abudction 
-%     str_fileName = strcat(str_folderPath,'/',name_sensor,'_',num2str(arr_angles_reference_abd(i)),'_','0','degree_',num_case,'.csv');
-    % flexion
-    str_fileName = strcat(str_folderPath,'/',name_sensor,'_','0','_',num2str(arr_angles_reference_flex(i)),'degree_',num_case,'.csv');
+    str_folderPath = strcat('magnetic_180/2dofs/',name_sensor,'/','abd_',num2str(angle));
+    
+    str_fileName = strcat(str_folderPath,'/',name_sensor,'_',num2str(angle),'_',num2str(arr_angles_reference_flex(i)),'degree.csv');
+    
     data = csvread(str_fileName);
     data = data(:, 4:6); % read one sensor data     
     mean_data = mean(data);
@@ -91,7 +92,7 @@ plot(data_plot(:,1), data_plot(:,4))
 legend('Bx', 'By', 'Bz')
 xlabel('reference angle (degree)')
 ylabel('magnetic flux(mT)');
-xlim([-30 30]);
+xlim([-90 90]);
 
 
 % calculate angle
@@ -136,7 +137,7 @@ title(strcat('Angle error : ', num2str(mean(diff)), '\pm',num2str(std(diff)),' \
 if flag_calibration==true
     sgtitle('After calibration')
 else
-     sgtitle('Before calibration')
+     sgtitle(strcat('flexion angle', '{} abduction angle','{}(',num2str(angle), ')', ' {}w/o calibration'))
 end
    
 set(gcf, 'position', [2000,0,1500,800])
