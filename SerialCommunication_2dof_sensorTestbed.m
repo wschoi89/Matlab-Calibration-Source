@@ -3,32 +3,33 @@ clear;clc;close all;
 %% set COM PORT, sensor, repetition position for DAQ, and the number of samples
 COM_PORT='COM10';
 
-% name_sensor='sensor10';
-name_sensor='sensor_test';
-%[-30,-22.5,-15,-7.5, 0, 7.5, 15, 22.5, 30]
-arr_angles_reference_abd = linspace(-30, 30, 9); % [-30, 30]도 범위에서 7.5도 간격 9개의 angle 
+name_sensor='sensor11';
+% [-30, 30]도 범위에서 7.5도 간격 9개의 angle (minus 4개, 0도, plus 4개) 
+arr_angles_reference_abd =[-30,-22.5,-15,-7.5, 0, 7.5, 15, 22.5, 30];
 
-%[-180,-165,-150,-135,-120,-105,-90,-75,-60,-45,-30,-15,0,15,30,45,60,75,90,105,120,135,150,165,180]
-arr_angles_reference_flex = linspace(-180,180,25); % [-180, 180]도 범위에서 15도 간격 25개의 angle
-angle=[arr_angles_reference_abd(5) arr_angles_reference_flex(7)];
+% [-90, 90]도 범위에서 15도 간격 13개의 angle (minus 6개, 0도, plus 6개) 
+arr_angles_reference_flex = [-90,-75,-60,-45,-30,-15,0,15,30,45,60,75,90];
 
-num_case='case1';  %3번 재조립 
+angle=[arr_angles_reference_abd(1) arr_angles_reference_flex(1)];
+
+% num_case='case1';  %3번 재조립 
 num_samples = 10;   
 
 num_sensors = 6;    
-base_dir = strcat(pwd,'/','sensor_validation_using_jig/magnetic_180/');
+base_dir = strcat(pwd,'/','sensor_validation_using_jig/magnetic_180/2dofs/');
 sensor_dir = strcat(base_dir, name_sensor);
-counting_dir = strcat(sensor_dir,'/',num_case);
+abd_dir = strcat(sensor_dir,'/','abd_',num2str(angle(1)));
 
 if mkdir(sensor_dir) ==false % create sensor folder
     mkdir(sensor_dir);
 end
 
-if mkdir(counting_dir)==false % create counting folder
-   mkdir(counting_dir) 
+if mkdir(abd_dir)==false
+    mkdir(abd_dir);
 end
 
-fileID = fopen(strcat(counting_dir,'/',name_sensor,'_', num2str(angle(1)),'_',num2str(angle(2)),'degree_', num_case,'.csv'), 'w');
+
+fileID = fopen(strcat(abd_dir,'/',name_sensor,'_', num2str(angle(1)),'_',num2str(angle(2)),'degree','.csv'), 'w');
 disp('Start in 5 seconds!')
 
 % set initial interation number as zero
