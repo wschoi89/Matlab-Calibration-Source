@@ -10,7 +10,7 @@ arr_angles_reference_abd =[-30,-22.5,-15,-7.5, 0, 7.5, 15, 22.5, 30];
 % 13 angles between [-90, 90] (15degree space)
 arr_angles_reference_flex = [-90,-75,-60,-45,-30,-15,0,15,30,45,60,75,90];
 
-angle=arr_angles_reference_abd(9);
+angle_fixed=arr_angles_reference_abd(9);
 
 flag_calibration = false; % flag about wheather the plot shows calibrated data(true) or raw data(false)
 
@@ -21,9 +21,9 @@ arr_minMax = zeros(2, 3); % first row : min, second row : max for flux component
 %% load magnetic flux data
 
 for i=1:size(arr_angles_reference_flex, 2)
-    str_folderPath = strcat('magnetic_180/2dofs/',name_sensor,'/','abd_',num2str(angle));
+    str_folderPath = strcat('magnetic_180/2dofs/',name_sensor,'/','abd_',num2str(angle_fixed));
     
-    str_fileName = strcat(str_folderPath,'/',name_sensor,'_',num2str(angle),'_',num2str(arr_angles_reference_flex(i)),'degree.csv');
+    str_fileName = strcat(str_folderPath,'/',name_sensor,'_',num2str(angle_fixed),'_',num2str(arr_angles_reference_flex(i)),'degree.csv');
     
     data = csvread(str_fileName);
     data = data(:, 4:6); % read one sensor data     
@@ -82,7 +82,7 @@ end
 % data_plot = [arr_angles_reference_abd' arr_mean_normalized];
 %flexion
 data_plot = [arr_angles_reference_flex' arr_mean_normalized];
-figure
+% figure
 subplot(1,3,1);
 plot(data_plot(:,1), data_plot(:,2))
 hold on
@@ -96,36 +96,34 @@ xlim([-90 90]);
 
 
 % calculate angle
-% arr_angles_calculated = size(arr_angles_reference_abd);% preallocate calculated angle array depending on the size of the number of reference angles 
-arr_angles_calculated = size(arr_angles_reference_flex);% preallocate calculated angle array depending on the size of the number of reference angles 
-
-% abduction
-% for i=1:size(arr_angles_reference_abd, 2)
-%     arr_angles_calculated(i) = -atan2(arr_mean_normalized(i,1),arr_mean_normalized(i,3))*180/pi;
-%     if i==1 &&arr_angles_calculated(i) > 0
-%        arr_angles_calculated(i) =  -arr_angles_calculated(i);
-%     end
-% end
+arr_angles_calculated_abd = size(arr_angles_reference_flex);% preallocate calculated angle array depending on the size of the number of reference angles 
+arr_angles_calculated_flex = size(arr_angles_reference_flex);% preallocate calculated angle array depending on the size of the number of reference angles 
 
 %flexion
 for i=1:size(arr_angles_reference_flex, 2)
-    arr_angles_calculated(i) = atan2(arr_mean_normalized(i,2),arr_mean_normalized(i,3))*180/pi;
-%     if i==1 &&arr_angles_calculated(i) > 0
-%        arr_angles_calculated(i) =  -arr_angles_calculated(i);
-%     end
+%     arr_angles_calculated_abd(i) = -atan2(arr_mean_normalized(i,1), arr_mean_normalized(i,3))*180/pi;
+    arr_angles_calculated_abd(i) = -atan2(arr_mean_normalized(i,1), arr_mean_normalized(i,3))*180/pi;
+    arr_angles_calculated_flex(i) = atan2(arr_mean_normalized(i,2),arr_mean_normalized(i,3))*180/pi;
 end
 
 %abduction
 % comp_angle = [arr_angles_reference_abd' arr_angles_calculated'];
 %flexion
-comp_angle = [arr_angles_reference_flex' arr_angles_calculated'];
-diff = comp_angle(:,2)-comp_angle(:,1);
+
+arr_angles_fixed_abd = zeros(1, size(arr_angles_calculated_flex,2));
+arr_angles_fixed_abd(1,:) = angle_fixed;
+comp_angle = [arr_angles_reference_flex' arr_angles_fixed_abd' arr_angles_calculated_flex' arr_angles_calculated_abd'];
+diff = comp_angle(:,3)-comp_angle(:,1); % difference about flexion angle 
 
 subplot(1,3,2);
-plot(comp_angle(:,1), comp_angle(:,2))
+plot(comp_angle(:,1), comp_angle(:,1)) % reference flexion angle
 hold on
-plot(comp_angle(:,1), comp_angle(:,1))
-legend('calculated angle', 'ideal');
+plot(comp_angle(:,1), comp_angle(:,2)) % reference abduction angle
+hold on
+plot(comp_angle(:,1), comp_angle(:,3)) % flexion angle 
+hold on
+plot(comp_angle(:,1), comp_angle(:,4)) % abduction angle
+legend('flexion ref','abduction ref','flexion calc', 'abduction calc');
 xlabel('reference angle (degree)')
 ylabel('Sensor calculated angle (degree)')
 
@@ -137,10 +135,11 @@ title(strcat('Angle error : ', num2str(mean(diff)), '\pm',num2str(std(diff)),' \
 if flag_calibration==true
     sgtitle('After calibration')
 else
-     sgtitle(strcat('flexion angle', '{} abduction angle','{}(',num2str(angle), ')', ' {}w/o calibration'))
+     sgtitle(strcat('flexion angle', '{} abduction angle','{}(',num2str(angle_fixed), ')', ' {}w/o calibration'))
 end
    
-set(gcf, 'position', [2000,0,1500,800])
+% set(gcf, 'position', [2000,0,1500,800])
+% hold on
 % calibrate_sensor_parameters
 % disp(offset(2:3), amplitude(2:3))
 % fprintf(strcat(name_sensor,'\t', num_case, '\n'));
