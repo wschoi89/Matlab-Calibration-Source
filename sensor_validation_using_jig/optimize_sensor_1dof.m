@@ -1,4 +1,4 @@
-function output = optimize_sensor(parameter_input, data)
+function output = optimize_sensor_1dof(parameter_input, data)
 
     
     offset_y = parameter_input(1);
