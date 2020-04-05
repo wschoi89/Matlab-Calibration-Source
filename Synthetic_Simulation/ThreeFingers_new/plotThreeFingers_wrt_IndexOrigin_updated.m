@@ -105,7 +105,7 @@ for n_pos=1:num_maxZigPos % the number of thumb zig positions
     magnetic_data{1,n_pos} = magnetic_data{1,n_pos}(1:num_samples, :); % load samples according to the number of sample variable 
 
     % convert magnetic data into joint angles
-    arr_jointAngles(:,:,n_pos) = getJointAngle(magnetic_data{1,n_pos});
+    arr_jointAngles(:,:,n_pos) = getJointAngle_updated(magnetic_data{1,n_pos}, [0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0]);
 
     % preallocate the size of pos_frame 
     for finger=1:num_fingers
