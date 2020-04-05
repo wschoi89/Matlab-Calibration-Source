@@ -4,6 +4,7 @@
 
 disp('optimization start')
 options = optimoptions(@lsqnonlin,'Algorithm', 'levenberg-marquardt','Display', 'iter', 'MaxFunctionEvaluations', 100000, 'MaxIterations', 100000, 'initDamping', 10,'StepTolerance', 1e-10);
+%  options = optimoptions(@lsqnonlin,'Algorithm', 'trust-region-reflective','Display', 'iter', 'MaxFunctionEvaluations', 100000, 'MaxIterations', 100000, 'initDamping', 10,'StepTolerance', 1e-10);
 
 % load data
 load training_test_data.mat
@@ -92,7 +93,7 @@ for iter=1:1
     % pre-allocation for optimized parameters
     num_optParam = 16 + 6 + 6 + 4; % previous param except sensor offset(16) + offset(6)+amplitude(6) + orthogonality(4) for each finger 
     num_iteration=1;
-    list_optParam = zeros(num_iteration, num_optParam);
+    list_optParam = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0];
 
 
     for page=1:num_iteration
