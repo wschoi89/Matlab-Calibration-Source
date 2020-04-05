@@ -11,112 +11,55 @@ function output = pos_endEffector_allCalibration_updated(parameter_input, data, 
     A5 = parameter_input(7);                          C5 = parameter_input(8); D5 = parameter_input(15);
     A6 = parameter_input(9);                          C6 = parameter_input(10); D6 = parameter_input(16);
 
-    offset_dx = parameter_input(17); % X sensor offset for distal sensor 
-    offset_dy = parameter_input(18); % Y sensor offset for distal sensor 
-    offset_dz = parameter_input(19); % Z sensor offset for distal sensor 
+    
+    offset_px = parameter_input(17); % X sensor offset for proximal sensor 
+    offset_py = parameter_input(18); % Y sensor offset for proximal sensor 
+    offset_pz = parameter_input(19); % Z sensor offset for proximal sensor 
+    offset_dx = parameter_input(20); % X sensor offset for distal sensor 
+    offset_dy = parameter_input(21); % Y sensor offset for distal sensor 
+    offset_dz = parameter_input(22); % Z sensor offset for distal sensor 
 
-    amp_dx = parameter_input(20); % X sensor amplitude for distal sensor 
-    amp_dy = parameter_input(21); % Y sensor amplitude for distal sensor 
-    amp_dz = parameter_input(22); % Z sensor amplitude for distal sensor 
+    
+    amp_px = parameter_input(23); % X sensor amplitude for proximal sensor 
+    amp_py = parameter_input(24); % Y sensor amplitude for proximal sensor 
+    amp_pz = parameter_input(25); % Z sensor amplitude for proximal sensor 
+    amp_dx = parameter_input(26); % X sensor amplitude for distal sensor 
+    amp_dy = parameter_input(27); % Y sensor amplitude for distal sensor 
+    amp_dz = parameter_input(28); % Z sensor amplitude for distal sensor 
 
-    offset_px = parameter_input(23); % X sensor offset for proximal sensor 
-    offset_py = parameter_input(24); % Y sensor offset for proximal sensor 
-    offset_pz = parameter_input(25); % Z sensor offset for proximal sensor 
 
-    amp_px = parameter_input(26); % X sensor amplitude for proximal sensor 
-    amp_py = parameter_input(27); % Y sensor amplitude for proximal sensor 
-    amp_pz = parameter_input(28); % Z sensor amplitude for proximal sensor 
-
-    orthogonality_dy = parameter_input(29);
-    orthogonality_dz = parameter_input(30);
-    orthogonality_py = parameter_input(31);
-    orthogonality_pz = parameter_input(32);
+    orthogonality_px = parameter_input(29);
+    orthogonality_py = parameter_input(30);
+    orthogonality_dx = parameter_input(31);
+    orthogonality_dy = parameter_input(32);
+    
     pos_reference = data(:, 7:9);
+    
+    bx_p_2 = (data(:,4)-offset_px)./amp_px;
+    by_p_2 = (data(:,5)-offset_py)./amp_py;
+    bz_p_2 = (data(:,6)-offset_pz)./amp_pz;
+    
+    bx_p_3 = (bx_p_2-bz_p_2*sin(-orthogonality_px))/cos(-orthogonality_px);
+    by_p_3 = (by_p_2-bz_p_2*sin(-orthogonality_py))/cos(-orthogonality_py);
+    bz_p_3 = bz_p_2;
+    
+    bx_d_2 = (data(:,1)-offset_dx)./amp_dx;
+    by_d_2 = (data(:,2)-offset_dy)./amp_dy;
+    bz_d_2 = (data(:,3)-offset_dz)./amp_dz;
+    
+    bx_d_3 = (bx_d_2-bz_d_2*sin(-orthogonality_dx))/cos(-orthogonality_dx);
+    by_d_3 = (by_d_2-bz_d_2*sin(-orthogonality_dy))/cos(-orthogonality_dy);
+    bz_d_3 = bz_d_2;
 
         
     for i=1:size(data, 1)
         
-        %proximal 
-        bx_p = (data(i,4)-offset_px)/amp_px;
-        by_p = ((data(i,5)-offset_py)/amp_py-bx_p*sin(-orthogonality_py))/cos(-orthogonality_py);
-        bz_p = ((data(i,6)-offset_pz)/amp_pz-bx_p*sin(-orthogonality_pz))/cos(-orthogonality_pz);
+        B2 = -atan2(bx_p_3(i), bz_p_3(i));
+        B3 = atan2(by_p_3(i),  bz_p_3(i));        
         
-        mag = sqrt(bx_p^2+by_p^2+bz_p^2);
-        a = bx_p;
-        b = by_p;
-        c = bz_p;
+        B5 = -atan2(by_d_3(i), bz_d_3(i));
+        B6 = -atan2(bx_d_3(i), bz_d_3(i))-pi/4;
         
-        X=atan2(1,0);
-        if 1-a^2>0
-            B2 = atan2(b, a)-X;
-        else
-            B2 = atan2(0,a)-X;
-        end
-        
-        if B2 > pi/2
-            B2=pi/2;
-        elseif B2<-pi/2
-            B2=-pi/2;
-        end
-        
-        Y = cos(B2);
-        if Y*Y-b*b<0
-           B3 = atan2(b,0)-atan2(0, Y); 
-        else
-%            B3 = atan2(b, sqrt(Y*Y-b*b))-atan2(0, Y);
-            B3 = atan2(b, c) - atan2(0,Y);
-        end
-        
-        if B3 > pi/2
-            B3=pi/2;
-        elseif B3<-pi/2
-            B3=-pi/2;
-        end
-        
-        % distal 
-        bx_d = (data(i,1)-offset_dx)/amp_dx;
-        by_d = ((data(i,2)-offset_dy)/amp_dy-bx_d*sin(-orthogonality_dy))/cos(-orthogonality_dy);
-        bz_d = ((data(i,3)-offset_dz)/amp_dz-bx_d*sin(-orthogonality_dz))/cos(-orthogonality_pz);
-        
-                
-        mag = sqrt(bx_d^2+by_d^2+bz_d^2);
-        a = bx_d;
-        b = by_d;
-        c = bz_d;
-        
-        X=atan2(0,1);
-        if 1-a^2>0
-            B6 = atan2(a,b)-X;
-        else
-            B6 = atan2(a,0)-X;
-        end
-        
-        if B6 > pi/2
-            B6=pi/2;
-        elseif B6<-pi/2
-            B6=-pi/2;
-        end
-        
-        Y = cos(B6);
-        if Y ==0
-            Y=0.00001;
-        end
-        if Y*Y-b*b<0
-           B5 = atan2(0,b)-atan2(Y,0); 
-        else
-%            B5 = atan2(sqrt(Y*Y-b*b),b)-atan2(Y, 0);
-            B5 = atan2(c,b)-atan2(Y, 0);
-        end
-        
-        if B5 > pi/2
-            B5=pi/2;
-        elseif B5<-pi/2
-            B5=-pi/2;
-        end
-        
-        B6 = B6+pi/4;
-        
-%         B2 = data(i,1);B3 = data(i,2);B5 = data(i,3);B6 = data(i,4);
         
                 
         if strcmp(finger, 'thumb')
