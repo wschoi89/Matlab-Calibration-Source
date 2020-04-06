@@ -105,7 +105,7 @@ for n_pos=1:num_maxZigPos % the number of thumb zig positions
     magnetic_data{1,n_pos} = magnetic_data{1,n_pos}(1:num_samples, :);
 
     % convert magnetic data into joint angles
-    arr_jointAngles(:,:,n_pos) = getJointAngle_updated(magnetic_data{1,n_pos}, [0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0]);
+    arr_jointAngles(:,:,n_pos) = getJointAngle(magnetic_data{1,n_pos});
 
     % preallocate the size of pos_frame 
     for finger=1:num_fingers
@@ -246,7 +246,6 @@ subplot(2,3,6); legend('middle w/o calibration');
 
 for n_pos=1:num_maxZigPos
     
-    
     % preallocate the size of pos_frame 
     for finger=1:num_fingers
         for joint=1:num_DHjoints
@@ -255,8 +254,16 @@ for n_pos=1:num_maxZigPos
     end
     
     % calculate each joint's transformation matrix and position
-    for finger=1:1
+    for finger=1:num_fingers
         for row_sample=1:size(arr_jointAngles(:,:,n_pos),1)
+            DH_temp = DH_ref;
+            jointAngles_temp = arr_jointAngles(:,:,n_pos);
+            DH_temp(2,2)=jointAngles_temp(row_sample,4*(finger-1)+1);
+            DH_temp(3,2)=jointAngles_temp(row_sample,4*(finger-1)+2);
+            DH_temp(5,2)=jointAngles_temp(row_sample,4*(finger-1)+3);
+            DH_temp(6,2)=jointAngles_temp(row_sample,4*(finger-1)+4);
+            DH_temp(2:end,3) = arr_links(:,finger);
+            % add calibrated parameters
             if finger==1
 %                 load(strcat('Optimized_parameter/',device_name,'/',device_name, '_optimized_parameter_thumb.mat'));
                 load optimized_parameter_thumb.mat
@@ -267,29 +274,24 @@ for n_pos=1:num_maxZigPos
 %                 load(strcat('Optimized_parameter/',device_name,'/',device_name, '_optimized_parameter_middle.mat'));
                 load optimized_parameter_middle.mat
             end
-            
-            DH_temp = DH_ref;
-            arr_jointAngles(:,:,n_pos) = getJointAngle_updated(magnetic_data{1,n_pos}, list_optParam(17:32));
-            jointAngles_temp = arr_jointAngles(:,:,n_pos);
-            DH_temp(2,2)=jointAngles_temp(row_sample,4*(finger-1)+1);
-            DH_temp(3,2)=jointAngles_temp(row_sample,4*(finger-1)+2);
-            DH_temp(5,2)=jointAngles_temp(row_sample,4*(finger-1)+3);
-            DH_temp(6,2)=jointAngles_temp(row_sample,4*(finger-1)+4);
-            DH_temp(2:end,3) = arr_links(:,finger);
-            % add calibrated parameters
-
-                % DH parameters
-                DH_temp(1,1)=DH_temp(1,1)+list_optParam(1);                DH_temp(1,3)=DH_temp(1,3)+list_optParam(2);
-                DH_temp(2,1)=DH_temp(2,1)+list_optParam(3);                DH_temp(2,3)=DH_temp(2,3)+list_optParam(4);
-                DH_temp(3,1)=DH_temp(3,1)+list_optParam(5);                DH_temp(3,3)=DH_temp(3,3)+list_optParam(6);
-                DH_temp(5,1)=DH_temp(5,1)+list_optParam(7);                DH_temp(5,3)=DH_temp(5,3)+list_optParam(8);
-                DH_temp(6,1)=DH_temp(6,1)+list_optParam(9);                DH_temp(6,3)=DH_temp(6,3)+list_optParam(10);
+                % sensor offset
+                DH_temp(2,2)=DH_temp(2,2)+list_optParam(1);
+                DH_temp(3,2)=DH_temp(3,2)+list_optParam(2);
+                DH_temp(5,2)=DH_temp(5,2)+list_optParam(3);
+                DH_temp(6,2)=DH_temp(6,2)+list_optParam(4);
                 
-                DH_temp(1,2)=DH_temp(1,2)+list_optParam(11);               DH_temp(1,4)=DH_temp(1,4)+list_optParam(12);
-                                                                           DH_temp(2,4)=DH_temp(2,4)+list_optParam(13);
-                                                                           DH_temp(3,4)=DH_temp(3,4)+list_optParam(14);
-                                                                           DH_temp(5,4)=DH_temp(5,4)+list_optParam(15);
-                                                                           DH_temp(6,4)=DH_temp(6,4)+list_optParam(16);
+                % DH parameters
+                DH_temp(1,1)=DH_temp(1,1)+list_optParam(5);                DH_temp(1,3)=DH_temp(1,3)+list_optParam(6);
+                DH_temp(2,1)=DH_temp(2,1)+list_optParam(7);                DH_temp(2,3)=DH_temp(2,3)+list_optParam(8);
+                DH_temp(3,1)=DH_temp(3,1)+list_optParam(9);                DH_temp(3,3)=DH_temp(3,3)+list_optParam(10);
+                DH_temp(5,1)=DH_temp(5,1)+list_optParam(11);               DH_temp(5,3)=DH_temp(5,3)+list_optParam(12);
+                DH_temp(6,1)=DH_temp(6,1)+list_optParam(13);               DH_temp(6,3)=DH_temp(6,3)+list_optParam(14);
+                
+                DH_temp(1,2)=DH_temp(1,2)+list_optParam(15);               DH_temp(1,4)=DH_temp(1,4)+list_optParam(16);
+                                                                           DH_temp(2,4)=DH_temp(2,4)+list_optParam(17);
+                                                                           DH_temp(3,4)=DH_temp(3,4)+list_optParam(18);
+                                                                           DH_temp(5,4)=DH_temp(5,4)+list_optParam(19);
+                                                                           DH_temp(6,4)=DH_temp(6,4)+list_optParam(20);
                         
             DH_table(:,:,finger) = DH_temp;
 
