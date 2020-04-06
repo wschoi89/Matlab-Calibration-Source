@@ -10,7 +10,6 @@ function output = pos_endEffector_allCalibration_updated(parameter_input, data, 
     A3 = parameter_input(5);                           C3 = parameter_input(6); D3 = parameter_input(14);
     A5 = parameter_input(7);                          C5 = parameter_input(8); D5 = parameter_input(15);
     A6 = parameter_input(9);                          C6 = parameter_input(10); D6 = parameter_input(16);
-
     
     offset_px = parameter_input(17); % X sensor offset for proximal sensor 
     offset_py = parameter_input(18); % Y sensor offset for proximal sensor 
@@ -18,15 +17,13 @@ function output = pos_endEffector_allCalibration_updated(parameter_input, data, 
     offset_dx = parameter_input(20); % X sensor offset for distal sensor 
     offset_dy = parameter_input(21); % Y sensor offset for distal sensor 
     offset_dz = parameter_input(22); % Z sensor offset for distal sensor 
-
-    
+   
     amp_px = parameter_input(23); % X sensor amplitude for proximal sensor 
     amp_py = parameter_input(24); % Y sensor amplitude for proximal sensor 
     amp_pz = parameter_input(25); % Z sensor amplitude for proximal sensor 
     amp_dx = parameter_input(26); % X sensor amplitude for distal sensor 
     amp_dy = parameter_input(27); % Y sensor amplitude for distal sensor 
     amp_dz = parameter_input(28); % Z sensor amplitude for distal sensor 
-
 
     orthogonality_px = parameter_input(29);
     orthogonality_py = parameter_input(30);
@@ -75,7 +72,7 @@ function output = pos_endEffector_allCalibration_updated(parameter_input, data, 
         B3 = atan2(by_p_3(i),  bz_p_3(i))+off_th2;        
         
         B5 = -atan2(by_d_3(i), bz_d_3(i))+off_th3;
-        B6 = -atan2(bx_d_3(i), bz_d_3(i))+off_th4;
+        B6 = atan2(bx_d_3(i), bz_d_3(i))+pi/4+off_th4;
         
         
                 
