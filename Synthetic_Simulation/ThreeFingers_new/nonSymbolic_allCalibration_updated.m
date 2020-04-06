@@ -3,7 +3,7 @@
 % options = optimoptions(@lsqnonlin,'Algorithm', 'trust-region-reflective','Display', 'iter', 'MaxFunctionEvaluations', 20000, 'MaxIterations', 20000, 'FiniteDifferenceType', 'central','PlotFcn','optimplotx', 'DiffMaxChange', 0.1);
 
 disp('optimization start')
-options = optimoptions(@lsqnonlin,'Algorithm', 'levenberg-marquardt','Display', 'iter', 'MaxFunctionEvaluations', 3000, 'MaxIterations', 3000, 'initDamping', 10,'StepTolerance', 1e-10);
+options = optimoptions(@lsqnonlin,'Algorithm', 'levenberg-marquardt','Display', 'iter', 'MaxFunctionEvaluations', 200000, 'MaxIterations', 200000, 'initDamping', 10,'StepTolerance', 1e-10);
 %  options = optimoptions(@lsqnonlin,'Algorithm', 'trust-region-reflective','Display', 'iter', 'MaxFunctionEvaluations', 200000, 'MaxIterations', 200000, 'initDamping', 10,'StepTolerance', 1e-10);
 
 % load data
@@ -14,7 +14,7 @@ if ~exist('num_fingers','var')
     num_fingers = 3;
 end
 
-for iter=1:1
+for iter=3:3
     if iter==1
         finger = 'thumb';
     elseif iter==2
@@ -94,17 +94,14 @@ for iter=1:1
     end
 
     % pre-allocation for optimized parameters
-    num_optParam = 16 + 6 + 6 + 4+4; % previous param except sensor offset(16) + offset(6)+amplitude(6) + orthogonality(4) for each finger + th4 offset 
+    num_optParam = 16 + 16 + 4; % previous param except sensor offset(16) + offset(6)+amplitude(6) + orthogonality(4) for each finger + th4 offset 
     num_iteration=1;
-    list_optParam = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0];
+    list_optParam_init = [0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,  0,0,0,0,0,0,  1,1,1,1,1,1,  0,0,0,0,  0,0,0,0];
 
 
     for page=1:num_iteration
-
-%         lb = [-0.5;-0.5;-0.5;-0.5;-5;-5;-5;-5;-5;-5;-5;-5;-5;-5;-0.5;-0.5;-0.5;-0.5;-0.5;-0.5;];
-%         ub = [0.5;0.5;0.5;0.5;5;5;5;5;5;5;5;5;5;5;0.5;0.5;0.5;0.5;0.5;0.5;];
-        optimized_parameter=lsqnonlin (@pos_endEffector_allCalibration_updated,ones(1,num_optParam),[],[],options, data, finger);
-%         optimized_parameter=lsqnonlin (@pos_endEffector_allCalibration,zeros(1,num_optParam),lb,ub,options, data, finger, transform_endEffector_CAD);
+        %optimized_parameter=lsqnonlin (@pos_endEffector_allCalibration_updated,ones(1,num_optParam),[],[],options, data, finger);
+        optimized_parameter=lsqnonlin (@pos_endEffector_allCalibration_updated,list_optParam_init,[],[],options, data, finger);
         list_optParam(page, :) = optimized_parameter;
 
     end
