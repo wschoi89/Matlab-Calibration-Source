@@ -3,12 +3,11 @@
 % options = optimoptions(@lsqnonlin,'Algorithm', 'trust-region-reflective','Display', 'iter', 'MaxFunctionEvaluations', 20000, 'MaxIterations', 20000, 'FiniteDifferenceType', 'central','PlotFcn','optimplotx', 'DiffMaxChange', 0.1);
 
 disp('optimization start')
-options = optimoptions(@lsqnonlin,'Algorithm', 'levenberg-marquardt','Display', 'iter', 'MaxFunctionEvaluations', 100000, 'MaxIterations', 100000, 'initDamping', 10,'StepTolerance', 1e-10);
-%  options = optimoptions(@lsqnonlin,'Algorithm', 'trust-region-reflective','Display', 'iter', 'MaxFunctionEvaluations', 100000, 'MaxIterations', 100000, 'initDamping', 10,'StepTolerance', 1e-10);
+options = optimoptions(@lsqnonlin,'Algorithm', 'levenberg-marquardt','Display', 'iter', 'MaxFunctionEvaluations', 3000, 'MaxIterations', 3000, 'initDamping', 10,'StepTolerance', 1e-10);
+%  options = optimoptions(@lsqnonlin,'Algorithm', 'trust-region-reflective','Display', 'iter', 'MaxFunctionEvaluations', 200000, 'MaxIterations', 200000, 'initDamping', 10,'StepTolerance', 1e-10);
 
 % load data
 load training_test_data.mat
-load transform_endEffector_CAD.mat
 
 % check if there is a variable named 'num_fingers'.
 if ~exist('num_fingers','var')
@@ -54,17 +53,19 @@ for iter=1:1
         data_test = zeros(num_zigPos(2)*num_samples,3);
         data_jointAngle_indexMiddle = zeros(num_zigPos(2)*num_samples, 8);
         data_jointAngle_index = data_jointAngle_indexMiddle(:,1:4);
+        data_magnetic_index = zeros(num_zigPos(2)*num_samples,6);
 
         for p=1:page
             data_training(row*(p-1)+1:row*p,:) = training_index(:,:,p);
             data_jointAngle_index(row*(p-1)+1:row*p,:) = arr_jointAngles(:,5:8,p);
+            data_magnetic_index(row*(p-1)+1:row*p,:) = magnetic_data{1,p}(:,7:12);
             for r=1:row
                 data_test(num_samples*(p-1)+r,:) = test_index(p,1:3);
 
             end
         end
 
-        data = [data_jointAngle_index data_test];
+        data = [data_magnetic_index data_test];
 
     elseif strcmp(finger, 'middle')
         test_middle = pos_calibZig{1,3};
@@ -74,26 +75,28 @@ for iter=1:1
         data_test = zeros(num_zigPos(3)*num_samples,3);
         data_jointAngle_indexMiddle = zeros(num_zigPos(3)*num_samples, 8);
         data_jointAngle_middle = data_jointAngle_indexMiddle(:,5:8);
+        data_magnetic_middle = zeros(num_zigPos(3)*num_samples,6);
 
         for p=1:page
             data_training(row*(p-1)+1:row*p,:) = training_middle(:,:,p);
             data_jointAngle_middle(row*(p-1)+1:row*p,:) = arr_jointAngles(:,9:12,p);
+            data_magnetic_middle(row*(p-1)+1:row*p,:) = magnetic_data{1,p}(:,13:18);
             for r=1:row
                 data_test(num_samples*(p-1)+r,:) = test_middle(p,1:3);
 
             end
         end
 
-        data = [data_jointAngle_middle data_test];
+        data = [data_magnetic_middle data_test];
 
     else
         disp('please check the finger string value');
     end
 
     % pre-allocation for optimized parameters
-    num_optParam = 16 + 6 + 6 + 4; % previous param except sensor offset(16) + offset(6)+amplitude(6) + orthogonality(4) for each finger 
+    num_optParam = 16 + 6 + 6 + 4+4; % previous param except sensor offset(16) + offset(6)+amplitude(6) + orthogonality(4) for each finger + th4 offset 
     num_iteration=1;
-    list_optParam = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0];
+    list_optParam = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0];
 
 
     for page=1:num_iteration
