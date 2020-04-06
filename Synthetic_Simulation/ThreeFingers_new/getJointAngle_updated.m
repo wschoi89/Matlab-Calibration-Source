@@ -106,7 +106,7 @@ function jointAngle = getJointAngle_updated(magnetic_data, param_thumb_sensors_i
         jointAngle(iter,2) =   atan2(by_p_3_thumb(iter), bz_p_3_thumb(iter))+ext_sensor_thumb_in(2);
         
         jointAngle(iter,3) =  -atan2(by_d_3_thumb(iter), bz_d_3_thumb(iter))+ext_sensor_thumb_in(3);
-        jointAngle(iter,4) =  -atan2(bx_d_3_thumb(iter), bz_d_3_thumb(iter))+ext_sensor_thumb_in(4);
+        jointAngle(iter,4) =  atan2(bx_d_3_thumb(iter), bz_d_3_thumb(iter))+pi/4+ext_sensor_thumb_in(4);
 
         
        % index finger
@@ -114,7 +114,7 @@ function jointAngle = getJointAngle_updated(magnetic_data, param_thumb_sensors_i
        jointAngle(iter,6) =   atan2(by_p_3_index(iter), bz_p_3_index(iter))+ext_sensor_index_in(2);
         
        jointAngle(iter,7) =  -atan2(by_d_3_index(iter), bz_d_3_index(iter))+ext_sensor_index_in(3);
-       jointAngle(iter,8) =  -atan2(bx_d_3_index(iter), bz_d_3_index(iter))+ext_sensor_index_in(4);
+       jointAngle(iter,8) =  atan2(bx_d_3_index(iter), bz_d_3_index(iter))+pi/4+ext_sensor_index_in(4);
         
       % middle finger
       
@@ -122,7 +122,7 @@ function jointAngle = getJointAngle_updated(magnetic_data, param_thumb_sensors_i
       jointAngle(iter,10) =  atan2(by_p_3_middle(iter), bz_p_3_middle(iter))+ext_sensor_middle_in(2);
         
       jointAngle(iter,11) =  -atan2(by_d_3_middle(iter), bz_d_3_middle(iter))+ext_sensor_middle_in(3);
-      jointAngle(iter,12) =  -atan2(bx_d_3_middle(iter), bz_d_3_middle(iter))+ext_sensor_middle_in(4);
+      jointAngle(iter,12) =  atan2(bx_d_3_middle(iter), bz_d_3_middle(iter))+pi/4+ext_sensor_middle_in(4);
         
         
     end
