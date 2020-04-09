@@ -54,7 +54,7 @@ end
 
 
 % load positions for CAD zig
-load('mat_files/pos_calibration_wrt_indexOrigin.mat') % positions with respect to index coordinate
+load('mat_files/pos_calibration_big_radius.mat') % positions with respect to index coordinate
 % load('mat_files./pos_calibration_small_radius.mat');
 % pos_calibZig = pos_calibZig_test;
 
