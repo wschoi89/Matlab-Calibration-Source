@@ -8,9 +8,11 @@ num_param_per_joint = 4; % DH parameter per joint
 num_fingers = 3; % the number of device fingers
 num_angles = 4; % device angle
 
-% num_zigPos_training = [45, 45, 45]; % thumb, index, middle 
-num_zigPos_training = [36, 38, 34]; % thumb, index, middle 
-num_maxZigPos = max(num_zigPos_training);
+DH_json = jsondecode(fileread('mech-R3.json'));
+
+num_zigPos_training = [45, 45, 45]; % thumb, index, middle 
+% num_zigPos_training = [36, 38, 34]; % thumb, index, middle 
+num_maxZigPos_training = max(num_zigPos_training);
 
 % set each finger's origin position
 if ~exist('transform_thumb_wrt_index','var')
@@ -43,7 +45,7 @@ pos_frame = cell(1, num_DHjoints, num_fingers);
 
 pos_endEffector_noCalib = cell(1,3);
 pos_endEffector_Calib = cell(1,3);
-arr_jointAngles = zeros(num_samples, num_angles*num_fingers, num_maxZigPos);
+arr_jointAngles = zeros(num_samples, num_angles*num_fingers, num_maxZigPos_training);
 
 for finger=1:num_fingers
     pos_endEffector_noCalib{1,finger} = zeros(num_samples,3,num_zigPos_training(finger));    
@@ -52,9 +54,9 @@ end
 
 
 % load positions for CAD zig
-% load('mat_files/pos_calibration_wrt_indexOrigin.mat') % positions with respect to index coordinate
-load('mat_files./pos_calibration_small_radius.mat');
-pos_calibZig = pos_calibZig_test;
+load('mat_files/pos_calibration_wrt_indexOrigin.mat') % positions with respect to index coordinate
+% load('mat_files./pos_calibration_small_radius.mat');
+% pos_calibZig = pos_calibZig_test;
 
 %% plot finger's origin
 color_zigPosition = {[0 0 0], [0 0 0], [0 0 0]}; % color for each finger (thumb, index,and middle finger)
@@ -95,16 +97,16 @@ for finger=1:num_fingers
 end
 
 %% preallocate magnetic data size 
-magnetic_data = cell(1, num_maxZigPos);
-for n_pos=1:num_maxZigPos
+magnetic_data = cell(1, num_maxZigPos_training);
+for n_pos=1:num_maxZigPos_training
    magnetic_data{1,n_pos} = zeros(num_samples, num_angles*num_fingers); 
 end
 
 %%  load magnet data from files and calculate estimated end-effector without calibration
-for n_pos=1:num_maxZigPos % the number of thumb zig positions
+for n_pos=1:num_maxZigPos_training % the number of thumb zig positions
 
-%     fileName_magneticData=strcat('DAQ/',device_name,'/training/',device_name,'_DAQ_T',num2str(n_pos),'_I',num2str(n_pos),'_M',num2str(n_pos),'_training.csv');
-    fileName_magneticData=strcat('DAQ/',device_name,'/test/',device_name,'_DAQ_T',num2str(n_pos),'_I',num2str(n_pos),'_M',num2str(n_pos),'_test.csv');
+    fileName_magneticData=strcat('DAQ/',device_name,'/training/',device_name,'_DAQ_T',num2str(n_pos),'_I',num2str(n_pos),'_M',num2str(n_pos),'_training.csv');
+%     fileName_magneticData=strcat('DAQ/',device_name,'/test/',device_name,'_DAQ_T',num2str(n_pos),'_I',num2str(n_pos),'_M',num2str(n_pos),'_test.csv');
     magnetic_data{1,n_pos} = load(fileName_magneticData);
     magnetic_data{1,n_pos} = magnetic_data{1,n_pos}(1:num_samples, :);
 
@@ -252,7 +254,13 @@ subplot(2,3,6); legend('middle w/o calibration');
 
 %% after calibration
 
-for n_pos=1:num_maxZigPos
+
+DH_offset = reshape(DH_json.DH_offset, 32, 3)';
+ext_off_thumb = [DH_json.off_TH1_Thumb, DH_json.off_TH2_Thumb, DH_json.off_TH3_Thumb, DH_json.off_TH4_Thumb];
+ext_off_index = [DH_json.off_TH1_Index, DH_json.off_TH2_Index, DH_json.off_TH3_Index, DH_json.off_TH4_Index];
+ext_off_middle = [DH_json.off_TH1_Middle, DH_json.off_TH2_Middle, DH_json.off_TH3_Middle, DH_json.off_TH4_Middle];
+
+for n_pos=1:num_maxZigPos_training
     
     % preallocate the size of pos_frame 
     for finger=1:num_fingers
@@ -266,27 +274,29 @@ for n_pos=1:num_maxZigPos
         for row_sample=1:size(arr_jointAngles(:,:,n_pos),1)
             
              % add calibrated parameters
-            if finger==1
-%                 load(strcat('Optimized_parameter/',device_name,'/',device_name, '_optimized_parameter_thumb.mat'));
-                load optimized_parameter_thumb.mat
-            elseif finger==2
-%                 load(strcat('Optimized_parameter/',device_name,'/',device_name, '_optimized_parameter_index.mat'));
-                load optimized_parameter_index.mat
-            elseif finger==3
-%                 load(strcat('Optimized_parameter/',device_name,'/',device_name, '_optimized_parameter_middle.mat'));
-                load optimized_parameter_middle.mat
-            end
+%             if finger==1
+% %                 load(strcat('Optimized_parameter/',device_name,'/',device_name, '_optimized_parameter_thumb.mat'));
+%                 load optimized_parameter_thumb.mat
+%             elseif finger==2
+% %                 load(strcat('Optimized_parameter/',device_name,'/',device_name, '_optimized_parameter_index.mat'));
+%                 load optimized_parameter_index.mat
+%             elseif finger==3
+% %                 load(strcat('Optimized_parameter/',device_name,'/',device_name, '_optimized_parameter_middle.mat'));
+%                 load optimized_parameter_middle.mat
+%             end
             DH_temp = DH_ref;
             param_thumb_sensors = [0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0];
             param_index_sensors = [0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0];
             param_middle_sensors = [0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0];
+            
             if finger==1
-                arr_jointAngles(:,:,n_pos) = getJointAngle_updated(magnetic_data{1,n_pos}, list_optParam(17:32), param_index_sensors,param_middle_sensors,list_optParam(33:36),[0,0,0,0],[0,0,0,0]);
+                arr_jointAngles(:,:,n_pos) = getJointAngle_updated(magnetic_data{1,n_pos}, DH_offset(finger, 17:32), param_index_sensors,param_middle_sensors,ext_off_thumb,[0,0,0,0],[0,0,0,0]);
             elseif finger==2
-                arr_jointAngles(:,:,n_pos) = getJointAngle_updated(magnetic_data{1,n_pos}, param_thumb_sensors,list_optParam(17:32),param_middle_sensors,[0,0,0,0],list_optParam(33:36),[0,0,0,0]);
+                arr_jointAngles(:,:,n_pos) = getJointAngle_updated(magnetic_data{1,n_pos}, param_thumb_sensors,DH_offset(finger, 17:32),param_middle_sensors,[0,0,0,0],ext_off_index,[0,0,0,0]);
             elseif finger==3
-                arr_jointAngles(:,:,n_pos) = getJointAngle_updated(magnetic_data{1,n_pos}, param_thumb_sensors,param_index_sensors,list_optParam(17:32),[0,0,0,0],[0,0,0,0],list_optParam(33:36));
+                arr_jointAngles(:,:,n_pos) = getJointAngle_updated(magnetic_data{1,n_pos}, param_thumb_sensors,param_index_sensors,DH_offset(finger, 17:32),[0,0,0,0],[0,0,0,0],ext_off_middle);
             end
+            
             jointAngles_temp = arr_jointAngles(:,:,n_pos);
             DH_temp(2,2)=jointAngles_temp(row_sample,4*(finger-1)+1);
             DH_temp(3,2)=jointAngles_temp(row_sample,4*(finger-1)+2);
@@ -296,17 +306,17 @@ for n_pos=1:num_maxZigPos
            
                 
                 % DH parameters
-                DH_temp(1,1)=DH_temp(1,1)+list_optParam(1);                DH_temp(1,3)=DH_temp(1,3)+list_optParam(2);
-                DH_temp(2,1)=DH_temp(2,1)+list_optParam(3);                DH_temp(2,3)=DH_temp(2,3)+list_optParam(4);
-                DH_temp(3,1)=DH_temp(3,1)+list_optParam(5);                DH_temp(3,3)=DH_temp(3,3)+list_optParam(6);
-                DH_temp(5,1)=DH_temp(5,1)+list_optParam(7);               DH_temp(5,3)=DH_temp(5,3)+list_optParam(8);
-                DH_temp(6,1)=DH_temp(6,1)+list_optParam(9);               DH_temp(6,3)=DH_temp(6,3)+list_optParam(10);
+                DH_temp(1,1)=DH_temp(1,1)+DH_offset(finger,1);                DH_temp(1,3)=DH_temp(1,3)+DH_offset(finger,2);
+                DH_temp(2,1)=DH_temp(2,1)+DH_offset(finger,3);                DH_temp(2,3)=DH_temp(2,3)+DH_offset(finger,4);
+                DH_temp(3,1)=DH_temp(3,1)+DH_offset(finger,5);                DH_temp(3,3)=DH_temp(3,3)+DH_offset(finger,6);
+                DH_temp(5,1)=DH_temp(5,1)+DH_offset(finger,7);                DH_temp(5,3)=DH_temp(5,3)+DH_offset(finger,8);
+                DH_temp(6,1)=DH_temp(6,1)+DH_offset(finger,9);                DH_temp(6,3)=DH_temp(6,3)+DH_offset(finger,10);
                 
-                DH_temp(1,2)=DH_temp(1,2)+list_optParam(11);               DH_temp(1,4)=DH_temp(1,4)+list_optParam(12);
-                                                                           DH_temp(2,4)=DH_temp(2,4)+list_optParam(13);
-                                                                           DH_temp(3,4)=DH_temp(3,4)+list_optParam(14);
-                                                                           DH_temp(5,4)=DH_temp(5,4)+list_optParam(15);
-                                                                           DH_temp(6,4)=DH_temp(6,4)+list_optParam(16);
+                DH_temp(1,2)=DH_temp(1,2)+DH_offset(finger,11);               DH_temp(1,4)=DH_temp(1,4)+DH_offset(finger,12);
+                                                                              DH_temp(2,4)=DH_temp(2,4)+DH_offset(finger,13);
+                                                                              DH_temp(3,4)=DH_temp(3,4)+DH_offset(finger,14);
+                                                                              DH_temp(5,4)=DH_temp(5,4)+DH_offset(finger,15);
+                                                                              DH_temp(6,4)=DH_temp(6,4)+DH_offset(finger,16);
                         
             DH_table(:,:,finger) = DH_temp;
 
