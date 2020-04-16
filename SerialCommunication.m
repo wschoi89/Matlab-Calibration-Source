@@ -6,17 +6,20 @@ if mkdir('DAQ')==false
 end
 
 %% set COM PORT, device number, position for DAQ, and the number of samples
-COM_PORT='COM10';
+COM_PORT='COM9';
 
-num_device='sensor3_testbed_magnet180_case3';
-position='-90';
-slide='0'; 
+num_device='Device7';
+position='29';
+
 num_samples = 10; 
 
 num_sensors = 6;    
 % fileID = fopen(strcat('DAQ/',num_device,'_DAQ_T',position,'_I',position,'_M',position,'_slide',slide,'_training.csv'), 'w');
 % fileID = fopen(strcat('DAQ/',num_device,'_DAQ_T',position,'_I',position,'_M',position,'_test.csv'), 'w');
-fileID = fopen(strcat('DAQ/',num_device,'_', position, 'degree.csv'), 'w');
+fileID = fopen(strcat('DAQ/',num_device,'_DAQ_T',position,'_test.csv'), 'w');
+% fileID = fopen(strcat('DAQ/',num_device,'_DAQ_I',position,'_M',position,'_test.csv'), 'w');
+
+% fileID = fopen(strcat('DAQ/',num_device,'_', position, 'degree.csv'), 'w');
 
 disp('Start in 5 seconds!')
 
@@ -132,5 +135,5 @@ fclose(fileID);
 delete(ser);
 
 disp('finished')
-
-
+pause(2);
+close all
