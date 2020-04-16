@@ -12,8 +12,8 @@ num_param_per_joint = 4; % DH parameter per joint
 num_fingers = 3; % the number of device fingers
 num_angles = 4; % device angle
 
-num_zigPos = [36, 38, 34]; % thumb, index, middle 
-% num_zigPos = [36, 38, 38]; % thumb, index, middle 
+num_zigPos = [81, 83, 79]; % thumb, index, middle 
+% num_zigPos = [36, 38, 34]; % thumb, index, middle 
 num_maxZigPos = max(num_zigPos);
 
 % set each finger's origin position
@@ -56,10 +56,8 @@ for finger=1:num_fingers
 end
 
 % load positions for CAD zig
-% load('mat_files./pos_calibration_wrt_indexOrigin.mat');
-load('mat_files./pos_calibration_small_radius.mat');
+load('mat_files./pos_calibration_integrated.mat');
 
-pos_calibZig = pos_calibZig_test;
 
 %% plot finger's origin
 color_zigPosition = {[1 0 0], [0 0.5 0], [0 0 1]}; % color for each finger (thumb, index,and middle finger)
@@ -104,7 +102,8 @@ end
 for n_pos=1:num_maxZigPos % the number of thumb zig positions
 
 %     fileName_magneticData=strcat('DAQ/',device_name,'/training/',device_name,'_DAQ_T',num2str(n_pos),'_I',num2str(n_pos),'_M',num2str(n_pos),'_training.csv');
-    fileName_magneticData=strcat('DAQ/',device_name,'/test/',device_name,'_DAQ_T',num2str(n_pos),'_I',num2str(n_pos),'_M',num2str(n_pos),'_test.csv');
+%     fileName_magneticData=strcat('DAQ/',device_name,'/test/',device_name,'_DAQ_T',num2str(n_pos),'_I',num2str(n_pos),'_M',num2str(n_pos),'_test.csv');
+    fileName_magneticData=strcat('DAQ/',device_name,'/',device_name,'_DAQ_T',num2str(n_pos),'_I',num2str(n_pos),'_M',num2str(n_pos),'.csv');
     magnetic_data{1,n_pos} = load(fileName_magneticData);
     magnetic_data{1,n_pos} = magnetic_data{1,n_pos}(1:num_samples, :); % load samples according to the number of sample variable 
 
