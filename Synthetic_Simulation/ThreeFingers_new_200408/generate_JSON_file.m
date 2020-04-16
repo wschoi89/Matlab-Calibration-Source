@@ -1,4 +1,4 @@
-filename = 'mech-R2.json';
+filename = 'mech-R4.json';
 fileID = fopen(filename, 'w');
 fprintf(fileID, '{\n');
 fprintf(fileID, '\t"HandSide" : "right",\n\n');

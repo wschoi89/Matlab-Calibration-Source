@@ -4,7 +4,7 @@ options = optimoptions(@lsqnonlin,'Algorithm', 'levenberg-marquardt','Display', 
 data = [arr_mean_normalized arr_angles_reference'];
 parameter_init = [0.01 0.01 0.01 0.01 0.01];
 disp('Optimization start!');
-optimized_sensor_param=lsqnonlin(@optimize_sensor, parameter_init, [],[],options, data);
+optimized_sensor_param=lsqnonlin(@optimize_sensor_1dof, parameter_init, [],[],options, data);
 
 offset_y = optimized_sensor_param(1);
 offset_z = optimized_sensor_param(2);

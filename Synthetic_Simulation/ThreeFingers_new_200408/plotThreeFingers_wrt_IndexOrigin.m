@@ -105,10 +105,7 @@ for n_pos=1:num_maxZigPos % the number of thumb zig positions
     magnetic_data{1,n_pos} = magnetic_data{1,n_pos}(1:num_samples, :); % load samples according to the number of sample variable 
 
     % convert magnetic data into joint angles
-    param_thumb_sensors =  [0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0];
-    param_index_sensors =  [0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0];
-    param_middle_sensors = [0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0];
-    arr_jointAngles(:,:,n_pos) = getJointAngle_updated(magnetic_data{1,n_pos}, param_thumb_sensors,param_index_sensors,param_middle_sensors,[0,0,0,0],[0,0,0,0],[0,0,0,0]);
+    arr_jointAngles(:,:,n_pos) = getJointAngle(magnetic_data{1,n_pos});
 
     % preallocate the size of pos_frame 
     for finger=1:num_fingers
@@ -241,8 +238,7 @@ subplot(2,3,5); legend('index w/o calibration', 'location', 'northoutside');
 subplot(2,3,6); legend('middle w/o calibration', 'location', 'northoutside');
 
 % save data
-% save('training_test_data.mat', 'arr_jointAngles', 'pos_calibZig', 'pos_endEffector_noCalib')
-save('training_test_data.mat', 'magnetic_data', 'pos_calibZig', 'pos_endEffector_noCalib')
+save('training_test_data.mat', 'arr_jointAngles', 'pos_calibZig', 'pos_endEffector_noCalib')
 
 
 
