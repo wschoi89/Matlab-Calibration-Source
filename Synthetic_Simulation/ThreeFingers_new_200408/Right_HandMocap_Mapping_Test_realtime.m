@@ -12,27 +12,34 @@ num_angles = 4; % device angle
 
 flag_init=0;
 
-COM_PORT='COM5';
+COM_PORT='COM9';
 %load optimized DH parameters
-DH_json = jsondecode(fileread('mech-R2.json'));
-DHoffset = reshape(DH_json.DH_offset, 16, 3)';
+DH_json = jsondecode(fileread('mech-R6.json'));
+DHoffset = reshape(DH_json.DH_offset, 32, 3)';
 %load device angle offset
+%thumb
+off_TH1_TH = DH_json.off_TH1_Thumb;
+off_TH2_TH = DH_json.off_TH2_Thumb;
+off_TH3_TH = DH_json.off_TH3_Thumb;
+off_TH4_TH = DH_json.off_TH4_Thumb;
+
+off_ext_thumb = [off_TH1_TH,off_TH2_TH,off_TH3_TH,off_TH4_TH]; 
+
 %index
 off_TH1 = DH_json.off_TH1_Index;
 off_TH2 = DH_json.off_TH2_Index;
 off_TH3 = DH_json.off_TH3_Index;
 off_TH4 = DH_json.off_TH4_Index;
 
+off_ext_index = [off_TH1,off_TH2,off_TH3,off_TH4]; 
+
+%middle
 off_TH1_MI = DH_json.off_TH1_Middle;
 off_TH2_MI = DH_json.off_TH2_Middle;
 off_TH3_MI = DH_json.off_TH3_Middle;
 off_TH4_MI = DH_json.off_TH4_Middle;
 
-off_TH1_TH = DH_json.off_TH1_Thumb;
-off_TH2_TH = DH_json.off_TH2_Thumb;
-off_TH3_TH = DH_json.off_TH3_Thumb;
-off_TH4_TH = DH_json.off_TH4_Thumb;
-
+off_ext_middle = [off_TH1_MI,off_TH2_MI,off_TH3_MI,off_TH4_MI]; 
 
 %close existing memory of port object
 if ~isempty(instrfind)
@@ -44,7 +51,7 @@ end
 ser = serial(COM_PORT);
 ser.Baudrate = 115200;
 
-load('mat_files/pos_calibration_wrt_indexOrigin_T13.mat');
+load('mat_files/pos_calibration_integrated.mat');
 
 %thumb, index, middle finger number (right)
 T1=1;
@@ -132,10 +139,7 @@ for i=1:6
     magneticValue(1, 3*(i-1)+3) = bz{i};
 end
 
-% M=size(magneticValue);
-magneticValue;
 
-% Matout=zeros(M(1,1),8);
 
 figure;
 axis([-250 250 -150 150 -150 150]);
@@ -146,9 +150,8 @@ hold on
 Origin=eye(4);%% initial values
 load('mat_files/transform_thumb_wrt_index.mat');
 Origin_TH=Origin*transform_thumb_wrt_index;%% initial values
-% Origin_THParam=[-88.75 -29.04 -24.35 asin(-Origin_TH(2,3)/cos(asin(Origin_TH(1,3)))) asin(Origin_TH(1,3)) asin(-Origin_TH(1,2)/cos(asin(Origin_TH(1,3))))];
+
 Origin_MI=Origin*transl(0,0,19);%% initial values
-% Origin_MI=Origin;%% initial values
 
 DH_ref = [0 0      0   -pi/2;
           0 0      0   pi/2;
@@ -180,11 +183,6 @@ plot3([Origin_MI(1,4) Link3_2(1,4)],[Origin_MI(2,4) Link3_2(2,4)],[Origin_MI(3,4
 alpha=0;
 beta=0;
 gamma=1;
-
-%% Initialization - Middle
-
-iter=1;
-
 
 %% Mechanism & Finger Drawing
 while(true)
@@ -248,15 +246,16 @@ while(true)
         magneticValue(1, 3*(i-1)+3) = bz{i};
     end
 
-    % jointAngles array includes thumb, index, and middle device angles
-   jointAngles = getJointAngle(magneticValue);
+   % jointAngles array includes thumb, index, and middle device angles
+   
+   jointAngles = getJointAngle_updated(magneticValue, DHoffset(1,17:32),DHoffset(2,17:32), DHoffset(3,17:32),off_ext_thumb,off_ext_index, off_ext_middle );
     
    
    %% thumb 
-   TH1_TH=jointAngles(1)+off_TH1_TH;
-   TH2_TH=jointAngles(2)+off_TH2_TH;
-   TH3_TH=jointAngles(3)+off_TH3_TH;
-   TH4_TH=jointAngles(4)+off_TH4_TH;
+   TH1_TH=jointAngles(1);
+   TH2_TH=jointAngles(2);
+   TH3_TH=jointAngles(3);
+   TH4_TH=jointAngles(4);
 
    if flag_init == 0 
        DH_TH = DH_ref;
@@ -333,10 +332,10 @@ while(true)
 
 
 %% index
-    TH1 = jointAngles(5)+off_TH1;
-    TH2 = jointAngles(6)+off_TH2;
-    TH3 = jointAngles(7)+off_TH3;
-    TH4 = jointAngles(8)+off_TH4;
+    TH1 = jointAngles(5);
+    TH2 = jointAngles(6);
+    TH3 = jointAngles(7);
+    TH4 = jointAngles(8);
 
     if flag_init ==0 
         DH = DH_ref;
@@ -414,10 +413,10 @@ while(true)
 
 %% Middle
     
-    TH1_MI=jointAngles(9)+off_TH1_MI;
-    TH2_MI=jointAngles(10)+off_TH2_MI;
-    TH3_MI=jointAngles(11)+off_TH3_MI;
-    TH4_MI=jointAngles(12)+off_TH4_MI;
+    TH1_MI=jointAngles(9);
+    TH2_MI=jointAngles(10);
+    TH3_MI=jointAngles(11);
+    TH4_MI=jointAngles(12);
     
     % initialize time-invariant paramters
     if flag_init == 0
@@ -494,13 +493,13 @@ while(true)
 
     drawnow;
     % % distance between end effectors
-    dist_thumb_index = sqrt((Joint7(1)-Joint7_TH(1))^2+(Joint7(2)-Joint7_TH(2))^2+(Joint7(3)-Joint7_TH(3))^2);
-    dist_thumb_middle = sqrt((Joint7_MI(1)-Joint7_TH(1))^2+(Joint7_MI(2)-Joint7_TH(2))^2+(Joint7_MI(3)-Joint7_TH(3))^2);
-    % fprintf('<DISTANCE> TH_INDEX : %3.3f, TH_MIDDLE : %3.3f\n', dist_thumb_index, dist_thumb_middle);
-    % fprintf('<DISTANCE> TH_INDEX : %3.3f, TH_MIDDLE : %3.3f\n', dist_thumb_index, dist_thumb_middle);
+    dist_thumb_index = sqrt((Joint6(1)-Joint6_TH(1))^2+(Joint6(2)-Joint6_TH(2))^2+(Joint6(3)-Joint6_TH(3))^2);
+    dist_thumb_middle = sqrt((Joint6_MI(1)-Joint6_TH(1))^2+(Joint6_MI(2)-Joint6_TH(2))^2+(Joint6_MI(3)-Joint6_TH(3))^2);
+    fprintf('<DISTANCE> TH_INDEX : %3.3f, TH_MIDDLE : %3.3f\n', dist_thumb_index, dist_thumb_middle);
+    
 
     % position
-    fprintf('Thumb: %3.3f, %3.3f, %3.3f\n', Joint6_TH(1), Joint6_TH(2), Joint6_TH(3));
+%     fprintf('Thumb: %3.3f, %3.3f, %3.3f\n', Joint6_TH(1), Joint6_TH(2), Joint6_TH(3));
     % fprintf('Index R6: %3.3f, %3.3f, %3.3f\n', Joint6(1), Joint6(2), Joint6(3));
     % fprintf('Index R7: %3.3f, %3.3f, %3.3f\n', Joint7(1), Joint7(2), Joint7(3));
     % fprintf('middle: %3.3f, %3.3f, %3.3f \n', Joint6_MI(1), Joint6_MI(2), Joint6_MI(3));
