@@ -6,18 +6,32 @@ if mkdir('DAQ')==false
 end
 
 %% set COM PORT, device number, position for DAQ, and the number of samples
-COM_PORT='COM9';
+COM_PORT='COM10';
 
 num_device='Device7';
-position='29';
+finger='thumb';
+% finger='index';
+% finger='middle';
+position='48';
 
 num_samples = 10; 
 
-num_sensors = 6;    
+num_sensors = 6;
+if mkdir(strcat('DAQ/',num_device))==false
+   mkdir(strcat('DAQ/',num_device))
+end
+
+if strcmp(finger, 'thumb')
+    fileID = fopen(strcat('DAQ/',num_device, '/', num_device,'_DAQ_T',position,'.csv'), 'w');
+elseif strcmp(finger, 'index')
+    fileID = fopen(strcat('DAQ/',num_device, '/', num_device,'_DAQ_I',position,'.csv'), 'w');
+elseif strcmp(finger, 'middle')
+    fileID = fopen(strcat('DAQ/',num_device, '/', num_device,'_DAQ_M',position,'.csv'), 'w');
+end
 % fileID = fopen(strcat('DAQ/',num_device,'_DAQ_T',position,'_I',position,'_M',position,'_slide',slide,'_training.csv'), 'w');
-% fileID = fopen(strcat('DAQ/',num_device,'_DAQ_T',position,'_I',position,'_M',position,'_test.csv'), 'w');
-fileID = fopen(strcat('DAQ/',num_device,'_DAQ_T',position,'_test.csv'), 'w');
-% fileID = fopen(strcat('DAQ/',num_device,'_DAQ_I',position,'_M',position,'_test.csv'), 'w');
+% fileID = fopen(strcat('DAQ/',num_device,'_DAQ_T',position,'_I',position,'_M',position,'.csv'), 'w');
+% fileID = fopen(strcat('DAQ/',num_device,'_DAQ_T',position,'_test.csv'), 'w');
+% fileID = fopen(strcat('DAQ/',num_device,'_DAQ_I ',position,'_M',position,'_test.csv'), 'w');
 
 % fileID = fopen(strcat('DAQ/',num_device,'_', position, 'degree.csv'), 'w');
 

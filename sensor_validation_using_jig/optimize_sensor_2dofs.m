@@ -30,7 +30,6 @@ function output = optimize_sensor_2dofs(parameter_input, data)
         ref_angle = data(i,4);
         ref_angle_abd = data(i,5);
 
-%         output(i,1) = sqrt((diff_angle - ref_angle)^2+(diff_angle_abd - ref_angle_abd)^2+100*(bz_3(i)-cos(ref_angle*pi/180))^2+100*(by_3(i)-sin(ref_angle*pi/180))^2+100*(bx_3(i)-cos(ref_angle*pi/180))^2);
         output(i,1) = sqrt((diff_angle - ref_angle)^2+(diff_angle_abd - ref_angle_abd)^2);
         
         

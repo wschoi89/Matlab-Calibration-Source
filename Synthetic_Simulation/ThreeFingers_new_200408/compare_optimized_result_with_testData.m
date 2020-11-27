@@ -8,7 +8,7 @@ close all
 
 % set device name
 device_name='Device7';
-DH_json = jsondecode(fileread('mech-R4.json')); %training parameter
+DH_json = jsondecode(fileread('mech-R6.json')); %training parameter
 
 %load link lengths for thumb, index, and middle devices
 arr_links = loadLinkLength();

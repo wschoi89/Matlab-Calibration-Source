@@ -3,19 +3,19 @@ clear;clc;close all;
 %% set COM PORT, sensor, repetition position for DAQ, and the number of samples
 COM_PORT='COM10';
 
-name_sensor='sensor11';
+name_sensor='sensor14';
 % 9 angles between [-30, 30] (7.5degree space)
-arr_angles_reference_abd =[-30,-22.5,-15,-7.5, 0, 7.5, 15, 22.5, 30];
+arr_angles_reference_TH1 =[-30,-22.5,-15,-7.5, 0, 7.5, 15, 22.5, 30];
 
-% 13 angles between [-90, 90] (15degree space)
-arr_angles_reference_flex = [-90,-75,-60,-45,-30,-15,0,15,30,45,60,75,90];
+% 11 angles between [-75, 75] (15 degree space)
+arr_angles_reference_TH2 = [-75,-60,-45,-30,-15,0,15,30,45,60,75];
 
-angle=[arr_angles_reference_abd(9) arr_angles_reference_flex(13)];
+angle=[arr_angles_reference_TH1(5) arr_angles_reference_TH2(11)];
 
 num_samples = 10;   
 
 num_sensors = 6;    
-base_dir = strcat(pwd,'/','sensor_validation_using_jig/magnetic_180/2dofs/'); %2dof testbed data 저장하는 base directory
+base_dir = strcat(pwd,'/','sensor_validation_using_jig/magnetic_90/2dofs/'); %2dof testbed data 저장하는 base directory
 sensor_dir = strcat(base_dir, name_sensor); % sensor directory
 abd_dir = strcat(sensor_dir,'/','abd_',num2str(angle(1))); % fixed abduction directory 
 

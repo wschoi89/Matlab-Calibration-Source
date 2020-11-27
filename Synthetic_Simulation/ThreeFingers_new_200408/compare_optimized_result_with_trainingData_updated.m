@@ -11,9 +11,9 @@ if ~exist('num_samples', 'var')
    num_samples = 10; 
 end
 
-DH_json = jsondecode(fileread('mech-R5.json'));
+DH_json = jsondecode(fileread('mech-R8.json'));
 
-num_zigPos_training = [81, 83, 79]; % thumb, index, middle 
+num_zigPos_training = [80, 82, 78]; % thumb, index, middle 
 % num_zigPos_training = [36, 38, 34]; % thumb, index, middle 
 num_maxZigPos_training = max(num_zigPos_training);
 

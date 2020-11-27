@@ -1,9 +1,9 @@
  close all
-% options = optimoptions(@lsqnonlin,'Algorithm', 'levenberg-marquardt','Display', 'iter', 'MaxFunctionEvaluations', 100000, 'MaxIterations', 100000, 'initDamping', 10,'StepTolerance', 1e-10);
-options = optimoptions(@lsqnonlin,'Algorithm', 'trust-region-reflective ','Display', 'iter', 'MaxFunctionEvaluations', 1000000, 'MaxIterations', 1000000, 'initDamping', 10,'StepTolerance', 1e-10);
+options = optimoptions(@lsqnonlin,'Algorithm', 'levenberg-marquardt','Display', 'iter', 'MaxFunctionEvaluations', 100000, 'MaxIterations', 100000, 'initDamping', 10,'StepTolerance', 1e-10);
+% options = optimoptions(@lsqnonlin,'Algorithm', 'trust-region-reflective ','Display', 'iter', 'MaxFunctionEvaluations', 1000000, 'MaxIterations', 1000000, 'initDamping', 10,'StepTolerance', 1e-10);
 
 data = [arr_mean_normalized arr_angles_reference_flex' arr_angles_fixed_abd'];
-parameter_init = [0.00 0.00 0.00 0.01 0.01 0.01 0.01 0.01];
+parameter_init = [0.00 0.00 0.00 1 1 1 0.0001 0.0001]; % parameter initilization 
 disp('Optimization start!');
 optimized_sensor_param=lsqnonlin(@optimize_sensor_2dofs, parameter_init, [],[],options, data);
 
@@ -25,12 +25,6 @@ bx_3 = (bx_2-bz_2*sin(-shift_x))/cos(-shift_x);
 by_3 = (by_2-bz_2*sin(-shift_y))/cos(-shift_y);
 bz_3 = bz_2;
 
-
-% optimized_bx = ((arr_mean_normalized(:,1)-offset_x)./amp_x - (arr_mean_normalized(:,3)-offset_z)./amp_z * sin(-shift_x))/cos(-shift_x);
-% optimized_by = ((arr_mean_normalized(:,2)-offset_y)./amp_y - (arr_mean_normalized(:,3)-offset_z)./amp_z * sin(-shift_y))/cos(-shift_y);
-% optimized_bz = (arr_mean_normalized(:,3)-offset_z)./amp_z;
-
-% arr_mean_optimzed = [(arr_mean_normalized(:,1)-offset_x)./amp_x (arr_mean_normalized(:,2)-offset_y)./amp_y (arr_mean_normalized(:,3)-offset_z)./amp_z];
 arr_mean_optimized = [bx_3 by_3 bz_3];
 
 for i=1:size(data,1)

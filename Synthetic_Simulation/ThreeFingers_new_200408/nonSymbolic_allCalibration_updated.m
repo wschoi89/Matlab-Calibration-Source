@@ -14,7 +14,7 @@ if ~exist('num_fingers','var')
     num_fingers = 3;
 end
 
-for iter=1:1
+for iter=1:3
     if iter==1
         finger = 'thumb';
     elseif iter==2
@@ -101,11 +101,11 @@ for iter=1:1
 
     for page=1:num_iteration
         
-        lb = [-5;-5;-5;-5;-5;-5;-5;-5;-5;-5; -0.5;-0.5;-0.5;-0.5;-0.5;-0.5; -2;-2;-2;-2;-2;-2; -2;-2;-2;-2;-2;-2; -0.5;-0.5;-0.5;-0.5; -0.5;-0.5;-0.5;-0.5;];
-        ub = [ 5; 5; 5; 5; 5; 5; 5; 5; 5; 5;  0.5; 0.5; 0.5; 0.5; 0.5; 0.5;  2; 2; 2; 2; 2; 2;  2; 2; 2; 2; 2; 2;  0.5; 0.5; 0.5; 0.5;  0.5; 0.5; 0.5; 0.5;];
+        lb = [-5;-5;-5;-5;-5;-5;-5;-5;-5;-5; -0.5;-0.5;-0.5;-0.5;-0.5;-0.5; -20;-20;-20;-20;-20;-20; -200;-200;-200;-200;-200;-200; -0.5;-0.5;-0.5;-0.5; -0.5;-0.5;-0.5;-0.5;];
+        ub = [ 5; 5; 5; 5; 5; 5; 5; 5; 5; 5;  0.5; 0.5; 0.5; 0.5; 0.5; 0.5;  20; 20; 20; 20; 20; 20;  200; 200; 200; 200; 200; 200;  0.5; 0.5; 0.5; 0.5;  0.5; 0.5; 0.5; 0.5;];
         
-        optimized_parameter=lsqnonlin (@pos_endEffector_allCalibration_updated,list_optParam_init,[],[],options, data, finger);
-%         optimized_parameter=lsqnonlin (@pos_endEffector_allCalibration_updated,list_optParam_init,lb,ub,options, data, finger);
+%         optimized_parameter=lsqnonlin (@pos_endEffector_allCalibration_updated,list_optParam_init,[],[],options, data, finger);
+        optimized_parameter=lsqnonlin (@pos_endEffector_allCalibration_updated,list_optParam_init,lb,ub,options, rhakqdata, finger);
         list_optParam(page, :) = optimized_parameter;
 
     end

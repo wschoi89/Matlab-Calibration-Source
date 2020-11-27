@@ -12,7 +12,7 @@ num_param_per_joint = 4; % DH parameter per joint
 num_fingers = 3; % the number of device fingers
 num_angles = 4; % device angle
 
-num_zigPos = [81, 83, 79]; % thumb, index, middle 
+num_zigPos = [80, 82, 78]; % thumb, index, middle 
 % num_zigPos = [36, 38, 34]; % thumb, index, middle 
 num_maxZigPos = max(num_zigPos);
 
@@ -229,7 +229,7 @@ for finger=1:num_fingers
        subplot(2,3,6);
    end
    x=1:1:num_zigPos(finger);
-    y=reshape(arr_mean_dist_noCalib{1,finger}(1,4,:), [num_zigPos(finger) 1]);
+    y=reshape(arr_mean_dist_noCalib{1,finger}(1,4,:), [num_zigPos(finger) 1])
     std=reshape(arr_mean_dist_noCalib{1,finger}(2,4,:), [num_zigPos(finger) 1]);
     errorbar(x,y,std,'o','MarkerSize', 15, 'Color', color_init_endEffector{finger})
     xlabel('position')

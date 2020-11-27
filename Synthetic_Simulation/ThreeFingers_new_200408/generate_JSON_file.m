@@ -1,4 +1,4 @@
-filename = 'mech-R4.json';
+filename = 'mech-R8.json';
 fileID = fopen(filename, 'w');
 fprintf(fileID, '{\n');
 fprintf(fileID, '\t"HandSide" : "right",\n\n');
@@ -39,3 +39,5 @@ fprintf(fileID, '\t"off_TH3_Middle": %f,\n', parameters(3,35));
 fprintf(fileID, '\t"off_TH4_Middle": %f\n', parameters(3,36));
 fprintf(fileID, ' }');
 fclose(fileID);
+
+disp('JSON file was generated!')
